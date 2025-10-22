@@ -1,0 +1,126 @@
+:root {
+    --space-unit: 8px;
+    --xs-space: var(--space-unit);
+    --sm-space: calc(2 * var(--space-unit));
+    --max-content-width: 860px;
+    --v-theme-primary: 0, 165, 207;
+    --v-theme-warning: 255, 203, 107;
+    --v-theme-success: 37, 161, 142;
+}
+
+.main {
+    padding: var(--sm-space);
+}
+.main.with-offset {
+    padding-top: calc(64px + var(--sm-space));
+}
+
+.v-window-item::after {
+    /* transition: opacity 2s ease; 
+    opacity: 0.4; */
+
+}
+
+.v-window-item.cover-selected::after {
+    animation: check 1s cubic-bezier(0.19, 1, 0.22, 1) 0.2s forwards;
+    content: "\F012C";
+    display: flex;
+    font: normal normal normal 35px/1 "Material Design Icons";
+    font-size: 35px;
+    line-height: 1;
+    font-size: inherit;
+    text-rendering: auto;
+    line-height: inherit;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    position: absolute;
+    margin: auto;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background-color: #000000e3;
+    width: 48px;
+    height: 48px;
+    text-align: center;
+    vertical-align: middle;
+    padding: auto;
+    color: white;
+    border-radius: 50% 50%;
+    justify-content: center;
+    align-items: center;
+    font-size: 36px;    
+    opacity: 0;  
+}
+
+@keyframes check {
+  from {opacity: 0;}
+  to {opacity: 1;}
+}
+
+.screen-overlay {
+    max-width: var(--max-content-width);
+    margin: auto;    
+}
+
+.overlay-content-wrapper {
+    width: 100%;
+    max-width: var(--max-content-width);
+    margin: auto;
+    height: 100vh;
+    padding: 20px;
+}
+
+.overlay-content {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    max-height: calc(100vh - 40px);
+}
+
+.map {
+    width:100%;
+    aspect-ratio:3/1;    
+}
+
+.map-select {
+    width:100%;
+    height: 700px;
+}
+
+.map-select-caption {
+    margin-top: -15px;
+}
+
+.text-error {
+    color: rgb(var(--v-theme-error));
+    line-height: 12px;
+    word-break: break-word;
+    overflow-wrap: break-word;
+    word-wrap: break-word;
+    hyphens: auto;
+    font-size: 12px;
+    padding-inline: 16px;
+}
+
+.required label::after {
+    content: " *";
+    color: rgb(var(--v-theme-error));
+}
+
+.v-toolbar__content {
+    max-width: var(--max-content-width);
+    margin-left: max(0px, (100vw - var(--max-content-width)) / 2);    
+    padding-left: var(--sm-space);
+}
+
+.v-application__wrap {
+    max-width: 860px;
+    margin: auto;    
+}
+
+.empty-state-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    height: 100vh;
+}
