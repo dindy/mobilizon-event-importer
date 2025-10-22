@@ -27,7 +27,7 @@ export class MobilizonApi {
 
     static instanceUrl = import.meta.env.VITE_MOBILIZON_API_URI
     static apiUrl = `${this.instanceUrl}/api`
-    static redirectUri = `http://${window.location.host}/mobilizon/callback`
+    static redirectUri = `${window.location.protocol}//${window.location.host}/mobilizon/callback`
     static clientId = import.meta.env.VITE_MOBILIZON_CLIENT_ID
     static clientSecret = import.meta.env.VITE_MOBILIZON_CLIENT_SECRET
     static scope = 'read write'
