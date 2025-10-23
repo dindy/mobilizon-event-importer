@@ -560,7 +560,18 @@ export class MobilizonApi {
         const bannerFormInputName = "p...i...c...t...u...r...e...m.e.d.i.a.file"
         const formData = new FormData()
         formData.append("query", `mutation createEvent(
-            $organizerActorId: ID!, $title: String!, $attributedToId: ID, $description: String!, $beginsOn: DateTime!, $endsOn: DateTime, $onlineAddress: String, $picture: MediaInput, $category: EventCategory, $physicalAddress: AddressInput, $options: EventOptionsInput
+            $organizerActorId: ID!,
+            $title: String!,
+            $attributedToId: ID,
+            $description: String!,
+            $beginsOn: DateTime!,
+            $endsOn: DateTime,
+            $onlineAddress: String,
+            $picture: MediaInput,
+            $category: EventCategory,
+            $physicalAddress: AddressInput,
+            $options: EventOptionsInput,
+            $metadata: [EventMetadataInput]
         ) {
             createEvent(
                 organizerActorId: $organizerActorId
@@ -573,14 +584,15 @@ export class MobilizonApi {
                 picture: $picture
                 category: $category
                 physicalAddress: $physicalAddress
-                options: $options
+                options: $options,
+                metadata: $metadata
             ) {
                 id
                 uuid
             }
         }`)
-
-        formData.append('variables', JSON.stringify({
+        
+        const data = {
             title: event.title,
             description: event.description, 
             beginsOn: event.startDate,
@@ -597,11 +609,23 @@ export class MobilizonApi {
             physicalAddress: event.physicalAddress,
             options: {
                 showStartTime: true,
-                showEndTime: event.endDate ? true : false
+                showEndTime: event.endDate ? true : false,
+                showRemainingAttendeeCapacity: false,
+                hideOrganizerWhenGroupEvent: true
             },
             organizerActorId: event.organizerActorId,
             attributedToId: event.attributedToId
-        }))
+        }
+
+        if (event.ticketsUrl) {
+            data.metadata = [{
+                key: 'mz:ticket:external_url',
+                type: 'STRING',
+                value: event.ticketsUrl
+            }]
+        }
+
+        formData.append('variables', JSON.stringify(data))
 
         if (event.banner) {
             formData.append(bannerFormInputName, event.banner, event.banner.name)

@@ -34,8 +34,9 @@ onMounted(() => {
 
 })
 
-let { ticketsUrl, hosts } = scrapped.metas
+let { hosts } = scrapped.metas
 
+const ticketsUrl = ref(scrapped.metas.ticketsUrl)
 const endTimestamp = ref(scrapped.metas.endTimestamp)
 const startTimestamp = ref(scrapped.metas.startTimestamp)
 const title = ref(scrapped.metas.title)
@@ -52,10 +53,6 @@ const uploadLimits = computed(() => store.getters.getUploadLimits)
 const uploadedCover = ref(null)
 const selectedCategory = ref(null)
 const groupAddress = computed(() => store.getters.getSelectedGroupAddress)
-
-if (ticketsUrl) {
-    description.value += `<br><p><a href="${ticketsUrl}">Accéder à la billeterie</a></p>`
-}
 
 const getLinkOrJustName = (name, url) => url ? `<a href="${url}">${name}</a>` : name
 
@@ -293,7 +290,8 @@ const submit = async e => {
         description: description.value.replaceAll('\n', '</br>'),
         url: url.value,
         physicalAddress: { ...physicalAddress.value, geom: `${longitude.value};${latitude.value}` },
-        category: selectedCategory.value
+        category: selectedCategory.value,
+        ticketsUrl: ticketsUrl.value
     }
 
     await store.dispatch('saveMobilizonEvent', data)
@@ -507,6 +505,8 @@ const useGroupAddress = () => {
         <QuillEditor :upload-limit="uploadLimits.default" contentType="html" v-model:content="description" id="description" :toolbar="toolbarOptions" theme="snow" />
 
         <v-text-field class="mt-5" label="Adresse web" type="url" v-model="url"/>
+        
+        <v-text-field class="mt-5" label="Adresse web de la billetterie" type="url" v-model="ticketsUrl"/>
         
         <v-autocomplete
             :items="categories" 
