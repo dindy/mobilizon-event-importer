@@ -1,6 +1,6 @@
 export class ScrapperApi {
 
-    endPoint = 'https://parse.import.mobilizon.webworkers.agency/scrap'
+    endPoint = import.meta.env.VITE_PARSER_API_URI
 
     async scrap(url) {
         
@@ -9,6 +9,8 @@ export class ScrapperApi {
             provider = 'facebook'
         } else if (url.indexOf('instagram.com') !== -1) {
             provider = 'instagram'
+        } else {
+            provider = 'default'
         }
 
         const base64Url = btoa(unescape(encodeURIComponent(url)))

@@ -506,7 +506,7 @@ const useGroupAddress = () => {
 
         <v-text-field class="mt-5" label="Adresse web" type="url" v-model="url"/>
         
-        <v-text-field class="mt-5" label="Adresse web de la billetterie" type="url" v-model="ticketsUrl"/>
+        <v-text-field class="" label="Adresse web de la billetterie" type="url" v-model="ticketsUrl"/>
         
         <v-autocomplete
             :items="categories" 
