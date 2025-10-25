@@ -84,6 +84,15 @@ export default createStore({
                 savingEvent: false,
                 fetchingToken: false,
                 refreshingToken: false,
+                instanceUrl: null,
+                application: {
+                    name: null,
+                    scope: null,
+                    client_secret: null,
+                    client_id: null,
+                    redirect_uri: null,
+                    website: null,
+                },
                 tokenData: {
                     code: null,
                     access_token: null,
@@ -179,7 +188,9 @@ export default createStore({
         getMobilizonImageURL: state => state.mobilizon.lastSavedImageUrl,
         getSelectedGroupAddress: state => state.mobilizon.selectedGroup ?
             state.mobilizon.groups?.filter(group => group.id === state.mobilizon.selectedGroup)[0].physicalAddress
-            : null
+            : null,
+        hasMobilizonTokenData: state => state.mobilizon.tokenData.access_token !== null,
+        getMobilizonInstanceUrl: state => state.mobilizon.instanceUrl
     },
     mutations: {
         clearAddressesFromString(state) {
@@ -208,8 +219,6 @@ export default createStore({
                 .forEach(source => state.addressesFromCoords.sources[source._key].loading = true) 
         },
         addAddressesFromCoords(state, data) {
-            console.log(data);
-            
             const { searchIndex } = data
             if (!searchIndex == state.addressesFromCoords.searchIndex) return
             let addressIndex = getAddresses(state.addressesFromCoords.sources).length
@@ -255,13 +264,6 @@ export default createStore({
                 preferredUsername: actor.preferredUsername,
                 avatar: actor.avatar ? {...actor.avatar} : null,
             }))
-
-            // Remove duplicates based on id
-            // identities = identities.filter(
-            //     (identity, index, self) =>
-            //         self.findIndex(i => i.id === identity.id) === index
-            // )
-
             state.mobilizon.identities = identities
             console.log('Mutation - Mobilizon identities set:', state.mobilizon.identities);
         },
@@ -299,6 +301,7 @@ export default createStore({
             state.scrapper.data = data
         },
         setMobilizonConfig(state, config) {
+            console.log('Mutation - Set mobilizon config', config);
             state.mobilizon.config = config
         },
         setMobilizonCreatedEventUuid(state, value) {
@@ -317,25 +320,57 @@ export default createStore({
         },
         setRefreshingMobilizonToken(state, isRefreshing) {
             state.mobilizon.refreshingToken = isRefreshing
-        }
+        },
+        setMobilizonAppData(state, appData) {
+            state.mobilizon.application = appData
+        },
+        setMobilizonInstanceUrl(state, url) {
+            console.log('Mutation - Set mobilizon instance url', url)
+            state.mobilizon.instanceUrl = url
+        },
     },
     actions: {
         async init({ commit, dispatch }) {
+
             console.log('Action - Initialize application');
-            const mobilizonTokenData = await dispatch('loadMobilizonTokenDataFromLocalStorage')
+
+            const mobilizonAppDataString = localStorage.getItem('mobilizonAppData')
+            if (mobilizonAppDataString) {
+                const mobilizonAppData = JSON.parse(mobilizonAppDataString)
+                mobilizonApi.clientSecret = mobilizonAppData.client_secret
+                mobilizonApi.clientId = mobilizonAppData.client_id
+                commit('setMobilizonAppData', mobilizonAppData)
+                console.log('Action - Mobilizon app data set from localstorage', mobilizonAppData)
+            } else {
+                console.log('Action - No Mobilizon app data in localstorage')
+            }
             
+            const mobilizonInstanceUrl = localStorage.getItem('mobilizonInstanceUrl')
+            if (mobilizonInstanceUrl) {
+                mobilizonApi.instanceUrl = mobilizonInstanceUrl
+                commit('setMobilizonInstanceUrl', mobilizonInstanceUrl)
+                console.log('Action - Mobilizon instance url set from localstorage', mobilizonInstanceUrl)
+            } else {
+                console.log('Action - No Mobilizon instance url in localstorage')
+            }
+
+            const mobilizonTokenData = localStorage.getItem('mobilizonTokenData')
             if (mobilizonTokenData) {
                 commit('setMobilizonTokenData', JSON.parse(mobilizonTokenData))
-                console.log('Action - Mobilizon Token set from localstorage')
+                console.log('Action - Mobilizon Token set from localstorage', mobilizonTokenData)
                 dispatch('fetchMobilizonGroups')
-                return
+                dispatch('loadMobilizonConfig')
             } else {
                 console.log('Action - No Mobilizon Token data in localstorage')
-            }
+            }            
         },
         loadMobilizonTokenDataFromLocalStorage() { 
             console.log('Action - Loading Mobilizon token data from local storage');
-            return localStorage.getItem('mobilizonTokenData')
+            return 
+        },
+        loadMobilizonAppDataFromLocalStorage() { 
+            console.log('Action - Loading Mobilizon app data from local storage');
+            return localStorage.getItem('mobilizonAppData')
         },
         logoutMobilizon({ commit }) {
             console.log('Action - Logout')
@@ -376,7 +411,7 @@ export default createStore({
                     commit('setIsLoadingGroups', false)                
                 }
             }
-            issueMobilizonRequest(store, requestHandler)
+            await issueMobilizonRequest(store, requestHandler)
         },
         selectMobilizonIdentityAndGroup({ commit }, payload) {
             console.log(`Action - Select identity ${payload.identity} and group ${payload.group}`);
@@ -417,6 +452,7 @@ export default createStore({
             issueMobilizonRequest(store, requestHandler)
         },        
         loadMobilizonConfig(store) {
+            console.log('Action - Load mobilizon config')
             issueMobilizonRequest(store, async (token, { commit }) => {
                 const config = await mobilizonApi.getConfig(token)
                 commit('setMobilizonConfig', config)
@@ -480,6 +516,22 @@ export default createStore({
         },
         setPageTitle({ commit }, title) {
             commit('setPageTitle', title)            
+        },
+        async registerApp({ commit, dispatch }, mobilizonInstanceUrl) {
+            try {
+                const data = await mobilizonApi.registerApp(mobilizonInstanceUrl)
+                mobilizonApi.clientSecret = data.client_secret
+                mobilizonApi.clientId = data.client_id
+                mobilizonApi.instanceUrl = mobilizonInstanceUrl
+                localStorage.setItem('mobilizonAppData', JSON.stringify(data))
+                localStorage.setItem('mobilizonInstanceUrl', mobilizonInstanceUrl)
+                commit('setMobilizonAppData', data)
+                commit('setMobilizonInstanceUrl', mobilizonInstanceUrl)
+                const authUrl = mobilizonApi.getAuthorizationUrl()
+                window.location = authUrl
+            } catch (error) {
+                dispatch('createErrorFromText', 'Impossible de se connecter à l\'instance : ' + error)
+            }
         }
     },
 })

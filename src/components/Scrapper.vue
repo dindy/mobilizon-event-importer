@@ -2,33 +2,11 @@
 import { ref, computed, onMounted } from 'vue'
 import { useStore } from 'vuex'
 import { useRouter } from 'vue-router'
-
+import { isValidUrl } from '../utils/utils.js'
 const router = useRouter()
 const store = useStore()
 store.dispatch('setPageTitle', 'URL de l\'événement')
 const url = ref(null)
-const isValidUrl = (testUrl) => {
-    try {
-        if (!testUrl.startsWith('http://') && !testUrl.startsWith('https://')) return false 
-        testUrl = new URL(testUrl)
-        return true
-    } catch (_) {
-        return false
-    }    
-} 
-
-// const updateUrl = (event) => {
-//     const newValue = event.target.value
-//     if (newValue == '') {
-//         emptyUrl.value = true
-//         return
-//     }
-//     emptyUrl.value = false
-//     validUrl.value = isValidUrl(newValue) 
-//     url.value = newValue
-// }
-// const validUrl = ref(false)
-// const emptyUrl = ref(true)
 
 const scrap = async (submitEventPromise) => {
 

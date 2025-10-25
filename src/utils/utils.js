@@ -4,4 +4,14 @@ const convertBytesToMegabytes = (bytes) => {
     return mb.toFixed(4).replace(/\.?0+$/, '').replace('.', ',');
 }
 
-export { convertBytesToMegabytes }
+const isValidUrl = (testUrl) => {
+    try {
+        if (!testUrl.startsWith('http://') && !testUrl.startsWith('https://')) return false 
+        testUrl = new URL(testUrl)
+        return true
+    } catch (_) {
+        return false
+    }    
+} 
+
+export { convertBytesToMegabytes, isValidUrl }

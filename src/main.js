@@ -16,13 +16,18 @@ import Home from './components/Home.vue'
 import Scrapper from './components/Scrapper.vue' 
 import Event from './components/Event.vue' 
 import Done from './components/Done.vue' 
+import SelectIdentity from './components/SelectIdentity.vue' 
+import SelectInstance from './components/SelectInstance.vue' 
+import { useRoute } from 'vue-router'
 
 const routes = [
+  { path: '/', component: Home },
+  { path: '/instance', component: SelectInstance },
+  { path: '/identity', component: SelectIdentity },
   { path: '/mobilizon/callback', component: Callback },
   { path: '/scrap', component: Scrapper },
   { path: '/create', component: Event },
   { path: '/done', component: Done },
-  { path: '/', component: Home },
   { path: '/:pathMatch(.*)*', name: 'NotFound', component: NotFound } 
 ]
 
@@ -30,11 +35,7 @@ const router = createRouter({
   history: createWebHistory(),
   routes
 })
-router.beforeEach((to, from) => {
-  if (!store.getters.isConfigLoaded && to.path !== '/' && to.path !== '/mobilizon/callback') {
-    router.replace('/')
-  }
-})
+
 const vuetify = createVuetify({
   components,
   directives,
@@ -68,3 +69,17 @@ createApp(App)
 
 store.dispatch('init')
  
+router.beforeEach((to, from) => {
+  
+  const hasTokenData = store.getters.hasMobilizonTokenData
+  const route = useRoute()
+  if (hasTokenData && to.path === '/') {
+    console.log('Router - Redirect to /identity')
+    router.replace('/identity')
+  }
+  
+  if (!store.getters.isConfigLoaded && to.path !== '/instance' && to.path !== '/' && to.path !== '/mobilizon/callback' && to.path !== '/identity') {
+    console.log('Router - Redirect to /')
+    router.replace('/')
+  }
+})

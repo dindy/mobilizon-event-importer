@@ -25,13 +25,21 @@ const isString = (x) => typeof x === 'string' || x instanceof String
 
 export class MobilizonApi {
 
-    static instanceUrl = import.meta.env.VITE_MOBILIZON_API_URI
-    static apiUrl = `${this.instanceUrl}/api`
-    static redirectUri = `${window.location.protocol}//${window.location.host}/mobilizon/callback`
-    static clientId = import.meta.env.VITE_MOBILIZON_CLIENT_ID
-    static clientSecret = import.meta.env.VITE_MOBILIZON_CLIENT_SECRET
-    static scope = 'read write'
-    static state = 'import-mobilizon-state'
+    // static instanceUrl = import.meta.env.VITE_MOBILIZON_API_URI
+    // static clientId = import.meta.env.VITE_MOBILIZON_CLIENT_ID
+    // static clientSecret = import.meta.env.VITE_MOBILIZON_CLIENT_SECRET
+    instanceUrl = null
+    clientId = null
+    clientSecret = null    
+    redirectUri = `${window.location.protocol}//${window.location.host}/mobilizon/callback`
+    scope = 'read write'
+    state = 'import-mobilizon-state'
+    clientName = 'mobilizon-importer-1'
+    websiteUrl = 'https://website.mobilizon.webworkers.agency'
+    
+    get apiUrl() {
+        return `${this.instanceUrl}/api`
+    } 
 
     searchAddressController = null
 
@@ -58,24 +66,50 @@ export class MobilizonApi {
         throw new RequestError(response)        
     }
 
-    static getAuthorizationUrl() {
+    async registerApp(instanceUrl) {
+
+        const response = await fetch(`${instanceUrl}/apps`, {
+            method: 'POST',
+            body: new URLSearchParams({
+                'name': this.clientName,
+                'redirect_uri': this.redirectUri,
+                'website': this.websiteUrl,
+                'scope': this.scope
+            })            
+        })
+
+        if (response.status === 200) {
+            const body = await response.json()
+            return body
+        } else if (response.status.toString().startsWith('4')) {
+            const body = await response.json()
+            const error = body.error && body.error_description ?
+                `${body.error} : ${body.error_description}` :
+                `${response.status} ${response.statusText}`
+            throw new RequestError(error)
+        } else {
+            throw new RequestError(`${response.status} ${response.statusText}`)
+        }        
+    }
+
+    getAuthorizationUrl() {
         return `${this.instanceUrl}/oauth/authorize?` + new URLSearchParams({
             client_id: this.clientId,
             redirect_uri: this.redirectUri,
             scope: this.scope,
             state: this.state
-        });
+        })
     }
 
     async exchangeCodeForToken(code) {
         
-        const response = await fetch(`${MobilizonApi.instanceUrl}/oauth/token?` + new URLSearchParams({
-            client_id: MobilizonApi.clientId,
-            client_secret: MobilizonApi.clientSecret,
+        const response = await fetch(`${this.instanceUrl}/oauth/token?` + new URLSearchParams({
+            client_id: this.clientId,
+            client_secret: this.clientSecret,
             grant_type: 'authorization_code',
             code: code,
-            redirect_uri: MobilizonApi.redirectUri,
-            scope: MobilizonApi.scope,
+            redirect_uri: this.redirectUri,
+            scope: this.scope,
         }), {
             method: 'POST',
         })
@@ -97,9 +131,9 @@ export class MobilizonApi {
 
     async refreshToken(refreshToken) {
         
-        const response = await fetch(`${MobilizonApi.instanceUrl}/oauth/token?` + new URLSearchParams({
-            client_id: MobilizonApi.clientId,
-            client_secret: MobilizonApi.clientSecret,
+        const response = await fetch(`${this.instanceUrl}/oauth/token?` + new URLSearchParams({
+            client_id: this.clientId,
+            client_secret: this.clientSecret,
             grant_type: 'refresh_token',
             refresh_token: refreshToken,
         }), {
@@ -182,8 +216,8 @@ export class MobilizonApi {
                 }
             }
         `
-        
-        const response = await fetch(MobilizonApi.apiUrl, {
+
+        const response = await fetch(this.apiUrl, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -210,7 +244,7 @@ export class MobilizonApi {
         formData.append("variables", `{"name":"${file.name}","file":"image1"}`)        
         formData.append("image1", file, file.name)   
 
-        const response = await fetch(MobilizonApi.apiUrl, {
+        const response = await fetch(this.apiUrl, {
             method: 'POST',
             headers: {
                 'Authorization': `Bearer ${accessToken}`
@@ -391,8 +425,8 @@ export class MobilizonApi {
                 }
             }        
         ` 
-
-        const response = await fetch(MobilizonApi.apiUrl, {
+        
+        const response = await fetch(this.apiUrl, {
             method: 'POST',
             headers: {
                 'Authorization': `Bearer ${accessToken}`,
@@ -453,7 +487,7 @@ export class MobilizonApi {
         
         this.searchAddressController = new AbortController()
         
-        const response = await fetch(MobilizonApi.apiUrl, {
+        const response = await fetch(this.apiUrl, {
             signal: this.searchAddressController.signal,
             method: 'POST',
             headers: {
@@ -533,7 +567,7 @@ export class MobilizonApi {
             }
         `
         
-        const response = await fetch(MobilizonApi.apiUrl, {
+        const response = await fetch(this.apiUrl, {
             method: 'POST',
             headers: {
                 'Authorization': `Bearer ${accessToken}`,
@@ -611,7 +645,7 @@ export class MobilizonApi {
                 showStartTime: true,
                 showEndTime: event.endDate ? true : false,
                 showRemainingAttendeeCapacity: false,
-                hideOrganizerWhenGroupEvent: true
+                hideOrganizerWhenGroupEvent: false
             },
             organizerActorId: event.organizerActorId,
             attributedToId: event.attributedToId
@@ -631,7 +665,7 @@ export class MobilizonApi {
             formData.append(bannerFormInputName, event.banner, event.banner.name)
         }
         
-        const response = await fetch(MobilizonApi.apiUrl, {
+        const response = await fetch(this.apiUrl, {
             method: 'POST',
             headers: {
                 'Authorization': `Bearer ${accessToken}`

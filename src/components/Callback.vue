@@ -15,7 +15,8 @@ onMounted(async () => {
     if (code) {
       store.dispatch('saveMobilizonCode', code)
       await store.dispatch('fetchMobilizonGroups')
-      router.replace('/')
+      store.dispatch('loadMobilizonConfig')
+      router.replace('/identity')
     }
 })
 </script> 

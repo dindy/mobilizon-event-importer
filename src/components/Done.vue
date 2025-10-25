@@ -7,7 +7,8 @@ const store = useStore()
 store.dispatch('setPageTitle', 'Evenement importé')
 const seeEvent = () => {
     const uuid = store.getters.getMobilizonEventUUID
-    window.open(`https://mobilizon.webworkers.agency/events/${uuid}`)
+    const instanceUrl = store.getters.getMobilizonInstanceUrl
+    window.open(`${instanceUrl}/events/${uuid}`)
 }
 
 const newEvent = () => {
