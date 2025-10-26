@@ -358,7 +358,7 @@ export default createStore({
             if (mobilizonTokenData) {
                 commit('setMobilizonTokenData', JSON.parse(mobilizonTokenData))
                 console.log('Action - Mobilizon Token set from localstorage', mobilizonTokenData)
-                dispatch('fetchMobilizonGroups')
+                await dispatch('fetchMobilizonGroups')
                 dispatch('loadMobilizonConfig')
             } else {
                 console.log('Action - No Mobilizon Token data in localstorage')
