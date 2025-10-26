@@ -11,6 +11,8 @@ export class ScrapperApi {
             provider = 'instagram'
         } else if (url.indexOf('helloasso.com') !== -1) {
             provider = 'helloasso'
+        } else if (url.indexOf('shotgun.live') !== -1) {
+            provider = 'shotgun'
         } else {
             provider = 'default'
         }
