@@ -9,6 +9,8 @@ export class ScrapperApi {
             provider = 'facebook'
         } else if (url.indexOf('instagram.com') !== -1) {
             provider = 'instagram'
+        } else if (url.indexOf('helloasso.com') !== -1) {
+            provider = 'helloasso'
         } else {
             provider = 'default'
         }

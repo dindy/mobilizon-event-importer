@@ -41,6 +41,7 @@ const endTimestamp = ref(scrapped.metas.endTimestamp)
 const startTimestamp = ref(scrapped.metas.startTimestamp)
 const title = ref(scrapped.metas.title)
 const description = ref(scrapped.metas.description)
+
 const url = ref(scrapped.metas.url)
 const physicalAddress = ref(scrapped.metas.physicalAddress)
 
@@ -289,7 +290,7 @@ const submit = async e => {
         title: title.value,
         description: description.value.replaceAll('\n', '</br>'),
         url: url.value,
-        physicalAddress: { ...physicalAddress.value, geom: `${longitude.value};${latitude.value}` },
+        physicalAddress: { ...physicalAddress.value, geom: longitude.value ? `${longitude.value};${latitude.value}` : null },
         category: selectedCategory.value,
         ticketsUrl: ticketsUrl.value
     }
