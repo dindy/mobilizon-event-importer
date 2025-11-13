@@ -77,7 +77,11 @@ router.beforeEach((to, from) => {
     console.log('Router - Redirect to /identity')
     router.replace('/identity')
   }
-  
+
+  if (!hasTokenData && to.path == '/identity') {
+    router.replace('/')
+  }
+
   if (!store.getters.isConfigLoaded && to.path !== '/instance' && to.path !== '/' && to.path !== '/mobilizon/callback' && to.path !== '/identity') {
     console.log('Router - Redirect to /')
     router.replace('/')
