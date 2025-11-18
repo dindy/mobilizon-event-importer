@@ -71,9 +71,8 @@ store.dispatch('init')
 router.beforeEach((to, from) => {
   
   const hasTokenData = store.getters.hasMobilizonTokenData
-  const route = useRoute()
 
-  if (to.path == '/share/') {
+  if (to.path == '/share/' || to.path == '/share') {
     console.log('Router - /share path detected')
     if (to.query.url) {
       store.commit('setScrapperUrl', to.query.url)
