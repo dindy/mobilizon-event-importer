@@ -68,7 +68,6 @@ createApp(App)
   .mount('#app')
 
 store.dispatch('init')
- 
 router.beforeEach((to, from) => {
   
   const hasTokenData = store.getters.hasMobilizonTokenData

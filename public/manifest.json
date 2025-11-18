@@ -1,0 +1,71 @@
+{
+  "name": "Outil d'import Mobilizon",
+  "short_name": "Import Mobilizon",
+  "description": "Application web pour importer des événements dans Mobilizon",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "theme_color": "#00A5CF",
+  "background_color": "#FFFFFF",
+  "icons": [
+    {
+      "src": "/logo-48.png",
+      "sizes": "48x48",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/logo-72.png",
+      "sizes": "72x72",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/logo-96.png",
+      "sizes": "96x96",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/logo-128.png",
+      "sizes": "128x128",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/logo-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/logo-256.png",
+      "sizes": "256x256",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/logo-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["events", "utilities"],
+  "shortcuts": [
+    {
+      "name": "Importer un événement",
+      "short_name": "Importer",
+      "description": "Accéder directement à l'importation d'événement",
+      "url": "/",
+      "icons": [
+        {
+          "src": "/logo-96.png",
+          "sizes": "96x96",
+          "type": "image/png"
+        }
+      ]
+    }
+  ]
+}
