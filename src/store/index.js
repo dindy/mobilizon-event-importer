@@ -115,6 +115,7 @@ export default createStore({
             scrapper: {
                 data: null,
                 isLoading: false,
+                url: null
             },
             geo: {
                 isLoadingAdressesFromString: false,
@@ -190,7 +191,8 @@ export default createStore({
             state.mobilizon.groups?.filter(group => group.id === state.mobilizon.selectedGroup)[0].physicalAddress
             : null,
         hasMobilizonTokenData: state => state.mobilizon.tokenData.access_token !== null,
-        getMobilizonInstanceUrl: state => state.mobilizon.instanceUrl
+        getMobilizonInstanceUrl: state => state.mobilizon.instanceUrl,
+        getScrapperUrl: state => state.scrapper.url,
     },
     mutations: {
         clearAddressesFromString(state) {
@@ -328,6 +330,10 @@ export default createStore({
             console.log('Mutation - Set mobilizon instance url', url)
             state.mobilizon.instanceUrl = url
         },
+        setScrapperUrl(state, url) {
+            console.log('Mutation - Set scrapper url', url)
+            state.scrapper.url = url
+        }
     },
     actions: {
         async init({ commit, dispatch }) {
@@ -532,6 +538,12 @@ export default createStore({
             } catch (error) {
                 dispatch('createErrorFromText', 'Impossible de se connecter à l\'instance : ' + error)
             }
+        },
+        resetEvent({ commit }) {
+            commit('setScrapperUrl', null)
+            commit('setScrapperData', null)
+            commit('setMobilizonCreatedEventUuid', null)
+            commit('clearAddressesFromCoords')              
         }
     },
 })

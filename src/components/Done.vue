@@ -12,6 +12,7 @@ const seeEvent = () => {
 }
 
 const newEvent = () => {
+    store.dispatch('resetEvent')
     router.push('/')
 }
 </script>

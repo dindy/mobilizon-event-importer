@@ -7,7 +7,9 @@ const router = useRouter()
 const store = useStore()
 store.dispatch('setPageTitle', 'URL de l\'événement')
 const url = ref(null)
-
+onMounted(() => {
+    url.value = store.getters.getScrapperUrl
+})
 const scrap = async (submitEventPromise) => {
 
     const { valid, errors } = await submitEventPromise

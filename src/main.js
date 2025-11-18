@@ -72,6 +72,15 @@ router.beforeEach((to, from) => {
   
   const hasTokenData = store.getters.hasMobilizonTokenData
   const route = useRoute()
+
+  if (to.path == '/share') {
+    console.log('Router - /share path detected')
+    if (to.query.url) {
+      store.commit('setScrapperUrl', to.query.url)
+    }
+    router.replace('/identity')
+  }
+
   if (hasTokenData && to.path === '/') {
     console.log('Router - Redirect to /identity')
     router.replace('/identity')
