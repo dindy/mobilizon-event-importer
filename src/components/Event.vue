@@ -73,7 +73,7 @@ if (hosts && hosts.length > 0) {
 function mergeDateTime(date, time) {
   if (!date) return ''
   const t = time || '00:00'
-  // Create a Date object in local time
+  // submit a Date object in local time
   const [year, month, day] = date.split('-')
   const [hour, minute] = t.split(':')
   const localDate = new Date(
@@ -143,7 +143,7 @@ const setUploadedImage = async e => {
         
         if (!isValidSizeFile(file)) {
             uploadedBannerTooBig.value = true
-            store.dispatch('createErrorFromText', `L'image est trop lourde (max ${convertBytesToMegabytes(uploadLimits.value.banner) } Mo)`)
+            store.dispatch('submitErrorFromText', `L'image est trop lourde (max ${convertBytesToMegabytes(uploadLimits.value.banner) } Mo)`)
             e.target.value = ""
             return
         }
@@ -265,7 +265,10 @@ const useFoundAddress = (address) => {
     altCoords.value = null
     mapCenter.value = [physicalAddress.value.geom.split(';')[1], physicalAddress.value.geom.split(';')[0]]
 }
-const submit = async e => {
+
+const submit = async action => {
+    
+    isDraft.value = action === 'submitAsDraft'
 
     const banner = getSelectedBanner()
     const data = {
@@ -414,7 +417,7 @@ const geolocateUser = () => {
             mapCenter.value = [tempLatitude.value, tempLongitude.value]
         }, (e) => {
             isLoadingGeolocation.value = false            
-            store.dispatch('createErrorFromText', e.message)
+            store.dispatch('submitErrorFromText', e.message)
         });        
     }    
 }
@@ -434,7 +437,7 @@ const useGroupAddress = () => {
 </script>
 
 <template>
-    <form @submit.prevent="submit">
+    <form @submit.prevent="">
         
         <v-alert
             text="Nous faisons de notre mieux pour récupérer les informations mais certaines données peuvent être manquantes ou erronées."
@@ -711,14 +714,25 @@ const useGroupAddress = () => {
             </div>
         </v-overlay>
         
-        <v-checkbox class="mt-5" label="Enregistrer en tant que brouillon" v-model="isDraft" id="is-draft"></v-checkbox>
+        <!-- <v-checkbox class="mt-5" label="Enregistrer en tant que brouillon" v-model="isDraft" id="is-draft"></v-checkbox> -->
+        <br/>
         
         <v-btn 
-            class="mt-5" 
+            class="mt-5 mr-5" 
             color="success" 
             type="submit"
             :loading="store.getters.isSavingEvent"
-            style="display: block;"
+            @click="submit('submit')"
         >Enregistrer</v-btn>
+
+        <v-btn 
+            class="mt-5" 
+            color="info" 
+            type="submit"
+            :loading="store.getters.isSavingEvent"
+            @click="submit('submitAsDraft')"
+        >Enregistrer comme brouillon</v-btn>
+
+        
     </form>
 </template>
