@@ -605,7 +605,8 @@ export class MobilizonApi {
             $category: EventCategory,
             $physicalAddress: AddressInput,
             $options: EventOptionsInput,
-            $metadata: [EventMetadataInput]
+            $metadata: [EventMetadataInput],
+            $draft: Boolean
         ) {
             createEvent(
                 organizerActorId: $organizerActorId
@@ -619,7 +620,8 @@ export class MobilizonApi {
                 category: $category
                 physicalAddress: $physicalAddress
                 options: $options,
-                metadata: $metadata
+                metadata: $metadata,
+                draft: $draft
             ) {
                 id
                 uuid
@@ -648,7 +650,8 @@ export class MobilizonApi {
                 hideOrganizerWhenGroupEvent: false
             },
             organizerActorId: event.organizerActorId,
-            attributedToId: event.attributedToId
+            attributedToId: event.attributedToId,
+            draft: event.draft
         }
 
         if (event.ticketsUrl) {

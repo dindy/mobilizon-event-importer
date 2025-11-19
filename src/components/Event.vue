@@ -41,7 +41,7 @@ const endTimestamp = ref(scrapped.metas.endTimestamp)
 const startTimestamp = ref(scrapped.metas.startTimestamp)
 const title = ref(scrapped.metas.title)
 const description = ref(scrapped.metas.description)
-
+const isDraft = ref(false)
 const url = ref(scrapped.metas.url)
 const physicalAddress = ref(scrapped.metas.physicalAddress)
 
@@ -269,6 +269,7 @@ const submit = async e => {
 
     const banner = getSelectedBanner()
     const data = {
+        draft: isDraft.value,
         banner: banner ? banner.file : null,
         startDate: new Date(mergeDateTime(startDate.value, startTime.value) * 1000).toJSON(),
         endDate: hasEndDate.value ? new Date(mergeDateTime(endDate.value, endTime.value) * 1000).toJSON() : null,
@@ -709,7 +710,9 @@ const useGroupAddress = () => {
                 </v-card>
             </div>
         </v-overlay>
-
+        
+        <v-checkbox class="mt-5" label="Enregistrer en tant que brouillon" v-model="isDraft" id="is-draft"></v-checkbox>
+        
         <v-btn 
             class="mt-5" 
             color="success" 

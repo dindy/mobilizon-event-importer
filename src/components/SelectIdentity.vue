@@ -30,7 +30,6 @@ const next = () => {
         identity: selectedIdentity.value,
         group: skipGroup.value ? null : selectedGroup.value,
     })
-    // store.dispatch('prepareNewScrap')
     router.push('/scrap')
 }
 

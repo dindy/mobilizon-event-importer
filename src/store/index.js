@@ -110,7 +110,8 @@ export default createStore({
                 config: null,
                 createdEventUuid: null,
                 lastSavedUUID: null,
-                lastSavedImageUrl: null
+                lastSavedImageUrl: null,
+                lastSavedIsDraft: null
             },
             scrapper: {
                 data: null,
@@ -193,6 +194,7 @@ export default createStore({
         hasMobilizonTokenData: state => state.mobilizon.tokenData.access_token !== null,
         getMobilizonInstanceUrl: state => state.mobilizon.instanceUrl,
         getScrapperUrl: state => state.scrapper.url,
+        getMobilizonEventIsDraft: state => state.mobilizon.lastSavedIsDraft,
     },
     mutations: {
         clearAddressesFromString(state) {
@@ -333,6 +335,10 @@ export default createStore({
         setScrapperUrl(state, url) {
             console.log('Mutation - Set scrapper url', url)
             state.scrapper.url = url
+        },
+        setLastSavedIsDraft(state, isDraft) {
+            console.log('Mutation - Set last saved is draft', isDraft)
+            state.mobilizon.lastSavedIsDraft = isDraft
         }
     },
     actions: {
@@ -482,6 +488,7 @@ export default createStore({
                         },
                         token
                     )
+                    commit('setLastSavedIsDraft', event.draft)
                     commit('setMobilizonCreatedEventUuid', uuid)
                     return uuid
                 } catch (error) { 
@@ -499,11 +506,6 @@ export default createStore({
                 }
             }
             return await issueMobilizonRequest(store, requestHandler)
-        },
-        prepareNewScrap({ commit }) {
-            commit('setScrapperData', null)
-            commit('setMobilizonCreatedEventUuid', null)
-            commit('clearAddressesFromCoords')            
         },
         async searchAddressFromString(store, addressString) {
             
@@ -544,7 +546,8 @@ export default createStore({
             commit('setScrapperUrl', null)
             commit('setScrapperData', null)
             commit('setMobilizonCreatedEventUuid', null)
-            commit('clearAddressesFromCoords')              
+            commit('clearAddressesFromCoords')   
+            commit('setLastSavedIsDraft', null)           
         }
     },
 })
