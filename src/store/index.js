@@ -425,6 +425,7 @@ export default createStore({
             commit('setSelectedMobilizonGroup', payload.group)
         },
         async scrap({ commit }, url) {
+            commit('setScrapperUrl', url)
             commit('setIsLoadingScrapper', true)          
             commit('setScrapperData', null)
             const data = await scrapperApi.scrap(url)
