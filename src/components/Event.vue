@@ -97,25 +97,10 @@ const dateGetter = ts => {
 }
 const timeGetter = ts => ts ? new Date(ts * 1000).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false }) : ''
 
-const endDate = computed({
-  get: () => dateGetter(endTimestamp.value),
-  set: (val) => endTimestamp.value = mergeDateTime(val, endTime.value)
-})
-
-const endTime = computed({
-  get: () => timeGetter(endTimestamp.value),
-  set: (val) => endTimestamp.value = mergeDateTime(endDate.value, val)
-})
-
-const startDate = computed({
-  get: () => dateGetter(startTimestamp.value),
-  set: (val) => startTimestamp.value = mergeDateTime(val, startTime.value)
-})
-
-const startTime = computed({
-  get: () => timeGetter(startTimestamp.value),
-  set: (val) => startTimestamp.value = mergeDateTime(startDate.value, val)
-})
+const startDate = ref(dateGetter(startTimestamp.value))
+const startTime = ref(timeGetter(startTimestamp.value))
+const endDate = ref(dateGetter(endTimestamp.value))
+const endTime = ref(timeGetter(endTimestamp.value))
 
 const latitude = computed({
     get: () => physicalAddress.value.geom ? parseFloat(physicalAddress.value.geom.split(';')[1]) : '',
