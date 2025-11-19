@@ -62,8 +62,9 @@ const updateUrl = (e) => {
         ></v-text-field>
     
         <v-btn
+            prepend-icon="mdi-login"
             type="submit"
             color="primary"
-        >Confirmer</v-btn>          
+        >Se connecter</v-btn>          
     </v-form>
 </template>
