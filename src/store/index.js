@@ -73,7 +73,9 @@ const entriesAsObject = entries => Object.entries(entries).map(([_key, value]) =
 const getAddresses = sources => entriesAsObject(sources)
     .sort((a, b) => a.priority - b.priority)
     .reduce((results, source) => [...results, ...source.results], [])
-            
+const getIdentityById = (state, identityId) => identityId ? state.mobilizon.identities.filter(identity => identity.id === identityId)[0] : null   
+const getGroupById = (state, groupId) => groupId ? state.mobilizon.groups.filter(group => group.id === groupId)[0] : null
+
 export default createStore({
     state() {
         return {
@@ -105,8 +107,8 @@ export default createStore({
                 },
                 identities: [],
                 groups: [],
-                selectedGroup: null,
-                selectedIdentity: null,
+                selectedGroupId: null,
+                selectedIdentityId: null,
                 config: null,
                 createdEventUuid: null,
                 lastSavedUUID: null,
@@ -168,9 +170,11 @@ export default createStore({
             .reduce((loading, source) => loading || source.loading, false),
         getMobilizonTokenData: state => state.mobilizon.tokenData.access_token,
         getIdentities: state => state.mobilizon.identities,
-        getIdentityById: state => identityId => state.mobilizon.identities.filter(identity => identity.id === identityId)[0],
-        getGroupById: state => groupId => state.mobilizon.groups.filter(group => group.id === groupId)[0],        
+        getIdentityById: state => identityId => getIdentityById(state, identityId),
+        getGroupById: state => groupId => getGroupById(state, groupId),        
         getGroupsByIdentityId: state => identityId => state.mobilizon.groups.filter(group => group.memberId === identityId),
+        getSelectedIdentity: state => getIdentityById(state, state.mobilizon.selectedIdentityId),
+        getSelectedGroup: state => getGroupById(state, state.mobilizon.selectedGroupId),
         isLoadingGroups: state => state.mobilizon.loadingGroups,
         isSavingEvent: state => state.mobilizon.savingEvent,
         isLoadingScrapper: state => state.scrapper.isLoading,
@@ -188,8 +192,8 @@ export default createStore({
         isConnectingToMobilizon: state => state.mobilizon.fetchingToken || state.mobilizon.refreshingToken,
         getMobilizonEventUUID: state => state.mobilizon.lastSavedUUID,
         getMobilizonImageURL: state => state.mobilizon.lastSavedImageUrl,
-        getSelectedGroupAddress: state => state.mobilizon.selectedGroup ?
-            state.mobilizon.groups?.filter(group => group.id === state.mobilizon.selectedGroup)[0].physicalAddress
+        getSelectedGroupAddress: state => state.mobilizon.selectedGroupId ?
+            state.mobilizon.groups?.filter(group => group.id === state.mobilizon.selectedGroupId)[0].physicalAddress
             : null,
         hasMobilizonTokenData: state => state.mobilizon.tokenData.access_token !== null,
         getMobilizonInstanceUrl: state => state.mobilizon.instanceUrl,
@@ -296,10 +300,10 @@ export default createStore({
             state.scrapper.isLoading = isLoading
         },
         setSelectedMobilizonIdentity(state, id) {
-            state.mobilizon.selectedIdentity = id
+            state.mobilizon.selectedIdentityId = id
         },
         setSelectedMobilizonGroup(state, id) {
-            state.mobilizon.selectedGroup = id
+            state.mobilizon.selectedGroupId = id
         },
         setScrapperData(state, data) {
             state.scrapper.data = data
@@ -483,8 +487,8 @@ export default createStore({
                     const uuid = await mobilizonApi.createEvent(
                         {
                             ...event,
-                            organizerActorId: state.mobilizon.selectedIdentity,
-                            attributedToId: state.mobilizon.selectedGroup,
+                            organizerActorId: state.mobilizon.selectedIdentityId,
+                            attributedToId: state.mobilizon.selectedGroupId,
                         },
                         token
                     )
