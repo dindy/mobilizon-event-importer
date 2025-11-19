@@ -21,7 +21,7 @@ const seeEvent = () => {
 
 const newEvent = () => {
     store.dispatch('resetEvent')
-    router.push('/')
+    router.push('/scrap')
 }
 
 const seeEventText = () => isDraft ? "Page de l'événement (brouillon)" : "Page de l'événement"
