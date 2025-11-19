@@ -18,10 +18,12 @@ import Event from './components/Event.vue'
 import Done from './components/Done.vue' 
 import SelectIdentity from './components/SelectIdentity.vue' 
 import SelectInstance from './components/SelectInstance.vue' 
+import Share from './components/Share.vue' 
 import { useRoute } from 'vue-router'
 
 const routes = [
   { path: '/', component: Home },
+  { path: '/share', component: Share },
   { path: '/instance', component: SelectInstance },
   { path: '/identity', component: SelectIdentity },
   { path: '/mobilizon/callback', component: Callback },
@@ -72,13 +74,13 @@ router.beforeEach((to, from) => {
   
   const hasTokenData = store.getters.hasMobilizonTokenData
 
-  if (to.path == '/share/' || to.path == '/share') {
-    console.log('Router - /share path detected')
-    if (to.query.url) {
-      store.commit('setScrapperUrl', to.query.url)
-    }
-    router.replace('/identity')
-  }
+  // if (to.path == '/share/' || to.path == '/share') {
+  //   console.log('Router - /share path detected')
+  //   if (to.query.url) {
+  //     store.commit('setScrapperUrl', to.query.url)
+  //   }
+  //   router.replace('/identity')
+  // }
 
   if (hasTokenData && to.path === '/') {
     console.log('Router - Redirect to /identity')
@@ -89,7 +91,7 @@ router.beforeEach((to, from) => {
     router.replace('/')
   }
 
-  if (!store.getters.isConfigLoaded && to.path !== '/instance' && to.path !== '/' && to.path !== '/mobilizon/callback' && to.path !== '/identity') {
+  if (!store.getters.isConfigLoaded && to.path !== '/share/' && to.path !== '/instance' && to.path !== '/' && to.path !== '/mobilizon/callback' && to.path !== '/identity') {
     console.log('Router - Redirect to /')
     router.replace('/')
   }
