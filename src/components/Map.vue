@@ -8,7 +8,8 @@
         <l-marker v-if="altCoords" :lat-lng="altCoords">
             <l-icon icon-url="/marker-blue.svg" :icon-size="[30, 30]"></l-icon>
         </l-marker>        
-        <l-marker @dragend="releaseMarker" :lat-lng="coords" draggable>
+        <l-marker v-if="props.canUpdateCoords" @dragend="releaseMarker" :lat-lng="coords" draggable/>
+        <l-marker v-else @dragend="releaseMarker" :lat-lng="coords">
         <!-- <l-marker :lat-lng="coords"> -->
             <l-icon icon-url="/marker-red.svg" :icon-anchor="[15, 30]" :icon-size="[30, 30]"></l-icon>
         </l-marker>
@@ -32,12 +33,9 @@ const props = defineProps({
 }) 
 let isDragging = false
 const updateCoords = coords => {
-    console.log('updateCoords');
-    
     emit('updateCoords', coords, zoom)
 }
 const releaseMarker = e => {
-    console.log('release',e);
     isDragging = true
     setTimeout(() => isDragging = false, 200)
     const coords = { ...e.target.getLatLng() } // Had to copy object
@@ -45,7 +43,6 @@ const releaseMarker = e => {
 }
 const clickMap = e => {
     if (!isDragging) {
-        console.log('click');
         updateCoords(e.latlng);
     }
 }

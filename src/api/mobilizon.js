@@ -585,8 +585,10 @@ export class MobilizonApi {
             })
         })
 
-        return (await this.handleResponse(response)).data.reverseGeocode        
-
+        return (await this.handleResponse(response))
+            .data
+            .reverseGeocode
+            .filter(result => result.type == 'house')
     }
 
     async createEvent(event, accessToken) {

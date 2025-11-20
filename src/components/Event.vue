@@ -1,19 +1,21 @@
 <script setup>
-import { computed, ref, onMounted, watch, useTemplateRef } from 'vue'
+import { computed, ref } from 'vue'
 import { useStore } from 'vuex';
 import { useRouter } from 'vue-router'
-import { convertBytesToMegabytes } from '../utils/utils';
+import { convertBytesToMegabytes, dataURLtoFile, mergeDateTime, timestampToDate, timestampToTime, blobToDataUrl, getFormattedAddress } from '../utils/utils';
 import QuillEditor from './QuillEditor.vue'
 import Map from './Map.vue'
+import SearchAddressFromStringOverlay from './SearchAddressFromStringOverlay.vue'
+import SearchAddressFromCoordsOverlay from './SearchAddressFromCoordsOverlay.vue'
+import LocateFromMapOverlay from './LocateFromMapOverlay.vue'
 
 const router = useRouter()
 const store = useStore()
 store.dispatch('setPageTitle', 'Détails de l\'événement')
 
-const defaultMapCenter = [43.63421932550079, -1.1998593807220461] // Pey mon village <3
-const scrapped = store.getters.getScrappedData
-const banners = ref(scrapped.images.map(url => ({ src: url, file: null })))
-let maxCoverRatio = ref(0)
+/* Utils functions */
+
+// Handle dimensions of cover carousel
 const updateMaxCoveratio = src => {
     const tempImage = new Image
     tempImage.onload = () => {
@@ -22,116 +24,24 @@ const updateMaxCoveratio = src => {
     } 
     tempImage.src = src    
 }
-onMounted(() => {
-
-    // Init scrapped covers
-    banners.value.map((image) => {
-        image.file = dataURLtoFile(image.src)
-        updateMaxCoveratio(image.src)
-    })
-    // Select first cover
-    setSelectedBanner(0)
-
-})
-
-let { hosts } = scrapped.metas
-
-const ticketsUrl = ref(scrapped.metas.ticketsUrl)
-const endTimestamp = ref(scrapped.metas.endTimestamp)
-const startTimestamp = ref(scrapped.metas.startTimestamp)
-const title = ref(scrapped.metas.title)
-const description = ref(scrapped.metas.description)
-const isDraft = ref(false)
-const url = ref(scrapped.metas.url)
-const physicalAddress = ref(scrapped.metas.physicalAddress)
-
-const isLoadingAdressesFromCoords = computed(() => store.getters.isLoadingAdressesFromCoords)
-const isLoadingAdressesFromString = computed(() => store.getters.isLoadingAddressesFromString)
-const foundAddressesFromCoords = computed(() => store.getters.getAddressesFromCoords)
-const foundAddressesFromString = computed(() => store.getters.getAddressesFromString)
-const categories = computed(() => store.getters.getEventCategories)
-const uploadLimits = computed(() => store.getters.getUploadLimits)
-const uploadedCover = ref(null)
-const selectedCategory = ref(null)
-const groupAddress = computed(() => store.getters.getSelectedGroupAddress)
 
 const getLinkOrJustName = (name, url) => url ? `<a href="${url}">${name}</a>` : name
 
-if (hosts && hosts.length > 0) {
-    if (hosts.length == 1) {
-        description.value += `<br><p>Organisé par ${getLinkOrJustName(hosts[0].name, hosts[0].url)}</p>`
-    } else {
-        description.value += `<br><p>Organisateurs :<ul>`
-        hosts.forEach((host) => {
-            description.value += `<li>${getLinkOrJustName(host.name, host.url)}</li>`
-        })
-        description.value += `</ul></p>`
+const isValidSizeFile = file => file.size <= uploadLimits.value.banner
+
+const setSelectedBanner = index => {
+
+    selectedBannerTooBig.value = false
+
+    if (index) {
+        const image = banners.value[index]
+        if (!isValidSizeFile(image.file)) {
+            selectedBannerTooBig.value = true
+            return
+        }
     }
+    selectedBannerId.value = index
 }
-
-// Merge date and time into ISO string (local timezone)
-function mergeDateTime(date, time) {
-  if (!date) return ''
-  const t = time || '00:00'
-  // submit a Date object in local time
-  const [year, month, day] = date.split('-')
-  const [hour, minute] = t.split(':')
-  const localDate = new Date(
-    Number(year),
-    Number(month) - 1,
-    Number(day),
-    Number(hour),
-    Number(minute)
-  )
-  // Store as seconds since epoch (local time)
-  return Math.floor(localDate.getTime() / 1000)
-}
-
-const dateGetter = ts => {
-    if (!ts) return ''
-    const date = new Date(ts * 1000).toLocaleDateString([], {timeZone: "Europe/Paris"})
-    const year = date.substring(6, 10)
-    const month = date.substring(3, 5)
-    const day = date.substring(0, 2)
-    return `${year}-${month}-${day}` 
-}
-const timeGetter = ts => ts ? new Date(ts * 1000).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false }) : ''
-
-const startDate = ref(dateGetter(startTimestamp.value))
-const startTime = ref(timeGetter(startTimestamp.value))
-const endDate = ref(dateGetter(endTimestamp.value))
-const endTime = ref(timeGetter(endTimestamp.value))
-
-const latitude = computed({
-    get: () => physicalAddress.value.geom ? parseFloat(physicalAddress.value.geom.split(';')[1]) : '',
-    set: (val) => physicalAddress.value.geom = `${longitude.value};${val}`
-})
-
-const longitude = computed({
-    get: () => physicalAddress.value.geom ? parseFloat(physicalAddress.value.geom.split(';')[0]) : '',
-    set: (val) => physicalAddress.value.geom = `${val};${latitude.value}`
-})
-
-const hasEndDate = ref(endTimestamp.value ? true : false)
-
-const toolbarOptions = ref(
-    [
-        ['bold', 'italic', 'underline', 'strike'],
-        ['link', 'image', 'video'],
-        [{ 'list': 'ordered' }, { 'list': 'bullet' }, { 'list': 'check' }],
-        [{ 'header': [1, 2, 3, 4, 5, 6, false] }],
-        [{ 'color': [] }, { 'background': [] }]
-    ]
-)
-
-const blobToDataUrl = blob => new Promise((resolve, reject) => {
-    const reader = new FileReader()
-    reader.onloadend = () => resolve(reader.result)
-    reader.onerror = reject
-    reader.readAsDataURL(blob)    
-})
-
-const uploadedBannerTooBig = ref(false)
 
 const setUploadedImage = async e => {
 
@@ -160,111 +70,20 @@ const setUploadedImage = async e => {
     }
 }
 
-const imageUrlToFile = async url => {
-    const response = await fetch(url)
-    const blob = await response.blob()
-    // Try to get filename from URL
-    const urlFilename = url.split('/').pop() || 'image'
-    // Robust regexp to extract extension (e.g. .jpg, .jpeg, .png, .webp, .gif, .svg, .tiff, .bmp, .ico)
-    const extMatch = urlFilename.match(/\.(jpe?g|png|webp|gif|svg|tiff?|bmp|ico)(?=$|\?)/i)
-    let ext = extMatch ? extMatch[0] : ''
-    // Try to get extension from Content-Type header if not found in filename
-    if (!ext) {
-        const contentType = response.headers.get('Content-Type')
-        if (contentType && contentType.startsWith('image/')) {
-            ext = '.' + contentType.split('/')[1].split(';')[0]
-        } else if (blob.type && blob.type.startsWith('image/')) {
-            ext = '.' + blob.type.split('/')[1]
-        } else {
-            ext = '.png'
-        }
-    }
-    const filename = 'header' + ext
-    
-    return new File([blob], filename, {
-        type: blob.type
-    })
+const getSelectedBanner = () => selectedBannerId.value !== null ?
+    banners.value[selectedBannerId.value] :
+    null
+
+const updateCoords = (coords, zoom = null) => {
+    longitude.value = parseFloat(coords.longitude)
+    latitude.value = parseFloat(coords.latitude)
 }
 
-function dataURLtoFile(dataUrl) {
-    var arr = dataUrl.split(','),
-        mime = arr[0].match(/:(.*?);/)[1],
-        bstr = atob(arr[arr.length - 1]), 
-        n = bstr.length, 
-        u8arr = new Uint8Array(n);
-    while(n--){
-        u8arr[n] = bstr.charCodeAt(n);
-    }
-    const filename = 'image.' + dataUrl.substring("data:image/".length, dataUrl.indexOf(";base64"))
-    
-    return new File([u8arr], filename, {type:mime});
+const openCoverUpload = () => {
+  uploadCoverInput.value?.click()
 }
 
-const isValidSizeFile = file => file.size <= uploadLimits.value.banner
 
-const getSelectedBanner = () => selectedBannerId.value !== null ? banners.value[selectedBannerId.value] : null
-
-const selectedBannerId = ref(null) 
-
-const selectedBannerTooBig = ref(false)
-
-const setSelectedBanner = index => {
-
-    selectedBannerTooBig.value = false
-
-    if (index) {
-        const image = banners.value[index]
-        if (!isValidSizeFile(image.file)) {
-            selectedBannerTooBig.value = true
-            return
-        }
-    }
-    selectedBannerId.value = index
-}
-
-const toggleSelectBanner = e => {
-    setSelectedBanner(e)
-}
-
-const updateCoords = (coords, zoom) => {
-    longitude.value = coords.lng
-    latitude.value = coords.lat
-    // store.dispatch('searchAddressFromCoords', coords, zoom)
-}
-
-const tempLongitude = ref(null)
-const tempLatitude = ref(null)
-
-const updateTempCoords  = (coords, zoom) => {
-    tempLongitude.value = coords.lng
-    tempLatitude.value = coords.lat
-    store.dispatch('searchAddressFromCoords', coords, zoom)
-}
-
-const mapCenter = ref(latitude.value && longitude.value ? [latitude.value, longitude.value] : defaultMapCenter)
-
-const showPosition = (e) => {
-    const address = store.getters.getAddressFromCoordsById(e.originalTarget.value)    
-    altCoords.value = [address.geom.split(';')[1], address.geom.split(';')[0]]    
-}
-
-const selectedFoundAddress = ref("")
-
-const altCoords = ref(null)
-
-const useFoundAddress = (address) => {
-    physicalAddress.value.description = address.description
-    physicalAddress.value.locality = address.locality
-    physicalAddress.value.postalCode = address.postalCode
-    physicalAddress.value.street = address.street
-    physicalAddress.value.country = address.country
-    latitude.value = address.geom.split(';')[1]
-    longitude.value = address.geom.split(';')[0]
-    tempLatitude.value = latitude.value
-    tempLongitude.value = longitude.value
-    altCoords.value = null
-    mapCenter.value = [physicalAddress.value.geom.split(';')[1], physicalAddress.value.geom.split(';')[0]]
-}
 
 const submit = async action => {
     
@@ -292,59 +111,145 @@ const submit = async action => {
     }
 }
 
-const getFormattedAddress = (address) => {
-    const hasPostalCode = address.postalCode && address.postalCode.trim() != '' 
-    const hasLocality = address.locality && address.locality.trim() != ''
-    const region = address.region && address.region.trim() !== '' ? address.region : null
-    const locality = hasPostalCode && hasLocality ? 
-        `${address.postalCode} ${address.locality}` :
-        hasPostalCode ? address.postalCode :
-        hasLocality ? address.locality :
-        null
-    const description = address.description && address.description.trim() != '' ? address.description : null
-    const street = address.street && address.street.trim() != '' ? address.street : null
-    let elements = [street,locality,region].filter(el => el)
-    if (description && description !== street) {
-        elements.unshift(description)
-    }
-
-    return elements.join(', ')
-}
-
+/* Initialize default variables */
+const uploadLimits = computed(() => store.getters.getUploadLimits)
+const isLoadingAdressesFromCoords = computed(() => store.getters.isLoadingAdressesFromCoords)
+const isLoadingAdressesFromString = computed(() => store.getters.isLoadingAddressesFromString)
+const foundAddressesFromCoords = computed(() => store.getters.getAddressesFromCoords)
+const foundAddressesFromString = computed(() => store.getters.getAddressesFromString)
+const categories = computed(() => store.getters.getEventCategories)
+const groupAddress = computed(() => store.getters.getSelectedGroupAddress)
+const uploadedCover = ref(null)
+const altCoords = ref(null)
 const searchAddressString = ref("")
-
-const searchAddress = () => {
-    const searchAddressString = getFormattedAddress(physicalAddress.value)
-    store.commit('clearAddressesFromString')
-    store.dispatch('searchAddressFromString', searchAddressString)
-    
-}
+const isLoadingGeolocation = ref(false)
 const uploadCoverInput = ref(null)
-const openCoverUpload = () => {
-  uploadCoverInput.value?.click()
+const searchAddressFromStringOverlay = ref(false)
+const locateFromMapOverlay = ref(false)
+const validateMapLocationDialog = ref(false)
+const searchAddressFromCoordsOverlay = ref(false)
+
+/* Get initial event data either from scrapped data or from saved event */
+const scrapped = store.getters.getScrappedData
+const banners = ref(null)
+const ticketsUrl = ref(null)
+const title = ref(null)
+const description = ref(null)
+const isDraft = ref(null)
+const url = ref(null)
+const selectedBannerId = ref(null) 
+const selectedBannerTooBig = ref(false)
+const maxCoverRatio = ref(0)
+const selectedCategory = ref(null)
+const startDate = ref(null)
+const startTime = ref(null)
+const endDate = ref(null)
+const endTime = ref(null)
+const hasEndDate = ref(null)
+const uploadedBannerTooBig = ref(false)
+const physicalAddress = ref({
+    description: null,
+    locality: null,
+    postalCode: null,
+    street: null,
+    country: null
+})
+const latitude = ref(null)
+const longitude = ref(null)
+const mapCenter = computed(() => latitude.value && longitude.value ? [latitude.value, longitude.value] : null)
+
+if (scrapped) {
+
+    // Raw data
+    const localPhysicalAddress = scrapped.metas.physicalAddress 
+    const endTimestamp = scrapped.metas.endTimestamp
+    const startTimestamp = scrapped.metas.startTimestamp
+    banners.value = scrapped.images.map(url => ({ src: url, file: null }))
+    ticketsUrl.value = scrapped.metas.ticketsUrl
+    title.value = scrapped.metas.title
+    description.value = scrapped.metas.description
+    isDraft.value = false
+    url.value = scrapped.metas.url
+    physicalAddress.value.description = localPhysicalAddress.description
+    physicalAddress.value.locality = localPhysicalAddress.locality
+    physicalAddress.value.postalCode = localPhysicalAddress.postalCode
+    physicalAddress.value.street = localPhysicalAddress.street
+    physicalAddress.value.country = localPhysicalAddress.country
+    
+    let { hosts } = scrapped.metas
+
+    // Data processed
+    if (localPhysicalAddress.geom) {
+        latitude.value = parseFloat(localPhysicalAddress.geom.split(';')[1])
+        longitude.value = parseFloat(localPhysicalAddress.geom.split(';')[0])      
+    }
+    startDate.value = timestampToDate(startTimestamp)
+    startTime.value = timestampToTime(startTimestamp)
+    endDate.value = timestampToDate(endTimestamp)
+    endTime.value = timestampToTime(endTimestamp)    
+    hasEndDate.value = endTimestamp ? true : false    
+    if (hosts && hosts.length > 0) {
+        if (hosts.length == 1) {
+            description.value += `<br><p>Organisé par ${getLinkOrJustName(hosts[0].name, hosts[0].url)}</p>`
+        } else {
+            description.value += `<br><p>Organisateurs :<ul>`
+            hosts.forEach((host) => {
+                description.value += `<li>${getLinkOrJustName(host.name, host.url)}</li>`
+            })
+            description.value += `</ul></p>`
+        }
+    }    
+
+    // Init scrapped covers
+    banners.value.map((image) => {
+        image.file = dataURLtoFile(image.src)
+        updateMaxCoveratio(image.src)
+    })
+    // Select first cover
+    setSelectedBanner(0)
 }
 
-const searchAddressFromStringOverlay = ref(false)
+const updateTempCoords  = (coords, zoom) => {
+    store.dispatch('searchAddressFromCoords', coords, zoom)
+}
+
+
+const useFoundAddress = (address) => {
+    physicalAddress.value.description = address.description
+    physicalAddress.value.locality = address.locality
+    physicalAddress.value.postalCode = address.postalCode
+    physicalAddress.value.street = address.street
+    physicalAddress.value.country = address.country
+    latitude.value = address.geom.split(';')[1]
+    longitude.value = address.geom.split(';')[0]
+    console.log("useFoundAddress", address, latitude.value, longitude.value);
+    
+    altCoords.value = null
+    mapCenter.value = [latitude.value, longitude.value]
+}
+
+const searchAddress = (address) => {
+    store.commit('clearAddressesFromString')
+    store.dispatch('searchAddressFromString', getFormattedAddress(address))
+}
+
 const toggleSearchAddressFromStringOverlay = () => {    
     searchAddressFromStringOverlay.value = !searchAddressFromStringOverlay.value
     if (searchAddressFromStringOverlay.value) {
         store.commit('clearAddressesFromString') 
         searchAddressString.value = getFormattedAddress(physicalAddress.value)
-        searchAddress()
+        searchAddress(physicalAddress.value)
     }
 }
 
-const locateFromMapOverlay = ref(false)
 const openLocateFromMapOverlay = () => {
-    tempLatitude.value = latitude.value
-    tempLongitude.value = longitude.value
     locateFromMapOverlay.value = true
 }
+
 const closeLocateFromMapOverlay = () => {
     locateFromMapOverlay.value = false
-    // mapCenter.value = [physicalAddress.value.geom.split(';')[1], physicalAddress.value.geom.split(';')[0]] 
-
 }
+
 const toggleLocateFromMapOverlay = () => {    
     if (locateFromMapOverlay.value) {
         closeLocateFromMapOverlay()
@@ -352,13 +257,12 @@ const toggleLocateFromMapOverlay = () => {
         openLocateFromMapOverlay()
     }
 }
-const validateMapLocationDialog = ref(false)
 
-const validateMapLocation = () => {
-    longitude.value = tempLongitude.value
-    latitude.value = tempLatitude.value    
+const validateMapLocation = (coords) => {
+    longitude.value = coords.longitude
+    latitude.value = coords.latitude    
     closeLocateFromMapOverlay()
-    mapCenter.value = [physicalAddress.value.geom.split(';')[1], physicalAddress.value.geom.split(';')[0]]
+    mapCenter.value = [latitude.value, longitude.value]
     validateMapLocationDialog.value = true
     store.dispatch('searchAddressFromCoords', { lng: longitude.value, lat: latitude.value })
 }
@@ -368,7 +272,7 @@ const acceptSearchAddressFromCoordsOverlay = () => {
     validateMapLocationDialog.value = false
 } 
 
-const searchAddressFromCoordsOverlay = ref(false)
+
 const openSearchAddressFromCoordsOverlay = () => {
     searchAddressFromCoordsOverlay.value = true
     store.dispatch('searchAddressFromCoords', { lng: longitude.value, lat: latitude.value })
@@ -382,57 +286,25 @@ const toggleSearchAddressFromCoordsOverlay = () => {
     }
 }
 
-const goBackToMap = () => {
-    searchAddressFromCoordsOverlay.value = false
-    openLocateFromMapOverlay()
-}
-
-const selectFoundAddressFromString = (e) => {
-    const address = store.getters.getAddressFromStringById(e.id)
+const selectFoundAddressFromStringById = (id) => {
+    const address = store.getters.getAddressFromStringById(id)
     useFoundAddress(address)
-    // mapCenter.value = [latitude.value, longitude.value] 
     searchAddressFromStringOverlay.value = false
     store.dispatch('searchAddressFromCoords', { lng: longitude.value, lat: latitude.value })
 }
 
-const selectFoundAddressFromCoords = (e) => {
-    const address = store.getters.getAddressFromCoordsById(e.id)
+const selectFoundAddressFromCoordsById = (id) => {
+    const address = store.getters.getAddressFromCoordsById(id)
     useFoundAddress(address)
-    // mapCenter.value = [latitude.value, longitude.value] 
     searchAddressFromCoordsOverlay.value = false   
     searchAddressFromStringOverlay.value = false 
 }
+
 const address = computed(() => getFormattedAddress(physicalAddress.value).split(', ').join('\n'))
 
 const hasAddress = computed(() => getFormattedAddress(physicalAddress.value) && getFormattedAddress(physicalAddress.value) !== '')
 
-const isLoadingGeolocation = ref(false)
-const geolocateUser = () => {
-    if ("geolocation" in navigator) {
-        isLoadingGeolocation.value = true
-        navigator.geolocation.getCurrentPosition((position) => {
-            isLoadingGeolocation.value = false
-            tempLatitude.value = position.coords.latitude
-            tempLongitude.value = position.coords.longitude
-            mapCenter.value = [tempLatitude.value, tempLongitude.value]
-        }, (e) => {
-            isLoadingGeolocation.value = false            
-            store.dispatch('submitErrorFromText', e.message)
-        });        
-    }    
-}
 
-const incompleteSearchCriterias = computed(() => {
-    const pc = physicalAddress.value.postalCode
-    const locality = physicalAddress.value.locality
-    
-    return ((!pc || pc == '') && (!locality || locality == ''))
-})
-
-const useGroupAddress = () => {
-    toggleSearchAddressFromStringOverlay()
-    useFoundAddress(groupAddress.value)
-}
 
 </script>
 
@@ -492,7 +364,7 @@ const useGroupAddress = () => {
 
         <v-text-field class="required" label="Titre" required id="title" v-model="title"/>        
         
-        <QuillEditor :upload-limit="uploadLimits.default" contentType="html" v-model:content="description" id="description" :toolbar="toolbarOptions" theme="snow" />
+        <QuillEditor :upload-limit="uploadLimits.default" contentType="html" v-model:content="description" id="description"  theme="snow" />
 
         <v-text-field class="mt-5" label="Adresse web" type="url" v-model="url"/>
         
@@ -554,103 +426,26 @@ const useGroupAddress = () => {
 
         <v-btn class="mt-5" prepend-icon="mdi-map-marker" @click="toggleLocateFromMapOverlay">Modifier la position</v-btn>
 
-        <v-overlay 
-            scrim="white" 
-            opacity="1" 
-            :close-on-content-click="false" 
-            v-model="searchAddressFromStringOverlay" 
-            scroll-strategy="block"
-            content-class="overlay-content-wrapper"
-            class="screen-overlay"
-        >
-            <div class="overlay-content">
-                <v-btn color="secondary" prepend-icon="mdi-close" @click="toggleSearchAddressFromStringOverlay">Fermer</v-btn>
-                <v-btn v-if="groupAddress" prepend-icon="mdi-map-marker-account" @click="useGroupAddress">Utiliser l'adresse du groupe</v-btn>
-                <!-- <v-btn v-if="latitude && longitude" prepend-icon="mdi-map-marker" @click="openSearchAddressFromCoordsOverlay">Utiliser la position</v-btn> -->
-                <div>
-                    <v-text-field @click:clear="searchAddress" @input="searchAddress" label="Nom du lieu" :clearable="true" v-model="physicalAddress.description"/>
-                    <v-text-field @click:clear="searchAddress" @input="searchAddress" label="N° et voie" :clearable="true" id="street" v-model="physicalAddress.street"/>    
-                    <v-text-field @click:clear="searchAddress" @input="searchAddress" label="Ville" :clearable="true" id="locality" v-model="physicalAddress.locality"/>    
-                    <v-text-field @click:clear="searchAddress" @input="searchAddress" label="Code postal" :clearable="true" id="zip" v-model="physicalAddress.postalCode"/>
-                </div>
-                <v-card 
-                    style="margin-top: -20px; overflow-y: scroll; z-index: initial"
-                    :loading="isLoadingAdressesFromString">
-                    <v-list 
-                        v-if="isLoadingAdressesFromString || (foundAddressesFromString && foundAddressesFromString.length > 0)" 
-                        lines="two"
-                        @click:select="selectFoundAddressFromString">
-                        <v-list-subheader>Résultats</v-list-subheader>
-                        <v-list-item
-                            v-for="address in foundAddressesFromString"    
-                            :value="address.id" 
-                            :key="address.id" 
-                            :title="address.description" 
-                            :subtitle="getFormattedAddress(address)"
-                        ></v-list-item>
-                    </v-list>                    
-                    <v-list v-else>
-                        <!-- <v-list-subheader v-if="isLoadingAdressesFromString">Recherche en cours</v-list-subheader> -->
-                        <v-list-subheader>Aucune adresse trouvée</v-list-subheader>
-                    </v-list>
-                </v-card>
-                <v-alert
-                    v-if="incompleteSearchCriterias && !isLoadingAdressesFromString && foundAddressesFromString.length == 0" 
-                    text="Indiquez une ville ou un code postal pour améliorer la recherche."
-                    title="Pas de résultat"
-                    type="info"
-                    class=""
-                ></v-alert>  
-                <v-alert
-                    v-if="!incompleteSearchCriterias && !isLoadingAdressesFromString && foundAddressesFromString.length == 0" 
-                    title="Créez le lieu"
-                    type="info"
-                    class=""
-                >
-                    <template v-slot:default>
-                        <p>Vous ne trouvez pas votre lieu ? </p>
-                        <p>Créez le sur <a target="_blank" href="https://www.openstreetmap.org">Open Street Map</a> pour le rendre visible ici et pour des millions d'utilisateurs !</p>
-                    </template>
-                </v-alert>                                     
-            </div>
-        </v-overlay>
+        <SearchAddressFromStringOverlay 
+            :show="searchAddressFromStringOverlay"
+            :group-address="groupAddress"
+            :physical-address="physicalAddress"
+            :found-addresses="foundAddressesFromString"
+            :is-loading="isLoadingAdressesFromString"
+            @select-address-by-id="selectFoundAddressFromStringById"
+            @toggle-show="toggleSearchAddressFromStringOverlay"
+            @use-address="useFoundAddress"
+            @search-address="searchAddress"
+        />
 
-        <v-overlay 
-            class="screen-overlay"
-            scrim="white" 
-            opacity="1" 
-            :close-on-content-click="false" 
-            v-model="locateFromMapOverlay" 
-            scroll-strategy="block"
-            content-class="overlay-content-wrapper"
-        >
-            <div class="overlay-content">
-                <v-btn color="secondary" prepend-icon="mdi-close" @click="toggleLocateFromMapOverlay">Fermer</v-btn>
-                <!-- <v-btn prepend-icon="mdi-magnify" @click="toggleSearchAddressFromStringOverlay">Centrer sur un lieu</v-btn>   -->
-                <v-btn 
-                    :loading="isLoadingGeolocation" 
-                    prepend-icon="mdi-crosshairs-gps" 
-                    @click="geolocateUser"
-                >Me géolocaliser</v-btn>                
-                <div class="map-select">
-                    <Map 
-                        ref="map2"
-                        @update-coords="updateTempCoords" 
-                        :coords="[ tempLatitude, tempLongitude ]" 
-                        :center="mapCenter"
-                        :alt-coords="altCoords"
-                        :zoom="15"
-                        :canUpdateCoords="true"
-                    />         
-                </div>              
-                <div class="map-select-caption text-caption font-italic">Cliquez sur la carte ou glissez-déposez le marqueur pour modifier la position.</div>       
-                <v-btn 
-                    @click="validateMapLocation" 
-                    prepend-icon="mdi-check" 
-                    color="primary"
-                >Valider</v-btn>
-            </div>
-        </v-overlay>
+        <LocateFromMapOverlay
+            :show="locateFromMapOverlay"
+            :isLoading="isLoadingGeolocation"
+            :latitude="latitude"
+            :longitude="longitude"
+            @toggle-show="toggleLocateFromMapOverlay"
+            @validate="validateMapLocation"
+        />
 
         <v-dialog
             v-model="validateMapLocationDialog"
@@ -677,43 +472,15 @@ const useGroupAddress = () => {
                 </template>
             </v-card>
         </v-dialog>
-
-        <v-overlay 
-            scrim="white" 
-            opacity="1" 
-            :close-on-content-click="false" 
-            v-model="searchAddressFromCoordsOverlay" 
-            scroll-strategy="block"
-            content-class="overlay-content-wrapper"
-            class="screen-overlay"
-        >
-            <div class="overlay-content">
-                <v-btn color="secondary" prepend-icon="mdi-close" @click="toggleSearchAddressFromCoordsOverlay">Fermer</v-btn>
-
-                <!-- <v-btn prepend-icon="mdi-map-marker" @click="goBackToMap">Modifier la position</v-btn> -->
-
-                <v-card style="overflow-y: scroll; z-index: initial">
-                    <v-list 
-                        v-if="!isLoadingAdressesFromCoords && foundAddressesFromCoords && foundAddressesFromCoords.length > 0" 
-                        lines="two"
-                        @click:select="selectFoundAddressFromCoords">
-                        <v-list-subheader>Addresses à proximité de la position</v-list-subheader>
-                        <v-list-item
-                            v-for="address in foundAddressesFromCoords"    
-                            :value="address.id" 
-                            :key="address.id" 
-                            :title="address.description" 
-                            :subtitle="getFormattedAddress(address)"
-                        ></v-list-item>
-                    </v-list>
-                    <v-list v-else>
-                        <v-list-subheader v-if="isLoadingAdressesFromCoords">Recherche en cours</v-list-subheader>
-                        <v-list-subheader v-else>Aucun résultat</v-list-subheader>
-                    </v-list>
-                </v-card>
-            </div>
-        </v-overlay>
         
+        <SearchAddressFromCoordsOverlay 
+            :show="searchAddressFromCoordsOverlay"
+            :isLoading="isLoadingAdressesFromCoords"
+            :foundAddresses="foundAddressesFromCoords"
+            @select-address-by-id="selectFoundAddressFromCoordsById"
+            @toggle-show="toggleSearchAddressFromCoordsOverlay"
+        />
+
         <!-- <v-checkbox class="mt-5" label="Enregistrer en tant que brouillon" v-model="isDraft" id="is-draft"></v-checkbox> -->
         <br/>
         

@@ -306,6 +306,7 @@ export default createStore({
             state.mobilizon.selectedGroupId = id
         },
         setScrapperData(state, data) {
+            console.log('Mutation - Set scrapper data', data);
             state.scrapper.data = data
         },
         setMobilizonConfig(state, config) {
@@ -454,6 +455,8 @@ export default createStore({
             await issueMobilizonRequest(store, requestHandler)
         },
         async searchAddressFromCoords(store, addressCoords) {
+            addressCoords.lng = parseFloat(addressCoords.lng)
+            addressCoords.lat = parseFloat(addressCoords.lat)
             const requestHandler = (token, { commit, state }) => {
                 const commitResult = source => data => commit('addAddressesFromCoords', { addresses: data || [], searchIndex, source })
                 commit('clearAddressesFromCoords')
