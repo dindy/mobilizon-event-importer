@@ -31,11 +31,13 @@ const logout = () => {
         <img src="/logo.svg" height="32px" width="32px"/>
         <v-app-bar-title>{{ title }}</v-app-bar-title>
         <template v-slot:append>
-            <v-avatar color="white" v-if="identity">
-                <v-img :title="identity.name" :alt="identity.name" :src="identity.avatar?.url || 'account-circle.svg'"></v-img>                    
+            <v-avatar :class="[identity.avatar?.url ? '' : 'bg-secondary']" :title="identity.name" :alt="identity.name" color="white" v-if="identity">
+                <v-img v-if="identity.avatar?.url" :src="identity.avatar?.url"></v-img>   
+                <v-icon v-else color="warning" icon="mdi-account"></v-icon>
             </v-avatar>
-            <v-avatar color="white" class="ml-n5" v-if="group">
-                <v-img :title="group.name" :alt="group.name" :src="group.avatar?.url || 'group.svg'"></v-img>
+            <v-avatar :class="[group.avatar?.url ? '' : 'bg-secondary', 'border-md', 'border-surface']" :title="group.name" :alt="group.name" color="white" class="ml-n5" v-if="group">
+                <v-img v-if="group.avatar?.url"  :src="group.avatar?.url"></v-img>
+                <v-icon v-else color="warning" icon="mdi-account-group"></v-icon>
             </v-avatar>
             <v-btn @click="switchIdentity" class="ml-1" title="Changer d'identité ou de groupe" v-if="identity" icon="mdi-account-switch"></v-btn>
             <v-btn class="ml-5" title="Se déconnecter de l'instance Mobilizon" v-if="isMobilizonUserAuthenticated" @click="logout" icon="mdi-logout"></v-btn>
