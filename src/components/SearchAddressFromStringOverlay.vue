@@ -1,12 +1,7 @@
 <script setup>
-import { computed, ref, onMounted } from 'vue'
+import { computed, ref, onMounted, watch } from 'vue'
 import { getFormattedAddress } from '../utils/utils'
 
-const physicalAddress = ref(null)
-
-onMounted(() => {
-    physicalAddress.value = props.physicalAddress    
-})
 
 const emit = defineEmits('toggleShow', 'useAddress', 'searchAddress', 'foundAdresses', 'selectAddressById')
 
@@ -16,6 +11,14 @@ const props = defineProps({
     physicalAddress: Object,
     foundAddresses: Array,
     isLoading: Boolean
+})
+
+const physicalAddress = ref(() => JSON.parse(JSON.stringify(props.physicalAddress)))
+
+const globalShow = computed(() => props.show)
+
+watch(globalShow, async (newShow, oldShow) => { 
+    physicalAddress.value = JSON.parse(JSON.stringify(props.physicalAddress))
 })
 
 const isOpen = computed(() => {
@@ -41,6 +44,11 @@ const incompleteSearchCriterias = computed(() => {
     
     return ((!pc || pc == '') && (!locality || locality == ''))
 })
+
+const validate = () => {
+    emit('useAddress', physicalAddress.value)
+    emit('toggleShow')
+}
 </script>
 
 <template>
@@ -54,7 +62,6 @@ const incompleteSearchCriterias = computed(() => {
         class="screen-overlay"
     >
         <div class="overlay-content">
-            <v-btn color="secondary" prepend-icon="mdi-close" @click="toggleShow">Fermer</v-btn>
             <v-btn v-if="groupAddress" prepend-icon="mdi-map-marker-account" @click="useGroupAddress">Utiliser l'adresse du groupe</v-btn>
             <!-- <v-btn v-if="latitude && longitude" prepend-icon="mdi-map-marker" @click="openSearchAddressFromCoordsOverlay">Utiliser la position</v-btn> -->
             <div>
@@ -80,7 +87,6 @@ const incompleteSearchCriterias = computed(() => {
                     ></v-list-item>
                 </v-list>                    
                 <v-list v-else>
-                    <!-- <v-list-subheader v-if="isLoading">Recherche en cours</v-list-subheader> -->
                     <v-list-subheader>Aucune adresse trouvée</v-list-subheader>
                 </v-list>
             </v-card>
@@ -101,7 +107,11 @@ const incompleteSearchCriterias = computed(() => {
                     <p>Vous ne trouvez pas votre lieu ? </p>
                     <p>Créez le sur <a target="_blank" href="https://www.openstreetmap.org">Open Street Map</a> pour le rendre visible ici et pour des millions d'utilisateurs !</p>
                 </template>
-            </v-alert>                                     
+            </v-alert>      
+            <div>
+                <v-btn class="mr-5" @click="validate" prepend-icon="mdi-check" color="success">Valider</v-btn>                                           
+                <v-btn color="" prepend-icon="mdi-close" @click="toggleShow">Annuler</v-btn>
+            </div>
         </div>
     </v-overlay>    
 </template>

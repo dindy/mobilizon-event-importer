@@ -83,8 +83,6 @@ const openCoverUpload = () => {
   uploadCoverInput.value?.click()
 }
 
-
-
 const submit = async action => {
     
     isDraft.value = action === 'submitAsDraft'
@@ -120,7 +118,6 @@ const foundAddressesFromString = computed(() => store.getters.getAddressesFromSt
 const categories = computed(() => store.getters.getEventCategories)
 const groupAddress = computed(() => store.getters.getSelectedGroupAddress)
 const uploadedCover = ref(null)
-const altCoords = ref(null)
 const searchAddressString = ref("")
 const isLoadingGeolocation = ref(false)
 const uploadCoverInput = ref(null)
@@ -213,19 +210,17 @@ const updateTempCoords  = (coords, zoom) => {
     store.dispatch('searchAddressFromCoords', coords, zoom)
 }
 
-
 const useFoundAddress = (address) => {
     physicalAddress.value.description = address.description
     physicalAddress.value.locality = address.locality
     physicalAddress.value.postalCode = address.postalCode
     physicalAddress.value.street = address.street
     physicalAddress.value.country = address.country
-    latitude.value = address.geom.split(';')[1]
-    longitude.value = address.geom.split(';')[0]
-    console.log("useFoundAddress", address, latitude.value, longitude.value);
-    
-    altCoords.value = null
-    mapCenter.value = [latitude.value, longitude.value]
+    if (address.geom) {
+        latitude.value = address.geom.split(';')[1]
+        longitude.value = address.geom.split(';')[0]
+        mapCenter.value = [latitude.value, longitude.value]
+    }
 }
 
 const searchAddress = (address) => {
@@ -410,7 +405,7 @@ const hasAddress = computed(() => getFormattedAddress(physicalAddress.value) && 
                 @update-coords="updateCoords" 
                 :coords="[ latitude, longitude ]" 
                 :center="mapCenter"
-                :alt-coords="altCoords"
+                :alt-coords="null"
                 :zoom="15"
                 :canUpdateCoords="false"
                 />
