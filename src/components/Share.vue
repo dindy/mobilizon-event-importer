@@ -37,8 +37,7 @@ onMounted(async () => {
 
     if (toImport.value) {
         if (hasTokenData && selectedIdentity && mobilizonConfig) {
-            store.commit('setScrapperUrl', url.value)
-            await store.dispatch('scrap', url.value)
+            await store.dispatch('scrap', toImport.value)
             router.push('/create')            
         }
     }
