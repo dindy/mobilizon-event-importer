@@ -496,7 +496,7 @@ const hasAddress = computed(() => getFormattedAddress(event.value.physicalAddres
         <div class="mt-5">
 
             <v-btn 
-                class="mr-5" 
+                class="mr-5 mb-5" 
                 color="success" 
                 type="submit"
                 :loading="store.getters.isSavingEvent"
@@ -504,7 +504,7 @@ const hasAddress = computed(() => getFormattedAddress(event.value.physicalAddres
             >Enregistrer</v-btn>
     
             <v-btn 
-                class="" 
+                class="mr-5 mb-5" 
                 color="info" 
                 type="submit"
                 :loading="store.getters.isSavingEvent"
@@ -512,7 +512,7 @@ const hasAddress = computed(() => getFormattedAddress(event.value.physicalAddres
             >Enregistrer comme brouillon</v-btn>
 
             <v-btn 
-                class="float-right" 
+                class="mb-5" 
                 color="warning" 
                 @click="cancel"
             >Annuler</v-btn>            
