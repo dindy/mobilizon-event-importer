@@ -69,30 +69,56 @@ createApp(App)
   .use(vuetify)
   .mount('#app')
 
-store.dispatch('init')
-router.beforeEach((to, from) => {
+await store.dispatch('init')
   
+router.beforeEach(async (to, from) => {
+  
+  console.log('Router - Before - ' + to.path);
+    
   const hasTokenData = store.getters.hasMobilizonTokenData
+  const selectedIdentity = store.getters.getSelectedIdentity
+  const localEvent = store.getters.getLocalEvent
+  const mobilizonConfig = store.getters.getMobilizonConfig
+  const mobilizonInstanceUrl = store.getters.getMobilizonInstanceUrl
+  const isInstanceConfigLoaded = store.getters.isInstanceConfigLoaded
+  const scrappedData = store.getters.getScrappedData
+  const scrapperUrl = store.getters.getScrapperUrl
 
-  // if (to.path == '/share/' || to.path == '/share') {
-  //   console.log('Router - /share path detected')
-  //   if (to.query.url) {
-  //     store.commit('setScrapperUrl', to.query.url)
-  //   }
-  //   router.replace('/identity')
-  // }
+  const notAuthenticatedAllowedPaths = [
+    '/',
+    '/instance',
+    '/mobilizon/callback',
+    '/share/',
+  ]
 
-  if (hasTokenData && to.path === '/') {
-    console.log('Router - Redirect to /identity')
+  const isAllowedWithoutAuth = path => notAuthenticatedAllowedPaths.includes(path)
+
+  if (!hasTokenData && !isAllowedWithoutAuth(to.path)) {
+    router.replace('/instance')
+  }
+
+  if ((to.path == '/scrap' || to.path == '/create') && !selectedIdentity) {
     router.replace('/identity')
   }
 
-  if (!hasTokenData && to.path == '/identity') {
-    router.replace('/')
+  if (to.path == '/scrap' && localEvent && from.path !== '/create') {
+    router.replace('/create')
   }
 
-  if (!store.getters.isConfigLoaded && to.path !== '/share/' && to.path !== '/instance' && to.path !== '/' && to.path !== '/mobilizon/callback' && to.path !== '/identity') {
-    console.log('Router - Redirect to /')
-    router.replace('/')
+  if (to.path == '/create' && !scrappedData && !localEvent) {
+    router.replace('/scrap')
   }
+
+  if (to.path === '/' && hasTokenData && mobilizonConfig) {
+    if (selectedIdentity) {
+      if (scrappedData || localEvent) {
+        router.replace('/create')
+      } else {
+        router.replace('/scrap')
+      }
+    } else {
+      router.replace('/identity')
+    }
+  }
+
 })

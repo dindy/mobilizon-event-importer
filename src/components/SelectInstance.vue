@@ -5,9 +5,18 @@ import { useStore } from 'vuex'
 import { useRouter } from 'vue-router'
 import { onMounted } from 'vue'
 import { isValidUrl } from '../utils/utils.js'
+const removeScheme = url => {
 
+    if (url.startsWith('https://')) {
+        url = url.slice(8)
+    } else if (url.startsWith('http://')) {
+        url = url.slice(7)
+    }
+
+    return url
+}
 const store = useStore()
-const instanceUrl = ref("")
+const instanceUrl = ref(removeScheme(store.getters.getMobilizonInstanceUrl || ''))
 const next = () => {
     if (instanceUrl.value.endsWith('/')) {
         instanceUrl.value = instanceUrl.value.slice(0, -1)
@@ -19,10 +28,7 @@ const isInstanceUrlValid = computed(() => isValidUrl(instanceUrl.value))
 store.dispatch('setPageTitle', 'Instance Mobilizon')
 const paste = async () => {
     let value = await navigator.clipboard.readText()
-    if (value.startsWith('https://')) {
-        value = value.slice(8)
-    }
-    instanceUrl.value = value
+    instanceUrl.value = removeScheme(value)
 }
 
 const rules = {

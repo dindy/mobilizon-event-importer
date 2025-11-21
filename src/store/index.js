@@ -156,7 +156,8 @@ export default createStore({
                     }
                 },
                 searchIndex: 1
-            }            
+            }, 
+            localEvent: null            
         }
     },
     getters: {
@@ -188,7 +189,7 @@ export default createStore({
             .sort((a, b) => a.id - b.id)
             .filter(message => !message.hidden)[0],
         isMobilizonUserAuthenticated: state => state.mobilizon.identities.length > 0,
-        isConfigLoaded: state => !!state.mobilizon.config,
+        isInstanceConfigLoaded: state => state.mobilizon.config !== null,
         isConnectingToMobilizon: state => state.mobilizon.fetchingToken || state.mobilizon.refreshingToken,
         getMobilizonEventUUID: state => state.mobilizon.lastSavedUUID,
         getMobilizonImageURL: state => state.mobilizon.lastSavedImageUrl,
@@ -199,6 +200,7 @@ export default createStore({
         getMobilizonInstanceUrl: state => state.mobilizon.instanceUrl,
         getScrapperUrl: state => state.scrapper.url,
         getMobilizonEventIsDraft: state => state.mobilizon.lastSavedIsDraft,
+        getLocalEvent: state => state.localEvent
     },
     mutations: {
         clearAddressesFromString(state) {
@@ -254,24 +256,11 @@ export default createStore({
             console.log('Mutation - Mutate mobilizon token data with', data);
             state.mobilizon.tokenData = data
         },
-        setMobilizonGroups(state, data) {
-            console.log('Mutation - Mutate mobilizon groups with', data);
-            const groups = data.loggedUser.memberships
-            const actors = data.loggedUser.actors
-            state.mobilizon.groups = groups.elements
-                .filter(group => group.role === 'MODERATOR' || group.role === 'ADMINISTRATOR')
-                .map(group => ({
-                    ...group.parent,
-                    memberId: group.actor.id
-                }))
+        setMobilizonGroups(state, groups) {
+            state.mobilizon.groups = groups
             console.log('Mutation - Mobilizon groups set:', state.mobilizon.groups);
-
-            let identities = actors.map(actor => ({
-                id: actor.id,
-                name: actor.name,
-                preferredUsername: actor.preferredUsername,
-                avatar: actor.avatar ? {...actor.avatar} : null,
-            }))
+        },
+        setMobilizonIdentities(state, identities) {
             state.mobilizon.identities = identities
             console.log('Mutation - Mobilizon identities set:', state.mobilizon.identities);
         },
@@ -295,6 +284,8 @@ export default createStore({
             }
             state.mobilizon.identities = []
             state.mobilizon.groups = []
+            state.mobilizon.selectedGroupId = null
+            state.mobilizon.selectedIdentityId = null
         },
         setIsLoadingScrapper(state, isLoading) {
             state.scrapper.isLoading = isLoading
@@ -344,6 +335,9 @@ export default createStore({
         setLastSavedIsDraft(state, isDraft) {
             console.log('Mutation - Set last saved is draft', isDraft)
             state.mobilizon.lastSavedIsDraft = isDraft
+        },
+        setLocalEvent(state, event) {
+            state.localEvent = event
         }
     },
     actions: {
@@ -374,12 +368,56 @@ export default createStore({
             const mobilizonTokenData = localStorage.getItem('mobilizonTokenData')
             if (mobilizonTokenData) {
                 commit('setMobilizonTokenData', JSON.parse(mobilizonTokenData))
-                console.log('Action - Mobilizon Token set from localstorage', mobilizonTokenData)
-                await dispatch('fetchMobilizonGroups')
-                dispatch('loadMobilizonConfig')
+                console.log('Action - Mobilizon Token set from localstorage', JSON.parse(mobilizonTokenData))
+                // dispatch('fetchMobilizonGroups')
+                // dispatch('loadMobilizonConfig')
             } else {
                 console.log('Action - No Mobilizon Token data in localstorage')
-            }            
+            }          
+            
+            const localEvent = localStorage.getItem('localEvent')
+            if (localEvent) {
+                commit('setLocalEvent', JSON.parse(localEvent))
+                console.log('Action - Local event set from localstorage', JSON.parse(localEvent))
+            }
+
+            const groups = localStorage.getItem('mobilizonGroups')
+            if (groups) {
+                commit('setMobilizonGroups', JSON.parse(groups))
+                console.log('Action - Mobilizon groups set from localstorage', JSON.parse(groups))
+            }   
+            
+            const identities = localStorage.getItem('mobilizonIdentities')
+            if (identities) {
+                commit('setMobilizonIdentities', JSON.parse(identities))
+                console.log('Action - Mobilizon identities set from localstorage', JSON.parse(identities))
+            }  
+            
+            const selectedMobilizonIdentity = localStorage.getItem('selectedMobilizonIdentity')
+            if (selectedMobilizonIdentity) {
+                commit('setSelectedMobilizonIdentity', JSON.parse(selectedMobilizonIdentity))
+                console.log('Action - Selected mobilizon identity set from localstorage', JSON.parse(selectedMobilizonIdentity))
+            }  
+            
+            const selectedMobilizonGroup = localStorage.getItem('selectedMobilizonGroup')
+            if (selectedMobilizonGroup) {
+                commit('setSelectedMobilizonGroup', JSON.parse(selectedMobilizonGroup))
+                console.log('Action - Selected mobilizon identity set from localstorage', JSON.parse(selectedMobilizonGroup))
+            }              
+
+            const mobilizonConfig = localStorage.getItem('mobilizonConfig')
+            if (mobilizonConfig) {
+                commit('setMobilizonConfig', JSON.parse(mobilizonConfig))
+                console.log('Action - Mobilizon config set from localstorage', JSON.parse(mobilizonConfig))
+            }  
+
+            const scrapperUrl = localStorage.getItem('scrapperUrl')
+            if (scrapperUrl) {
+                commit('setScrapperUrl', JSON.parse(scrapperUrl))
+                console.log('Action - Scrapper URL set from localstorage', JSON.parse(scrapperUrl))
+            }  
+            
+            return true
         },
         loadMobilizonTokenDataFromLocalStorage() { 
             console.log('Action - Loading Mobilizon token data from local storage');
@@ -389,9 +427,16 @@ export default createStore({
             console.log('Action - Loading Mobilizon app data from local storage');
             return localStorage.getItem('mobilizonAppData')
         },
-        logoutMobilizon({ commit }) {
+        logoutMobilizon({ commit, dispatch }) {
             console.log('Action - Logout')
+            dispatch('resetEvent')
+            dispatch('resetScrapper')
             localStorage.removeItem('mobilizonTokenData')
+            localStorage.removeItem('mobilizonGroups')
+            localStorage.removeItem('mobilizonIdentities')
+            localStorage.removeItem('selectedMobilizonIdentity')
+            localStorage.removeItem('selectedMobilizonGroup')
+            localStorage.removeItem('mobilizonConfig')
             commit('clearMobilizonSession')
         },
         saveMobilizonCode({ commit }, code) {
@@ -422,8 +467,25 @@ export default createStore({
                     console.log('Action - Fetch Mobilizon Groups')
                     commit('setIsLoadingGroups', true)       
                     const data = await mobilizonApi.getUserGroups(token)
-                    commit('setMobilizonGroups', data)
-                    console.log('Action - Fetched Mobilizon groups:', data);
+                    const groups = data.loggedUser.memberships
+                    const actors = data.loggedUser.actors
+                    const formattedGroups = groups.elements
+                        .filter(group => group.role === 'MODERATOR' || group.role === 'ADMINISTRATOR')
+                        .map(group => ({
+                            ...group.parent,
+                            memberId: group.actor.id
+                        }))
+
+                    const formattedActors = actors.map(actor => ({
+                        id: actor.id,
+                        name: actor.name,
+                        preferredUsername: actor.preferredUsername,
+                        avatar: actor.avatar ? {...actor.avatar} : null,
+                    }))
+                    localStorage.setItem('mobilizonGroups', JSON.stringify(formattedGroups))
+                    localStorage.setItem('mobilizonIdentities', JSON.stringify(formattedActors))
+                    commit('setMobilizonGroups', formattedGroups)
+                    commit('setMobilizonIdentities', formattedActors)
                 } finally {
                     commit('setIsLoadingGroups', false)                
                 }
@@ -432,13 +494,16 @@ export default createStore({
         },
         selectMobilizonIdentityAndGroup({ commit }, payload) {
             console.log(`Action - Select identity ${payload.identity} and group ${payload.group}`);
+            localStorage.setItem('selectedMobilizonGroup', JSON.stringify(payload.group))
+            localStorage.setItem('selectedMobilizonIdentity', JSON.stringify(payload.identity))
             commit('setSelectedMobilizonIdentity', payload.identity)
             commit('setSelectedMobilizonGroup', payload.group)
         },
-        async scrap({ commit }, url) {
+        async scrap({ commit, dispatch }, url) {
+            dispatch('resetEvent')
+            dispatch('resetScrapper')
             commit('setScrapperUrl', url)
             commit('setIsLoadingScrapper', true)          
-            commit('setScrapperData', null)
             const data = await scrapperApi.scrap(url)
             commit('setScrapperData', data)
             commit('setIsLoadingScrapper', false)    
@@ -475,6 +540,7 @@ export default createStore({
             console.log('Action - Load mobilizon config')
             issueMobilizonRequest(store, async (token, { commit }) => {
                 const config = await mobilizonApi.getConfig(token)
+                localStorage.setItem('mobilizonConfig', JSON.stringify(config))
                 commit('setMobilizonConfig', config)
             })
         },
@@ -549,12 +615,29 @@ export default createStore({
                 dispatch('createErrorFromText', 'Impossible de se connecter à l\'instance : ' + error)
             }
         },
-        resetEvent({ commit }) {
+        resetScrapper({ commit }) {
+            console.log('Action - Reset scrapper')
+            localStorage.removeItem('scrapperUrl')
             commit('setScrapperUrl', null)
             commit('setScrapperData', null)
+        },
+        resetEvent({ commit }) {
+            console.log('Action - Reset event')
             commit('setMobilizonCreatedEventUuid', null)
             commit('clearAddressesFromCoords')   
             commit('setLastSavedIsDraft', null)           
+            commit('setLocalEvent', null)
+            localStorage.removeItem('localEvent')
+        },
+        saveLocalEvent({ commit }, event) {
+            console.log('Action - Save local event', event)
+            localStorage.setItem('localEvent', JSON.stringify(event))
+            commit('setLocalEvent', event)
+        },
+        shareUrl({ commit }, url) {
+            console.log('Action - Share url');
+            localStorage.setItem('scrapperUrl', JSON.stringify(url))
+            commit('setScrapperUrl', url)
         }
     },
 })

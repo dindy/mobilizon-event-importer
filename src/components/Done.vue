@@ -21,6 +21,7 @@ const seeEvent = () => {
 
 const newEvent = () => {
     store.dispatch('resetEvent')
+    store.dispatch('resetScrapper')
     router.push('/scrap')
 }
 

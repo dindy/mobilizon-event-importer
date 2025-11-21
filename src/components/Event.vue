@@ -1,5 +1,5 @@
 <script setup>
-import { computed, ref } from 'vue'
+import { computed, ref, watch } from 'vue'
 import { useStore } from 'vuex';
 import { useRouter } from 'vue-router'
 import { convertBytesToMegabytes, dataURLtoFile, mergeDateTime, timestampToDate, timestampToTime, blobToDataUrl, getFormattedAddress } from '../utils/utils';
@@ -20,7 +20,7 @@ const updateMaxCoveratio = src => {
     const tempImage = new Image
     tempImage.onload = () => {
         const heightWidthRatio = tempImage.height / tempImage.width
-        maxCoverRatio.value = heightWidthRatio > maxCoverRatio.value ? heightWidthRatio : maxCoverRatio.value
+        event.value.maxCoverRatio = heightWidthRatio > event.value.maxCoverRatio ? heightWidthRatio : event.value.maxCoverRatio
     } 
     tempImage.src = src    
 }
@@ -31,16 +31,16 @@ const isValidSizeFile = file => file.size <= uploadLimits.value.banner
 
 const setSelectedBanner = index => {
 
-    selectedBannerTooBig.value = false
+    event.value.selectedBannerTooBig = false
 
     if (index) {
-        const image = banners.value[index]
+        const image = event.value.banners[index]
         if (!isValidSizeFile(image.file)) {
-            selectedBannerTooBig.value = true
+            event.value.selectedBannerTooBig = true
             return
         }
     }
-    selectedBannerId.value = index
+    event.value.selectedBannerId = index
 }
 
 const setUploadedImage = async e => {
@@ -49,10 +49,10 @@ const setUploadedImage = async e => {
     const file = files.length > 0 ? files[0] : null
     
     if (file) {
-        uploadedBannerTooBig.value = false
+        event.value.uploadedBannerTooBig = false
         
         if (!isValidSizeFile(file)) {
-            uploadedBannerTooBig.value = true
+            event.value.uploadedBannerTooBig = true
             store.dispatch('submitErrorFromText', `L'image est trop lourde (max ${convertBytesToMegabytes(uploadLimits.value.banner) } Mo)`)
             e.target.value = ""
             return
@@ -62,21 +62,21 @@ const setUploadedImage = async e => {
             const dataUrl = await blobToDataUrl(file)
             uploadedImage.src = dataUrl
             updateMaxCoveratio(dataUrl)
-            banners.value.push(uploadedImage)
-            selectedBannerId.value = banners.value.length - 1
+            event.value.banners.push(uploadedImage)
+            event.value.selectedBannerId = event.value.banners.length - 1
         } catch (e) {
             console.error('Erreur lors de la conversion de l\'image en base 64')
         }
     }
 }
 
-const getSelectedBanner = () => selectedBannerId.value !== null ?
-    banners.value[selectedBannerId.value] :
+const getSelectedBanner = () => event.value.selectedBannerId !== null ?
+    event.value.banners[event.value.selectedBannerId] :
     null
 
 const updateCoords = (coords, zoom = null) => {
-    longitude.value = parseFloat(coords.longitude)
-    latitude.value = parseFloat(coords.latitude)
+    event.value.longitude = parseFloat(coords.longitude)
+    event.value.latitude = parseFloat(coords.latitude)
 }
 
 const openCoverUpload = () => {
@@ -85,20 +85,20 @@ const openCoverUpload = () => {
 
 const submit = async action => {
     
-    isDraft.value = action === 'submitAsDraft'
+    event.value.isDraft = action === 'submitAsDraft'
 
     const banner = getSelectedBanner()
     const data = {
-        draft: isDraft.value,
+        draft: event.value.isDraft,
         banner: banner ? banner.file : null,
-        startDate: new Date(mergeDateTime(startDate.value, startTime.value) * 1000).toJSON(),
-        endDate: hasEndDate.value ? new Date(mergeDateTime(endDate.value, endTime.value) * 1000).toJSON() : null,
+        startDate: new Date(mergeDateTime(event.value.startDate, event.value.startTime) * 1000).toJSON(),
+        endDate: event.value.endDate ? new Date(mergeDateTime(event.value.endDate, event.value.endTime) * 1000).toJSON() : null,
         title: title.value,
-        description: description.value.replaceAll('\n', '</br>'),
-        url: url.value,
-        physicalAddress: { ...physicalAddress.value, geom: longitude.value ? `${longitude.value};${latitude.value}` : null },
-        category: selectedCategory.value,
-        ticketsUrl: ticketsUrl.value
+        description: event.value.description.replaceAll('\n', '</br>'),
+        url: event.value.url,
+        physicalAddress: { ...event.value.physicalAddress, geom: event.value.longitude ? `${event.value.longitude};${event.value.latitude}` : null },
+        category: event.value.selectedCategory,
+        ticketsUrl: event.value.ticketsUrl
     }
 
     await store.dispatch('saveMobilizonEvent', data)
@@ -107,6 +107,12 @@ const submit = async action => {
     if (uuid) {
         router.push('/done')
     }
+}
+
+const cancel = () => {
+    store.dispatch('resetEvent')
+    store.dispatch('resetScrapper')
+    router.push('/scrap')
 }
 
 /* Initialize default variables */
@@ -128,77 +134,89 @@ const searchAddressFromCoordsOverlay = ref(false)
 
 /* Get initial event data either from scrapped data or from saved event */
 const scrapped = store.getters.getScrappedData
-const banners = ref(null)
-const ticketsUrl = ref(null)
-const title = ref(null)
-const description = ref(null)
-const isDraft = ref(null)
-const url = ref(null)
-const selectedBannerId = ref(null) 
-const selectedBannerTooBig = ref(false)
-const maxCoverRatio = ref(0)
-const selectedCategory = ref(null)
-const startDate = ref(null)
-const startTime = ref(null)
-const endDate = ref(null)
-const endTime = ref(null)
-const hasEndDate = ref(null)
-const uploadedBannerTooBig = ref(false)
-const physicalAddress = ref({
+const saved = store.getters.getLocalEvent
+const event = ref({
+    banners: null,
+    ticketsUrl: null,
+    title: null,
     description: null,
-    locality: null,
-    postalCode: null,
-    street: null,
-    country: null
+    isDraft: false,
+    url: null,
+    selectedBannerId: null,
+    selectedBannerTooBig: null,
+    maxCoverRatio: 0,
+    selectedCategory: null,
+    startDate: null,
+    startTime: null,
+    endDate: null,
+    endTime: null,
+    hasEndDate: null,
+    uploadedBannerTooBig: null,
+    physicalAddress: {
+        description: null,
+        locality: null,
+        postalCode: null,
+        street: null,
+        country: null
+    },    
+    latitude: null,
+    longitude: null,    
 })
-const latitude = ref(null)
-const longitude = ref(null)
-const mapCenter = computed(() => latitude.value && longitude.value ? [latitude.value, longitude.value] : null)
+const mapCenter = computed(() => event.value.latitude && event.value.longitude ? [event.value.latitude, event.value.longitude] : null)
 
-if (scrapped) {
+watch(
+    () => event,
+    (event, prevEvent) => {
+        store.dispatch('saveLocalEvent', event.value)
+    },
+    {deep: true}
+)
+
+if (saved) {
+    event.value = saved
+} else if (scrapped) {
 
     // Raw data
     const localPhysicalAddress = scrapped.metas.physicalAddress 
     const endTimestamp = scrapped.metas.endTimestamp
     const startTimestamp = scrapped.metas.startTimestamp
-    banners.value = scrapped.images.map(url => ({ src: url, file: null }))
-    ticketsUrl.value = scrapped.metas.ticketsUrl
-    title.value = scrapped.metas.title
-    description.value = scrapped.metas.description
-    isDraft.value = false
-    url.value = scrapped.metas.url
-    physicalAddress.value.description = localPhysicalAddress.description
-    physicalAddress.value.locality = localPhysicalAddress.locality
-    physicalAddress.value.postalCode = localPhysicalAddress.postalCode
-    physicalAddress.value.street = localPhysicalAddress.street
-    physicalAddress.value.country = localPhysicalAddress.country
+    event.value.banners = scrapped.images.map(url => ({ src: url, file: null }))
+    event.value.ticketsUrl = scrapped.metas.ticketsUrl
+    event.value.title = scrapped.metas.title
+    event.value.description = scrapped.metas.description
+    event.value.url = scrapped.metas.url
+    event.value.physicalAddress.description = localPhysicalAddress.description
+    event.value.physicalAddress.locality = localPhysicalAddress.locality
+    event.value.physicalAddress.postalCode = localPhysicalAddress.postalCode
+    event.value.physicalAddress.street = localPhysicalAddress.street
+    event.value.physicalAddress.country = localPhysicalAddress.country
     
     let { hosts } = scrapped.metas
 
     // Data processed
     if (localPhysicalAddress.geom) {
-        latitude.value = parseFloat(localPhysicalAddress.geom.split(';')[1])
-        longitude.value = parseFloat(localPhysicalAddress.geom.split(';')[0])      
+        event.value.latitude = parseFloat(localPhysicalAddress.geom.split(';')[1])
+        event.value.longitude = parseFloat(localPhysicalAddress.geom.split(';')[0])      
     }
-    startDate.value = timestampToDate(startTimestamp)
-    startTime.value = timestampToTime(startTimestamp)
-    endDate.value = timestampToDate(endTimestamp)
-    endTime.value = timestampToTime(endTimestamp)    
-    hasEndDate.value = endTimestamp ? true : false    
+    event.value.startDate = timestampToDate(startTimestamp)
+    event.value.startTime = timestampToTime(startTimestamp)
+    event.value.endDate = timestampToDate(endTimestamp)
+    event.value.endTime = timestampToTime(endTimestamp)    
+    event.value.endDate = endTimestamp ? true : false    
     if (hosts && hosts.length > 0) {
         if (hosts.length == 1) {
-            description.value += `<br><p>Organisé par ${getLinkOrJustName(hosts[0].name, hosts[0].url)}</p>`
+            event.value.description += `<br><p>Organisé par ${getLinkOrJustName(hosts[0].name, hosts[0].url)}</p>`
         } else {
-            description.value += `<br><p>Organisateurs :<ul>`
+            event.value.description += `<br><p>Organisateurs :<ul>`
             hosts.forEach((host) => {
-                description.value += `<li>${getLinkOrJustName(host.name, host.url)}</li>`
+                event.value.description += `<li>${getLinkOrJustName(host.name, host.url)}</li>`
             })
-            description.value += `</ul></p>`
+            event.value.description += `</ul></p>`
         }
     }    
 
     // Init scrapped covers
-    banners.value.map((image) => {
+    event.value.banners.map((image) => {
         image.file = dataURLtoFile(image.src)
         updateMaxCoveratio(image.src)
     })
@@ -211,14 +229,14 @@ const updateTempCoords  = (coords, zoom) => {
 }
 
 const useFoundAddress = (address) => {
-    physicalAddress.value.description = address.description
-    physicalAddress.value.locality = address.locality
-    physicalAddress.value.postalCode = address.postalCode
-    physicalAddress.value.street = address.street
-    physicalAddress.value.country = address.country
+    event.value.physicalAddress.description = address.description
+    event.value.physicalAddress.locality = address.locality
+    event.value.physicalAddress.postalCode = address.postalCode
+    event.value.physicalAddress.street = address.street
+    event.value.physicalAddress.country = address.country
     if (address.geom) {
-        latitude.value = address.geom.split(';')[1]
-        longitude.value = address.geom.split(';')[0]
+        event.value.latitude = address.geom.split(';')[1]
+        event.value.longitude = address.geom.split(';')[0]
     }
 }
 
@@ -231,8 +249,8 @@ const toggleSearchAddressFromStringOverlay = () => {
     searchAddressFromStringOverlay.value = !searchAddressFromStringOverlay.value
     if (searchAddressFromStringOverlay.value) {
         store.commit('clearAddressesFromString') 
-        searchAddressString.value = getFormattedAddress(physicalAddress.value)
-        searchAddress(physicalAddress.value)
+        searchAddressString.value = getFormattedAddress(event.value.physicalAddress)
+        searchAddress(event.value.physicalAddress)
     }
 }
 
@@ -253,11 +271,11 @@ const toggleLocateFromMapOverlay = () => {
 }
 
 const validateMapLocation = (coords) => {
-    longitude.value = coords.longitude
-    latitude.value = coords.latitude    
+    event.value.longitude = coords.longitude
+    event.value.latitude = coords.latitude    
     closeLocateFromMapOverlay()
     validateMapLocationDialog.value = true
-    store.dispatch('searchAddressFromCoords', { lng: longitude.value, lat: latitude.value })
+    store.dispatch('searchAddressFromCoords', { lng: event.value.longitude, lat: event.value.latitude })
 }
 
 const acceptSearchAddressFromCoordsOverlay = () => {
@@ -268,7 +286,7 @@ const acceptSearchAddressFromCoordsOverlay = () => {
 
 const openSearchAddressFromCoordsOverlay = () => {
     searchAddressFromCoordsOverlay.value = true
-    store.dispatch('searchAddressFromCoords', { lng: longitude.value, lat: latitude.value })
+    store.dispatch('searchAddressFromCoords', { lng: event.value.longitude, lat: event.value.latitude })
 }
 
 const toggleSearchAddressFromCoordsOverlay = () => {    
@@ -283,7 +301,7 @@ const selectFoundAddressFromStringById = (id) => {
     const address = store.getters.getAddressFromStringById(id)
     useFoundAddress(address)
     searchAddressFromStringOverlay.value = false
-    store.dispatch('searchAddressFromCoords', { lng: longitude.value, lat: latitude.value })
+    store.dispatch('searchAddressFromCoords', { lng: event.value.longitude, lat: event.value.latitude })
 }
 
 const selectFoundAddressFromCoordsById = (id) => {
@@ -293,11 +311,9 @@ const selectFoundAddressFromCoordsById = (id) => {
     searchAddressFromStringOverlay.value = false 
 }
 
-const address = computed(() => getFormattedAddress(physicalAddress.value).split(', ').join('\n'))
+const address = computed(() => getFormattedAddress(event.value.physicalAddress).split(', ').join('\n'))
 
-const hasAddress = computed(() => getFormattedAddress(physicalAddress.value) && getFormattedAddress(physicalAddress.value) !== '')
-
-
+const hasAddress = computed(() => getFormattedAddress(event.value.physicalAddress) && getFormattedAddress(event.value.physicalAddress) !== '')
 
 </script>
 
@@ -314,15 +330,15 @@ const hasAddress = computed(() => getFormattedAddress(physicalAddress.value) && 
 
         <h1 class="text-subtitle-2 mb-3">Date et heure</h1>
         
-        <v-text-field class="required" required label="Date de début" id="start-date" type="date" v-model="startDate" />
+        <v-text-field class="required" required label="Date de début" id="start-date" type="date" v-model="event.startDate" />
         
-        <v-text-field class="required" required label="Heure de début" id="start-time" type="time" v-model="startTime" />
+        <v-text-field class="required" required label="Heure de début" id="start-time" type="time" v-model="event.startTime" />
         
-        <v-checkbox label="L'événement a une date de fin" v-model="hasEndDate" id="has-end-date"></v-checkbox>
+        <v-checkbox label="L'événement a une date de fin" v-model="event.hasEndDate" id="has-end-date"></v-checkbox>
 
-        <div v-if="hasEndDate">
-            <v-text-field label="Date de fin" id="end-date" type="date" v-model="endDate"  />            
-            <v-text-field label="Heure de fin" id="end-time" type="time" v-model="endTime"  />    
+        <div v-if="event.hasEndDate">
+            <v-text-field label="Date de fin" id="end-date" type="date" v-model="event.endDate"  />            
+            <v-text-field label="Heure de fin" id="end-time" type="time" v-model="event.endTime"  />    
         </div>
 
         <h1 class="text-subtitle-2 mb-3">Image d'en-tête</h1>
@@ -330,15 +346,15 @@ const hasAddress = computed(() => getFormattedAddress(physicalAddress.value) && 
         <v-carousel
             class="mb-5"
             selected-class="cover-selected"
-            :show-arrows="banners.length > 1"
-            :model-value="selectedBannerId"
-            :height="`calc(100% * ${maxCoverRatio})`"
+            :show-arrows="event.banners.length > 1"
+            :model-value="event.selectedBannerId"
+            :height="`calc(100% * ${event.maxCoverRatio})`"
             :hide-delimiter-background="true"
             :hide-delimiters="true"
             :continuous="false"
         >
             <v-carousel-item
-                v-for="(image, index) in banners"
+                v-for="(image, index) in event.banners"
                 :key="image.url"
                 :value="index"
                 :data-image-index="index" 
@@ -355,20 +371,20 @@ const hasAddress = computed(() => getFormattedAddress(physicalAddress.value) && 
 
         <h1 class="text-subtitle-2 mt-5 mb-3">Description</h1>
 
-        <v-text-field class="required" label="Titre" required id="title" v-model="title"/>        
+        <v-text-field class="required" label="Titre" required id="title" v-model="event.title"/>        
         
-        <QuillEditor :upload-limit="uploadLimits.default" contentType="html" v-model:content="description" id="description"  theme="snow" />
+        <QuillEditor :upload-limit="uploadLimits.default" contentType="html" v-model:content="event.description" id="description"  theme="snow" />
 
-        <v-text-field class="mt-5" label="Adresse web" type="url" v-model="url"/>
+        <v-text-field class="mt-5" label="Adresse web" type="url" v-model="event.url"/>
         
-        <v-text-field class="" label="Adresse web de la billetterie" type="url" v-model="ticketsUrl"/>
+        <v-text-field class="" label="Adresse web de la billetterie" type="url" v-model="event.ticketsUrl"/>
         
         <v-autocomplete
             :items="categories" 
             item-title="label" 
             item-value="id" 
             label="Catégorie" 
-            v-model="selectedCategory"
+            v-model="event.selectedCategory"
             :clearable="true"
             no-data-text="Aucun résultat correspondant"
         >
@@ -397,11 +413,11 @@ const hasAddress = computed(() => getFormattedAddress(physicalAddress.value) && 
 
         <v-btn prepend-icon="mdi-pencil" @click="toggleSearchAddressFromStringOverlay">Modifier l'adresse</v-btn>
 
-        <div class="map mt-5" v-if="latitude && longitude">
+        <div class="map mt-5" v-if="event.latitude && event.longitude">
             <Map 
                 ref="map"
                 @update-coords="updateCoords" 
-                :coords="[ latitude, longitude ]" 
+                :coords="[ event.latitude, event.longitude ]" 
                 :center="mapCenter"
                 :alt-coords="null"
                 :zoom="15"
@@ -422,7 +438,7 @@ const hasAddress = computed(() => getFormattedAddress(physicalAddress.value) && 
         <SearchAddressFromStringOverlay 
             :show="searchAddressFromStringOverlay"
             :group-address="groupAddress"
-            :physical-address="physicalAddress"
+            :physical-address="event.physicalAddress"
             :found-addresses="foundAddressesFromString"
             :is-loading="isLoadingAdressesFromString"
             @select-address-by-id="selectFoundAddressFromStringById"
@@ -434,8 +450,8 @@ const hasAddress = computed(() => getFormattedAddress(physicalAddress.value) && 
         <LocateFromMapOverlay
             :show="locateFromMapOverlay"
             :isLoading="isLoadingGeolocation"
-            :latitude="latitude"
-            :longitude="longitude"
+            :latitude="event.latitude"
+            :longitude="event.longitude"
             @toggle-show="toggleLocateFromMapOverlay"
             @validate="validateMapLocation"
         />
@@ -477,21 +493,30 @@ const hasAddress = computed(() => getFormattedAddress(physicalAddress.value) && 
         <!-- <v-checkbox class="mt-5" label="Enregistrer en tant que brouillon" v-model="isDraft" id="is-draft"></v-checkbox> -->
         <br/>
         
-        <v-btn 
-            class="mt-5 mr-5" 
-            color="success" 
-            type="submit"
-            :loading="store.getters.isSavingEvent"
-            @click="submit('submit')"
-        >Enregistrer</v-btn>
+        <div class="mt-5">
 
-        <v-btn 
-            class="mt-5" 
-            color="info" 
-            type="submit"
-            :loading="store.getters.isSavingEvent"
-            @click="submit('submitAsDraft')"
-        >Enregistrer comme brouillon</v-btn>
+            <v-btn 
+                class="mr-5" 
+                color="success" 
+                type="submit"
+                :loading="store.getters.isSavingEvent"
+                @click="submit('submit')"
+            >Enregistrer</v-btn>
+    
+            <v-btn 
+                class="" 
+                color="info" 
+                type="submit"
+                :loading="store.getters.isSavingEvent"
+                @click="submit('submitAsDraft')"
+            >Enregistrer comme brouillon</v-btn>
+
+            <v-btn 
+                class="float-right" 
+                color="warning" 
+                @click="cancel"
+            >Annuler</v-btn>            
+        </div>
 
         
     </form>
