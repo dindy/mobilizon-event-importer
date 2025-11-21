@@ -86,6 +86,7 @@ const openCoverUpload = () => {
 const submit = async action => {
     
     event.value.isDraft = action === 'submitAsDraft'
+console.log(event.value.endDate);
 
     const banner = getSelectedBanner()
     const data = {
@@ -202,7 +203,7 @@ if (saved) {
     event.value.startTime = timestampToTime(startTimestamp)
     event.value.endDate = timestampToDate(endTimestamp)
     event.value.endTime = timestampToTime(endTimestamp)    
-    event.value.endDate = endTimestamp ? true : false    
+    event.value.hasEndDate = endTimestamp ? true : false    
     if (hosts && hosts.length > 0) {
         if (hosts.length == 1) {
             event.value.description += `<br><p>Organisé par ${getLinkOrJustName(hosts[0].name, hosts[0].url)}</p>`
