@@ -29,7 +29,6 @@ const selectAddress = e => emit('selectAddressById', e.id)
         class="screen-overlay"
     >
         <div class="overlay-content">
-            <v-btn color="secondary" prepend-icon="mdi-close" @click="toggleShow">Fermer</v-btn>
             <v-card style="overflow-y: scroll; z-index: initial">
                 <v-list 
                     v-if="!isLoading && foundAddresses && foundAddresses.length > 0" 
@@ -49,6 +48,7 @@ const selectAddress = e => emit('selectAddressById', e.id)
                     <v-list-subheader v-else>Aucun résultat</v-list-subheader>
                 </v-list>
             </v-card>
+            <v-btn class="float-right" color="" prepend-icon="mdi-close" @click="toggleShow">Fermer</v-btn>
         </div>
     </v-overlay>    
 </template>

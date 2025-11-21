@@ -94,10 +94,8 @@ const validateMapLocation = () => emit('validate', {
                 />         
             </div>              
             <div class="map-select-caption text-caption font-italic">Cliquez sur la carte ou glissez-déposez le marqueur pour modifier la position.</div>       
-            <div>
-                <v-btn class="mr-5" @click="validateMapLocation" prepend-icon="mdi-check" color="success">Valider</v-btn>
-                <v-btn color="" prepend-icon="mdi-close" @click="toggleShow">Annuler</v-btn>            
-            </div>
+            <v-btn color="" prepend-icon="mdi-close" @click="toggleShow">Annuler</v-btn>            
+            <v-btn class="" @click="validateMapLocation" prepend-icon="mdi-check" color="success">Valider</v-btn>
         </div>
     </v-overlay>    
 </template>

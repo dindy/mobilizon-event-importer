@@ -61,7 +61,7 @@ const validate = () => {
         content-class="overlay-content-wrapper"
         class="screen-overlay"
     >
-        <div class="overlay-content">
+        <div class="overlay-content">      
             <v-btn v-if="groupAddress" prepend-icon="mdi-map-marker-account" @click="useGroupAddress">Utiliser l'adresse du groupe</v-btn>
             <!-- <v-btn v-if="latitude && longitude" prepend-icon="mdi-map-marker" @click="openSearchAddressFromCoordsOverlay">Utiliser la position</v-btn> -->
             <div>
@@ -108,10 +108,8 @@ const validate = () => {
                     <p>Créez le sur <a target="_blank" href="https://www.openstreetmap.org">Open Street Map</a> pour le rendre visible ici et pour des millions d'utilisateurs !</p>
                 </template>
             </v-alert>      
-            <div>
-                <v-btn class="mr-5" @click="validate" prepend-icon="mdi-check" color="success">Valider</v-btn>                                           
-                <v-btn color="" prepend-icon="mdi-close" @click="toggleShow">Annuler</v-btn>
-            </div>
+            <v-btn color="" prepend-icon="mdi-close" @click="toggleShow">Annuler</v-btn>
+            <v-btn @click="validate" prepend-icon="mdi-check" color="success">Valider</v-btn>                                           
         </div>
     </v-overlay>    
 </template>
