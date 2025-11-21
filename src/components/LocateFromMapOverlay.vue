@@ -14,13 +14,9 @@ const globalLongitude = computed(() => props.longitude)
 const globalShow = computed(() => props.show)
 const latitude = ref(globalLatitude.value || defaultMapCenter[0])
 const longitude = ref(globalLongitude.value || defaultMapCenter[1])
-onMounted(() => {
-    console.log('latitude',latitude.value);
-    
-})
+
 watch(globalLatitude, async (newLatitude, oldLatitude) => { 
     latitude.value = newLatitude
-    console.log('latitude watch',latitude.value);
 })
 watch(globalLongitude, async (newLongitude, oldLongitude) => { 
     longitude.value = newLongitude
@@ -98,12 +94,10 @@ const validateMapLocation = () => emit('validate', {
                 />         
             </div>              
             <div class="map-select-caption text-caption font-italic">Cliquez sur la carte ou glissez-déposez le marqueur pour modifier la position.</div>       
-            <v-btn color="" prepend-icon="mdi-close" @click="toggleShow">Annuler</v-btn>            
-            <v-btn 
-                @click="validateMapLocation" 
-                prepend-icon="mdi-check" 
-                color="success"
-            >Valider</v-btn>
+            <div>
+                <v-btn class="mr-5" @click="validateMapLocation" prepend-icon="mdi-check" color="success">Valider</v-btn>
+                <v-btn color="" prepend-icon="mdi-close" @click="toggleShow">Annuler</v-btn>            
+            </div>
         </div>
     </v-overlay>    
 </template>
