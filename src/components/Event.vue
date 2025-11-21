@@ -219,7 +219,6 @@ const useFoundAddress = (address) => {
     if (address.geom) {
         latitude.value = address.geom.split(';')[1]
         longitude.value = address.geom.split(';')[0]
-        mapCenter.value = [latitude.value, longitude.value]
     }
 }
 
@@ -257,7 +256,6 @@ const validateMapLocation = (coords) => {
     longitude.value = coords.longitude
     latitude.value = coords.latitude    
     closeLocateFromMapOverlay()
-    mapCenter.value = [latitude.value, longitude.value]
     validateMapLocationDialog.value = true
     store.dispatch('searchAddressFromCoords', { lng: longitude.value, lat: latitude.value })
 }
