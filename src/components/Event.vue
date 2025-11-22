@@ -86,14 +86,13 @@ const openCoverUpload = () => {
 const submit = async action => {
     
     event.value.isDraft = action === 'submitAsDraft'
-console.log(event.value.endDate);
 
     const banner = getSelectedBanner()
     const data = {
         draft: event.value.isDraft,
         banner: banner ? banner.file : null,
         startDate: new Date(mergeDateTime(event.value.startDate, event.value.startTime) * 1000).toJSON(),
-        endDate: event.value.endDate ? new Date(mergeDateTime(event.value.endDate, event.value.endTime) * 1000).toJSON() : null,
+        endDate: event.value.hasEndDate && event.value.endDate ? new Date(mergeDateTime(event.value.endDate, event.value.endTime) * 1000).toJSON() : null,
         title: title.value,
         description: event.value.description.replaceAll('\n', '</br>'),
         url: event.value.url,
@@ -102,12 +101,48 @@ console.log(event.value.endDate);
         ticketsUrl: event.value.ticketsUrl
     }
 
+    const { valid } = await form.value.validate()
+
+    if (!valid) {
+        store.dispatch('createErrorFromText', 'Le formulaire comporte des erreurs. Merci de vérifier les données.')
+        return
+    }
+
     await store.dispatch('saveMobilizonEvent', data)
     const uuid = store.getters.getMobilizonEventUUID
     
     if (uuid) {
         router.push('/done')
     }
+}
+
+const isStartDateSuperiorToEndDate = () => {
+
+    if (event.value.hasEndDate) { 
+        const startDate = new Date(mergeDateTime(event.value.startDate, event.value.startTime) * 1000)
+        const endDate = new Date(mergeDateTime(event.value.endDate, event.value.endTime) * 1000)        
+        return startDate > endDate
+    }
+
+    return false
+}
+
+const rules = {
+    maxEndDate: value => {
+        if (isStartDateSuperiorToEndDate()) {
+            return event.value.startDate <= event.value.endDate || 'La date de début est supérieure à la date de fin.'
+        }
+        return true
+    },
+    maxEndTime: value => {
+        if (isStartDateSuperiorToEndDate()) {
+            if (event.value.startDate <= event.value.endDate) {
+                return event.value.startTime <= event.value.endTime || 'L\'heure de début est supérieure à l\'heure de fin.'
+            }
+        }
+        return true
+    },
+    notEmpty: value => (value && value !== '') || 'Le champ ne doit pas être vide.' 
 }
 
 const cancel = () => {
@@ -132,6 +167,7 @@ const searchAddressFromStringOverlay = ref(false)
 const locateFromMapOverlay = ref(false)
 const validateMapLocationDialog = ref(false)
 const searchAddressFromCoordsOverlay = ref(false)
+const form = ref()
 
 /* Get initial event data either from scrapped data or from saved event */
 const scrapped = store.getters.getScrappedData
@@ -168,6 +204,10 @@ const mapCenter = computed(() => event.value.latitude && event.value.longitude ?
 watch(
     () => event,
     (event, prevEvent) => {
+        if (form.value) {
+            form.value.resetValidation()
+            form.value.validate()
+        }
         store.dispatch('saveLocalEvent', event.value)
     },
     {deep: true}
@@ -175,6 +215,8 @@ watch(
 
 if (saved) {
     event.value = saved
+    console.log(event.value);
+    
 } else if (scrapped) {
 
     // Raw data
@@ -216,14 +258,15 @@ if (saved) {
         }
     }    
 
-    // Init scrapped covers
-    event.value.banners.map((image) => {
-        image.file = dataURLtoFile(image.src)
-        updateMaxCoveratio(image.src)
-    })
     // Select first cover
     setSelectedBanner(0)
 }
+
+// Init scrapped covers
+event.value.banners.map((image) => {
+    image.file = dataURLtoFile(image.src)
+    updateMaxCoveratio(image.src)
+})
 
 const updateTempCoords  = (coords, zoom) => {
     store.dispatch('searchAddressFromCoords', coords, zoom)
@@ -319,7 +362,7 @@ const hasAddress = computed(() => getFormattedAddress(event.value.physicalAddres
 </script>
 
 <template>
-    <form @submit.prevent="">
+    <v-form ref="form" validate-on="input eager" @submit.prevent="">
         
         <v-alert
             text="Nous faisons de notre mieux pour récupérer les informations mais certaines données peuvent être manquantes ou erronées."
@@ -331,15 +374,15 @@ const hasAddress = computed(() => getFormattedAddress(event.value.physicalAddres
 
         <h1 class="text-subtitle-2 mb-3">Date et heure</h1>
         
-        <v-text-field class="required" required label="Date de début" id="start-date" type="date" v-model="event.startDate" />
+        <v-text-field :rules="[rules.notEmpty]" class="required" required label="Date de début" id="start-date" type="date" v-model="event.startDate" />
         
-        <v-text-field class="required" required label="Heure de début" id="start-time" type="time" v-model="event.startTime" />
+        <v-text-field :rules="[rules.notEmpty]" class="required" required label="Heure de début" id="start-time" type="time" v-model="event.startTime" />
         
         <v-checkbox label="L'événement a une date de fin" v-model="event.hasEndDate" id="has-end-date"></v-checkbox>
 
         <div v-if="event.hasEndDate">
-            <v-text-field label="Date de fin" id="end-date" type="date" v-model="event.endDate"  />            
-            <v-text-field label="Heure de fin" id="end-time" type="time" v-model="event.endTime"  />    
+            <v-text-field :rules="[rules.maxEndDate]" label="Date de fin" id="end-date" type="date" v-model="event.endDate"  />            
+            <v-text-field :rules="[rules.maxEndTime]" label="Heure de fin" id="end-time" type="time" v-model="event.endTime"  />    
         </div>
 
         <h1 class="text-subtitle-2 mb-3">Image d'en-tête</h1>
@@ -372,7 +415,7 @@ const hasAddress = computed(() => getFormattedAddress(event.value.physicalAddres
 
         <h1 class="text-subtitle-2 mt-5 mb-3">Description</h1>
 
-        <v-text-field class="required" label="Titre" required id="title" v-model="event.title"/>        
+        <v-text-field :rules="[rules.notEmpty]" class="required" label="Titre" required id="title" v-model="event.title"/>        
         
         <QuillEditor :upload-limit="uploadLimits.default" contentType="html" v-model:content="event.description" id="description"  theme="snow" />
 
@@ -520,5 +563,5 @@ const hasAddress = computed(() => getFormattedAddress(event.value.physicalAddres
         </div>
 
         
-    </form>
+    </v-form>
 </template>
