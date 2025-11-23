@@ -142,7 +142,8 @@ const rules = {
         }
         return true
     },
-    notEmpty: value => (value && value !== '') || 'Le champ ne doit pas être vide.' 
+    notEmpty: value => (value && value !== '') || 'Le champ ne doit pas être vide.',
+    titleLength: value => value.length <= 200 || 'Le titre ne peut pas comporter plus de 200 caractères.'
 }
 
 const cancel = () => {
@@ -225,7 +226,7 @@ if (saved) {
     const startTimestamp = scrapped.metas.startTimestamp
     event.value.banners = scrapped.images.map(url => ({ src: url, file: null }))
     event.value.ticketsUrl = scrapped.metas.ticketsUrl
-    event.value.title = scrapped.metas.title
+    event.value.title = scrapped.metas.title ? scrapped.metas.title.substring(0, 200) : null
     event.value.description = scrapped.metas.description
     event.value.url = scrapped.metas.url
     event.value.physicalAddress.description = localPhysicalAddress.description
@@ -415,7 +416,7 @@ const hasAddress = computed(() => getFormattedAddress(event.value.physicalAddres
 
         <h1 class="text-subtitle-2 mt-5 mb-3">Description</h1>
 
-        <v-text-field :rules="[rules.notEmpty]" class="required" label="Titre" required id="title" v-model="event.title"/>        
+        <v-text-field :rules="[rules.notEmpty, rules.titleLength]" class="required" label="Titre" required id="title" v-model="event.title"/>        
         
         <QuillEditor :upload-limit="uploadLimits.default" contentType="html" v-model:content="event.description" id="description"  theme="snow" />
 
