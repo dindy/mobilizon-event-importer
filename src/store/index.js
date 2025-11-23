@@ -65,7 +65,11 @@ const issueMobilizonRequest = async ({ dispatch, commit, getters, state }, reque
         } else if (error instanceof RequestError) {
             dispatch('createErrorFromText', 'Erreur de communication avec le serveur : ' + error.message)
         } else {
-            dispatch('createErrorFromText', 'Erreur de communication inconnue avec le serveur : ' + error.message)
+            if (error instanceof DOMException) {
+
+            } else {
+                dispatch('createErrorFromText', 'Erreur de communication inconnue avec le serveur : ' + error.message)
+            }
         }
     }
 }
