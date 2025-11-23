@@ -112,8 +112,6 @@ const submit = async action => {
     const uuid = store.getters.getMobilizonEventUUID
     
     if (uuid) {
-        store.dispatch('resetEvent')
-        store.dispatch('resetScrapper')        
         router.push('/done')
     }
 }

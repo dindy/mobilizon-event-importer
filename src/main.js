@@ -111,11 +111,11 @@ router.beforeEach(async (to, from) => {
 
   if (to.path === '/' && hasTokenData && mobilizonConfig) {
     if (selectedIdentity) {
-      if (scrappedData || localEvent) {
-        router.replace('/create')
-      } else {
+    //   if (scrappedData || localEvent) {
+    //     router.replace('/create')
+    //   } else {
         router.replace('/scrap')
-      }
+    //   }
     } else {
       router.replace('/identity')
     }
