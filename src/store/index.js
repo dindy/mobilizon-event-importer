@@ -527,9 +527,10 @@ export default createStore({
                 commit('clearAddressesFromCoords')
                 commit('newAdressesFromCoordsSearch')
                 const { searchIndex } = state.addressesFromCoords
-                mobilizonApi
-                    .reverseGeocode(addressCoords, token)
-                    .then(commitResult('osm'))
+                issueMobilizonRequest(store, async (token, { commit }) => {
+                    const data = await mobilizonApi.reverseGeocode(addressCoords, token)
+                    commit('addAddressesFromCoords', { addresses: data || [], searchIndex, source: 'osm' })
+                })
                 geoApi
                     .reverse(addressCoords)
                     .then(commitResult('geodata'))
@@ -587,9 +588,10 @@ export default createStore({
                 commit('clearAddressesFromString')
                 commit('newAdressesFromStringSearch')
                 const { searchIndex } = state.addressesFromString
-                mobilizonApi
-                    .searchAddress(addressString, token)
-                    .then(commitResult('osm'))
+                issueMobilizonRequest(store, async (token, { commit }) => {
+                    const data = await mobilizonApi.searchAddress(addressString, token)
+                    commit('addAddressesFromString', { addresses: data || [], searchIndex, source: 'osm' })
+                })
                 geoApi
                     .search(addressString)
                     .then(commitResult('geodata'))
