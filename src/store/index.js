@@ -65,11 +65,7 @@ const issueMobilizonRequest = async ({ dispatch, commit, getters, state }, reque
         } else if (error instanceof RequestError) {
             dispatch('createErrorFromText', 'Erreur de communication avec le serveur : ' + error.message)
         } else {
-            if (error instanceof DOMException) {
-
-            } else {
-                dispatch('createErrorFromText', 'Erreur de communication inconnue avec le serveur : ' + error.message)
-            }
+            dispatch('createErrorFromText', 'Erreur de communication inconnue avec le serveur : ' + error.message)
         }
     }
 }
@@ -218,7 +214,7 @@ export default createStore({
         },
         addAddressesFromString(state, data) {
             const { searchIndex } = data
-            if (!searchIndex == state.addressesFromString.searchIndex) return
+            if (searchIndex !== state.addressesFromString.searchIndex) return
             let addressIndex = getAddresses(state.addressesFromString.sources).length
             state.addressesFromString.sources[data.source].results = data.addresses.map((address, index) => ({ ...address, id: addressIndex + index }))
             state.addressesFromString.sources[data.source].loading = false
@@ -593,8 +589,8 @@ export default createStore({
                 commit('newAdressesFromStringSearch')
                 const { searchIndex } = state.addressesFromString
                 issueMobilizonRequest(store, async (token, { commit }) => {
-                    const data = await mobilizonApi.searchAddress(addressString, token)
-                    commit('addAddressesFromString', { addresses: data || [], searchIndex, source: 'osm' })
+                        const data = await mobilizonApi.searchAddress(addressString, token)
+                        commit('addAddressesFromString', { addresses: data || [], searchIndex, source: 'osm' })
                 })
                 geoApi
                     .search(addressString)

@@ -482,27 +482,40 @@ export class MobilizonApi {
                 __typename
             }
         `
+        
+        let response
 
         if (this.searchAddressController) this.searchAddressController.abort()
-        
+    
         this.searchAddressController = new AbortController()
         
-        const response = await fetch(this.apiUrl, {
-            signal: this.searchAddressController.signal,
-            method: 'POST',
-            headers: {
-                'Authorization': `Bearer ${accessToken}`,
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                operationName: 'SearchAddress',
-                query: query,
-                variables: {
-                    locale: 'fr',
-                    query: queryString,
-                }
+        try {
+            response = await fetch(this.apiUrl, {
+                signal: this.searchAddressController.signal,
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${accessToken}`,
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    operationName: 'SearchAddress',
+                    query: query,
+                    variables: {
+                        locale: 'fr',
+                        query: queryString,
+                    }
+                })
             })
-        })
+        // Handles Abort Exception
+        } catch (error) {
+            if ( ! (error instanceof DOMException) ) {
+                throw exception
+            } else {
+                console.log(error.message);
+            }
+        }   
+        
+        if (!response) return null
 
         return (await this.handleResponse(response))
             .data
@@ -519,7 +532,8 @@ export class MobilizonApi {
                 return (address.type == 'street') ?
                     { ...address, street: address.description } :
                     { ...address }
-            })        
+            })  
+   
     }
 
     async reverseGeocode(coords, accessToken) {
