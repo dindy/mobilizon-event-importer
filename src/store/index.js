@@ -510,7 +510,7 @@ export default createStore({
             dispatch('resetEvent')
             dispatch('resetScrapper')
             commit('setScrapperUrl', url)
-            commit('setIsLoadingScrapper', true)          
+            commit('setIsLoadingScrapper', true)
             const data = await scrapperApi.scrap(url)
             commit('setScrapperData', data)
             commit('setIsLoadingScrapper', false)    
