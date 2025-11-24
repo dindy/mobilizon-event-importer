@@ -144,7 +144,8 @@ onMounted(async () => {
             :disabled="!selectedIdentity"
             @click="next"
             color="primary"
-        >Confirmer</v-btn>  
+            prepend-icon="mdi-check"
+        >Sélectionner l'identité</v-btn>  
     </div>
 
 </template>
