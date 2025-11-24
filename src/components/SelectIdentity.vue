@@ -36,7 +36,7 @@ watch(selectedIdentity, (newVal) => {
 const next = () => {
     store.dispatch('selectMobilizonIdentityAndGroup', {
         identity: selectedIdentity.value,
-        group: skipGroup.value ? null : selectedGroup.value,
+        group: skipGroup.value ? null : selectedGroup.value || null,
     })
     router.push('/scrap')
 }
