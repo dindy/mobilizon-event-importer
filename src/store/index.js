@@ -506,7 +506,7 @@ export default createStore({
             commit('setSelectedMobilizonIdentity', payload.identity)
             commit('setSelectedMobilizonGroup', payload.group)
         },
-        async scrap({ commit, dispatch }, url) {
+        async scrapEvent({ commit, dispatch }, url) {
             dispatch('resetEvent')
             dispatch('resetScrapper')
             commit('setScrapperUrl', url)

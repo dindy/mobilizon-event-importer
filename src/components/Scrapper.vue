@@ -15,10 +15,8 @@ onMounted(() => {
     url.value = store.getters.getScrapperUrl
 })
 
-const scrap = async (url) => {
-    console.log('wrap');
-    
-    await store.dispatch('scrap', url)
+const scrap = async (url) => {    
+    await store.dispatch('scrapEvent', url)
     router.push('/create')
 }
 
@@ -33,23 +31,4 @@ const scrap = async (url) => {
         :is-loading="store.getters.isLoadingScrapper"
         @send="scrap"
     />
-        
-        <!-- <v-form validate-on="submit" @submit.prevent="scrap">
-            <v-text-field 
-                type="url" 
-                :model-value="url"
-                @update:model-value="updateUrl"
-                :rules="[rules.notEmpty, rules.validUrl]"
-                validate-on="input"
-                placeholder="" 
-                label="Entrez une adresse web (facebook, instagram ou autre)"
-                append-inner-icon="mdi-content-paste"
-                @click:append-inner="paste"
-            ></v-text-field>
-            <v-btn 
-                :loading="store.getters.isLoadingScrapper" 
-                type="submit"
-                color="primary"
-            >Importer</v-btn>
-        </v-form> -->
 </template>

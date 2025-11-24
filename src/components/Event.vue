@@ -2,72 +2,26 @@
 import { computed, ref, watch } from 'vue'
 import { useStore } from 'vuex';
 import { useRouter } from 'vue-router'
-import { convertBytesToMegabytes, dataURLtoFile, mergeDateTime, timestampToDate, timestampToTime, blobToDataUrl, getFormattedAddress } from '../utils/utils';
+import { convertBytesToMegabytes, dataURLtoFile, mergeDateTime, timestampToDate, timestampToTime, blobToDataUrl, getFormattedAddress } from '../utils/utils'
 import QuillEditor from './QuillEditor.vue'
 import Map from './Map.vue'
 import SearchAddressFromStringOverlay from './SearchAddressFromStringOverlay.vue'
 import SearchAddressFromCoordsOverlay from './SearchAddressFromCoordsOverlay.vue'
 import LocateFromMapOverlay from './LocateFromMapOverlay.vue'
+import ImageSelect from './ImageSelect.vue'
 
 const router = useRouter()
 const store = useStore()
 store.dispatch('setPageTitle', 'Détails de l\'événement')
 
-/* Utils functions */
-
-// Handle dimensions of cover carousel
-const updateMaxCoveratio = src => {
-    const tempImage = new Image
-    tempImage.onload = () => {
-        const heightWidthRatio = tempImage.height / tempImage.width
-        event.value.maxCoverRatio = heightWidthRatio > event.value.maxCoverRatio ? heightWidthRatio : event.value.maxCoverRatio
-    } 
-    tempImage.src = src    
+const dispatchError = (error) => {
+    store.dispatch('createErrorFromText', error)
 }
 
 const getLinkOrJustName = (name, url) => url ? `<a href="${url}">${name}</a>` : name
 
-const isValidSizeFile = file => file.size <= uploadLimits.value.banner
-
 const setSelectedBanner = index => {
-
-    event.value.selectedBannerTooBig = false
-
-    if (index) {
-        const image = event.value.banners[index]
-        if (!isValidSizeFile(image.file)) {
-            event.value.selectedBannerTooBig = true
-            return
-        }
-    }
     event.value.selectedBannerId = index
-}
-
-const setUploadedImage = async e => {
-
-    const files = e.target.files
-    const file = files.length > 0 ? files[0] : null
-    
-    if (file) {
-        event.value.uploadedBannerTooBig = false
-        
-        if (!isValidSizeFile(file)) {
-            event.value.uploadedBannerTooBig = true
-            store.dispatch('submitErrorFromText', `L'image est trop lourde (max ${convertBytesToMegabytes(uploadLimits.value.banner) } Mo)`)
-            e.target.value = ""
-            return
-        }
-        const uploadedImage = { file }
-        try {
-            const dataUrl = await blobToDataUrl(file)
-            uploadedImage.src = dataUrl
-            updateMaxCoveratio(dataUrl)
-            event.value.banners.push(uploadedImage)
-            event.value.selectedBannerId = event.value.banners.length - 1
-        } catch (e) {
-            console.error('Erreur lors de la conversion de l\'image en base 64')
-        }
-    }
 }
 
 const getSelectedBanner = () => event.value.selectedBannerId !== null ?
@@ -79,12 +33,8 @@ const updateCoords = (coords, zoom = null) => {
     event.value.latitude = parseFloat(coords.latitude)
 }
 
-const openCoverUpload = () => {
-  uploadCoverInput.value?.click()
-}
-
 const submit = async action => {
-    
+
     event.value.isDraft = action === 'submitAsDraft'
 
     const banner = getSelectedBanner()
@@ -263,12 +213,6 @@ if (saved) {
     setSelectedBanner(0)
 }
 
-// Init scrapped covers
-event.value.banners.map((image) => {
-    image.file = dataURLtoFile(image.src)
-    updateMaxCoveratio(image.src)
-})
-
 const updateTempCoords  = (coords, zoom) => {
     store.dispatch('searchAddressFromCoords', coords, zoom)
 }
@@ -328,7 +272,6 @@ const acceptSearchAddressFromCoordsOverlay = () => {
     validateMapLocationDialog.value = false
 } 
 
-
 const openSearchAddressFromCoordsOverlay = () => {
     searchAddressFromCoordsOverlay.value = true
     store.dispatch('searchAddressFromCoords', { lng: event.value.longitude, lat: event.value.latitude })
@@ -359,7 +302,6 @@ const selectFoundAddressFromCoordsById = (id) => {
 const address = computed(() => getFormattedAddress(event.value.physicalAddress).split(', ').join('\n'))
 
 const hasAddress = computed(() => getFormattedAddress(event.value.physicalAddress) && getFormattedAddress(event.value.physicalAddress) !== '')
-
 </script>
 
 <template>
@@ -388,31 +330,14 @@ const hasAddress = computed(() => getFormattedAddress(event.value.physicalAddres
 
         <h1 class="text-subtitle-2 mb-3">Image d'en-tête</h1>
 
-        <v-carousel
-            class="mb-5"
-            selected-class="cover-selected"
-            :show-arrows="event.banners.length > 1"
-            :model-value="event.selectedBannerId"
-            :height="`calc(100% * ${event.maxCoverRatio})`"
-            :hide-delimiter-background="true"
-            :hide-delimiters="true"
-            :continuous="false"
-        >
-            <v-carousel-item
-                v-for="(image, index) in event.banners"
-                :key="image.url"
-                :value="index"
-                :data-image-index="index" 
-                :src="image.src"
-                max-width="100%"
-                max-height="100%"
-            >
-            </v-carousel-item>            
-        </v-carousel>
-
-        <v-btn class="" @click="openCoverUpload" prepend-icon="mdi-upload">Téléverser une image d'en-tête</v-btn>
-        
-        <input ref="uploadCoverInput" type="file" style="display: none;" v-on:change="setUploadedImage">
+        <ImageSelect
+            :maxSize="uploadLimits.banner"
+            :images="event.banners"
+            :selected="event.selectedBannerId"
+            upload-button-label="Téléverser une image d'en-tête"
+            @display-error="dispatchError"
+            @set-selected-image-index="setSelectedBanner"
+        />
 
         <h1 class="text-subtitle-2 mt-5 mb-3">Description</h1>
 
@@ -535,7 +460,6 @@ const hasAddress = computed(() => getFormattedAddress(event.value.physicalAddres
             @toggle-show="toggleSearchAddressFromCoordsOverlay"
         />
 
-        <!-- <v-checkbox class="mt-5" label="Enregistrer en tant que brouillon" v-model="isDraft" id="is-draft"></v-checkbox> -->
         <br/>
         
         <div class="mt-5">
