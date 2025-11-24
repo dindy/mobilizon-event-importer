@@ -310,7 +310,7 @@ const hasAddress = computed(() => getFormattedAddress(event.value.physicalAddres
         <v-alert
             text="Nous faisons de notre mieux pour récupérer les informations mais certaines données peuvent être manquantes ou erronées."
             title="Vérifiez les infos SVP !"
-            type="warning"
+            type="info"
             class="mb-5"
             :closable="true"
         ></v-alert> 
