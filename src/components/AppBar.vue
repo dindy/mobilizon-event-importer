@@ -13,10 +13,6 @@ const identity = computed(() => store.getters.getSelectedIdentity)
 const group = computed(() => store.getters.getSelectedGroup)
 
 const switchIdentity = () => {
-    store.dispatch('selectMobilizonIdentityAndGroup', {
-        identity: null,
-        group: null,
-    })    
     router.push('/identity')
 }
 

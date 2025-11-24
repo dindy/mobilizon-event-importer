@@ -1,30 +1,38 @@
 <script setup>
 
-import { computed, ref, watch } from 'vue'
+import { computed, ref, watch, onMounted } from 'vue'
 import { useStore } from 'vuex'
 import { useRouter } from 'vue-router'
-import { onMounted } from 'vue'
 
 const router = useRouter()
 const store = useStore()
 store.dispatch('setPageTitle', 'Identité')
+
+const globalSelectedIdentity = store.getters.getSelectedIdentity
+const globalSelectedGroup = store.getters.getSelectedGroup
 const isConnectingToMobilizon = computed(() => store.getters.isConnectingToMobilizon)
 const isLoadingGroups = computed(() => store.getters.isLoadingGroups)
-
 const identities = computed(() => store.getters.getIdentities)
-const selectedIdentity = ref(identities.value.length > 0 ? identities.value[0].id : null)
 const groups = computed(() => {
     if (!selectedIdentity.value) return []
     return store.getters.getGroupsByIdentityId(selectedIdentity.value)
 })
-const selectedGroup = ref(groups.value[0]?.id)
+const dynSelectedIdentity = () => globalSelectedIdentity ? globalSelectedIdentity.id : identities.value[0]?.id
+const dynSelectedGroup = () => globalSelectedGroup ? globalSelectedGroup.id : groups.value[0]?.id
+const selectedIdentity = ref(dynSelectedIdentity())
+const selectedGroup = ref(dynSelectedGroup())
 const skipGroup = ref(false)
-watch(groups, (newVal) => {
-    selectedGroup.value = newVal.length > 0 ? newVal[0].id : null
+
+watch(groups, (newVal, oldVal) => {
+    selectedGroup.value = dynSelectedGroup()    
 })
 watch(identities, (newVal) => {
-    selectedIdentity.value = newVal.length > 0 ? newVal[0].id : null
+    selectedIdentity.value = dynSelectedIdentity()
 })
+watch(selectedIdentity, (newVal) => {
+    selectedGroup.value = groups.value[0]?.id || null
+})
+
 const next = () => {
     store.dispatch('selectMobilizonIdentityAndGroup', {
         identity: selectedIdentity.value,
@@ -34,12 +42,12 @@ const next = () => {
 }
 
 const getActionText = () => {
-    const identityName = store.getters.getIdentityById(selectedIdentity.value).name
+    const identityName = store.getters.getIdentityById(selectedIdentity.value)?.name
     let message = `L'événement sera publié avec l'identité de "${identityName}"`
 
     return !selectedGroup.value || skipGroup.value ?
         `${message}.` :
-        `${message} dans le groupe "${store.getters.getGroupById(selectedGroup.value).name}".`
+        `${message} dans le groupe "${store.getters.getGroupById(selectedGroup.value)?.name}".`
 }
 
 const clearGroup = () => {
@@ -55,9 +63,6 @@ const updateSkipGroup = () => {
 const updateIdentity = () => {
     skipGroup.value = false
 }
-onMounted(async () => {
-    // store.dispatch('loadMobilizonConfig')
-})
 </script>
 
 <template>
@@ -128,7 +133,14 @@ onMounted(async () => {
                 </v-list-item>
             </template>
         </v-autocomplete>
-
+        <!-- <v-btn
+            class="mt-5"
+            v-if="!skipGroup"
+            :disabled="!selectedIdentity"
+            @click="importGroup"
+            color=""
+            prepend-icon="mdi-plus"
+        >Créer un groupe depuis Facebook</v-btn>    -->
         <v-checkbox 
             v-model="skipGroup" 
             v-if="groups.length > 0" 
@@ -145,7 +157,7 @@ onMounted(async () => {
             @click="next"
             color="primary"
             prepend-icon="mdi-check"
-        >Sélectionner l'identité</v-btn>  
+        >Sélectionner l'identité</v-btn>
     </div>
 
 </template>
