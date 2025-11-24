@@ -43,11 +43,10 @@ const next = () => {
 
 const getActionText = () => {
     const identityName = store.getters.getIdentityById(selectedIdentity.value)?.name
-    let message = `L'événement sera publié avec l'identité de "${identityName}"`
-
+    let message = `Publier avec "${identityName}"`
     return !selectedGroup.value || skipGroup.value ?
-        `${message}.` :
-        `${message} dans le groupe "${store.getters.getGroupById(selectedGroup.value)?.name}".`
+        `${message}` :
+        `${message} dans "${store.getters.getGroupById(selectedGroup.value)?.name}"`
 }
 
 const clearGroup = () => {
@@ -67,7 +66,7 @@ const updateIdentity = () => {
 
 <template>
     <v-infinite-scroll v-if="isConnectingToMobilizon || isLoadingGroups"></v-infinite-scroll>
-    <div v-else>
+    <div class="form" v-else>
         <v-select 
             label="Sélectionnez une identité"
             :items="identities"
@@ -78,7 +77,7 @@ const updateIdentity = () => {
             @update:model-value="updateIdentity"
             :hide-details="true"
             :hide-no-data="true"
-            class="mb-5"
+            class=""
         >
             <template v-slot:selection="{ item, props }">
                 <v-list-item v-if="item.raw.avatar?.url" v-bind="props" :prepend-avatar="item.raw.avatar?.url">{{item.title}}</v-list-item>
@@ -133,31 +132,33 @@ const updateIdentity = () => {
                 </v-list-item>
             </template>
         </v-autocomplete>
+
+        <v-alert class="" v-if="!groups || groups.length < 1" variant="outlined" type="info" text="Cette identité n'appartient à aucun groupe."></v-alert>
+
         <!-- <v-btn
-            class="mt-5"
+            class=""
             v-if="!skipGroup"
             :disabled="!selectedIdentity"
             @click="importGroup"
             color=""
             prepend-icon="mdi-plus"
-        >Créer un groupe depuis Facebook</v-btn>    -->
+        >Importer un groupe Facebook</v-btn>   -->
+
         <v-checkbox 
             v-model="skipGroup" 
             v-if="groups.length > 0" 
             label="Ne pas publier dans un groupe"
             @update:model-value="updateSkipGroup"
             :hide-details="true"
-            class="mt-3 mb-3"
+            class=""
         ></v-checkbox>
-
-        <v-alert class="mb-5" v-if="selectedIdentity" variant="outlined" type="info" :text="getActionText()"></v-alert>
 
         <v-btn
             :disabled="!selectedIdentity"
             @click="next"
             color="primary"
             prepend-icon="mdi-check"
-        >Sélectionner l'identité</v-btn>
+        >{{ getActionText() }}</v-btn>
     </div>
 
 </template>
@@ -166,5 +167,15 @@ const updateIdentity = () => {
 .v-list-item__prepend i+.v-list-item__spacer {
     width: 16px !important;
 }
+.form {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
 
+.form {
+    button {
+        width: fit-content;
+    }
+}
 </style>
