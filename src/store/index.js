@@ -200,7 +200,7 @@ export default createStore({
         getMobilizonInstanceUrl: state => state.mobilizon.instanceUrl,
         getScrapperUrl: state => state.scrapper.url,
         getMobilizonEventIsDraft: state => state.mobilizon.lastSavedIsDraft,
-        getLocalEvent: state => state.localEvent
+        getLocalEvent: state => state.localEvent,
     },
     mutations: {
         clearAddressesFromString(state) {
@@ -416,6 +416,12 @@ export default createStore({
                 commit('setScrapperUrl', JSON.parse(scrapperUrl))
                 console.log('Action - Scrapper URL set from localstorage', JSON.parse(scrapperUrl))
             }  
+
+            const lastSavedUUID = localStorage.getItem('lastSavedUUID')
+            if (lastSavedUUID) {
+                commit('setMobilizonCreatedEventUuid', lastSavedUUID)
+                console.log('Action - Last event saved UUID set from localstorage', lastSavedUUID)
+            }  
             
             return true
         },
@@ -437,6 +443,7 @@ export default createStore({
             localStorage.removeItem('selectedMobilizonIdentity')
             localStorage.removeItem('selectedMobilizonGroup')
             localStorage.removeItem('mobilizonConfig')
+            localStorage.removeItem('lastSavedUUID')
             commit('clearMobilizonSession')
         },
         saveMobilizonCode({ commit }, code) {
@@ -564,6 +571,7 @@ export default createStore({
                     )
                     commit('setLastSavedIsDraft', event.draft)
                     commit('setMobilizonCreatedEventUuid', uuid)
+                    localStorage.setItem('lastSavedUUID', uuid)
                     return uuid
                 } catch (error) { 
                     if (error instanceof SaveError) {
@@ -630,6 +638,7 @@ export default createStore({
             commit('setLastSavedIsDraft', null)           
             commit('setLocalEvent', null)
             localStorage.removeItem('localEvent')
+            localStorage.removeItem('lastSavedUUID')
         },
         saveLocalEvent({ commit }, event) {
             console.log('Action - Save local event', event)

@@ -83,6 +83,7 @@ router.beforeEach(async (to, from) => {
   const isInstanceConfigLoaded = store.getters.isInstanceConfigLoaded
   const scrappedData = store.getters.getScrappedData
   const scrapperUrl = store.getters.getScrapperUrl
+  const lastUUID = store.getters.getMobilizonEventUUID
 
   const notAuthenticatedAllowedPaths = [
     '/',
@@ -101,7 +102,7 @@ router.beforeEach(async (to, from) => {
     router.replace('/identity')
   }
 
-  if (to.path == '/scrap' && localEvent && from.path !== '/create') {
+  if (to.path == '/scrap' && localEvent && lastUUID === null && from.path !== '/create') {
     router.replace('/create')
   }
 
@@ -111,11 +112,13 @@ router.beforeEach(async (to, from) => {
 
   if (to.path === '/' && hasTokenData && mobilizonConfig) {
     if (selectedIdentity) {
-    //   if (scrappedData || localEvent) {
-    //     router.replace('/create')
-    //   } else {
+      console.log(lastUUID);
+      
+      if (localEvent && lastUUID === null) {
+        router.replace('/create')
+      } else {
         router.replace('/scrap')
-    //   }
+      }
     } else {
       router.replace('/identity')
     }
