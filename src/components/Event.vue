@@ -166,7 +166,6 @@ watch(
 
 if (saved) {
     event.value = saved
-    console.log(event.value);
     
 } else if (scrapped) {
 
@@ -330,11 +329,18 @@ const hasAddress = computed(() => getFormattedAddress(event.value.physicalAddres
 
         <h1 class="text-subtitle-2 mb-3">Image d'en-tête</h1>
 
+        <v-alert
+            v-if="!getSelectedBanner()"
+            text="Aucune image de couverture n'a été trouvée. Vous pouvez en téléverser une vous-même."
+            title="Pas de d'image de couverture"
+            type="warning"
+        />
+
         <ImageSelect
             :maxSize="uploadLimits.banner"
             :images="event.banners"
             :selected="event.selectedBannerId"
-            upload-button-label="Téléverser une image d'en-tête"
+            upload-button-label="Téléverser une image de couverture"
             @display-error="dispatchError"
             @set-selected-image-index="setSelectedBanner"
         />
