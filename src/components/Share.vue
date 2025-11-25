@@ -37,7 +37,7 @@ onMounted(async () => {
 
     if (toImport.value) {
         if (hasTokenData && selectedIdentity && mobilizonConfig) {
-            await store.dispatch('scrap', toImport.value)
+            await store.dispatch('scrapEvent', toImport.value)
             router.push('/create')            
         }
     }
