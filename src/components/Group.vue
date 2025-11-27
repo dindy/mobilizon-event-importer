@@ -152,7 +152,7 @@ const submit = async () => {
             :maxSize="uploadLimits.banner"
             :images="group.banners"
             :selected="group.selectedBannerId"
-            upload-button-label="Téléverser une image de couverture"
+            upload-button-label="Téléverser"
             @display-error="dispatchError"
             @set-selected-image-index="setSelectedBanner"
         />        
@@ -170,7 +170,7 @@ const submit = async () => {
             :maxSize="uploadLimits.avatar"
             :images="group.logos"
             :selected="group.selectedLogoId"
-            upload-button-label="Téléverser un logo"
+            upload-button-label="Téléverser"
             @display-error="dispatchError"
             @set-selected-image-index="setSelectedLogo"
         />  

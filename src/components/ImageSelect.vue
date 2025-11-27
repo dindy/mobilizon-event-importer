@@ -89,7 +89,7 @@ const updateSelected = (index) => {
             :hide-delimiter-background="true"
             :hide-delimiters="true"
             :continuous="false"
-            :height="`min(${maxHeight}px, 50vh, 100vw, var(--max-content-width) * ${maxHeightRatio})`"
+            :height="`min(${maxHeight}px, 50vh, (min(100vw, var(--max-content-width))) * ${maxHeightRatio})`"
         >
             <v-carousel-item
                 v-for="(image, index) in images"

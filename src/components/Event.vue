@@ -239,7 +239,7 @@ const useFoundAddress = (address) => {
             :maxSize="uploadLimits.banner"
             :images="event.banners"
             :selected="event.selectedBannerId"
-            upload-button-label="Téléverser une image de couverture"
+            upload-button-label="Téléverser"
             @display-error="dispatchError"
             @set-selected-image-index="setSelectedBanner"
         />
