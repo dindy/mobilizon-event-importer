@@ -38,7 +38,7 @@ const next = () => {
         identity: selectedIdentity.value,
         group: skipGroup.value ? null : selectedGroup.value || null,
     })
-    router.push('/scrap')
+    router.push('/scrapEvent')
 }
 
 const getActionText = () => {
@@ -61,6 +61,10 @@ const updateSkipGroup = () => {
 
 const updateIdentity = () => {
     skipGroup.value = false
+}
+
+const importGroup = () => {
+    router.push('/scrapGroup')
 }
 </script>
 
@@ -135,14 +139,14 @@ const updateIdentity = () => {
 
         <v-alert class="" v-if="!groups || groups.length < 1" variant="outlined" type="info" text="Cette identité n'appartient à aucun groupe."></v-alert>
 
-        <!-- <v-btn
+        <v-btn
             class=""
             v-if="!skipGroup"
             :disabled="!selectedIdentity"
             @click="importGroup"
             color=""
             prepend-icon="mdi-plus"
-        >Importer un groupe Facebook</v-btn>   -->
+        >Importer un groupe Facebook</v-btn>  
 
         <v-checkbox 
             v-model="skipGroup" 

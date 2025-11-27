@@ -82,6 +82,7 @@ export default createStore({
             pageTitle: null,
             messages: [],
             mobilizon: {
+                savingGroup: false,
                 loadingGroups: false,
                 savingEvent: false,
                 fetchingToken: false,
@@ -116,9 +117,15 @@ export default createStore({
                 lastSavedIsDraft: null
             },
             scrapper: {
-                data: null,
                 isLoading: false,
-                url: null
+                event: {
+                    data: null,
+                    url: null
+                },
+                group: {
+                    data: null,
+                    url: null                    
+                }
             },
             geo: {
                 isLoadingAdressesFromString: false,
@@ -178,8 +185,10 @@ export default createStore({
         getSelectedGroup: state => getGroupById(state, state.mobilizon.selectedGroupId),
         isLoadingGroups: state => state.mobilizon.loadingGroups,
         isSavingEvent: state => state.mobilizon.savingEvent,
+        isSavingGroup: state => state.mobilizon.savingGroup,
         isLoadingScrapper: state => state.scrapper.isLoading,
-        getScrappedData: state => state.scrapper.data,
+        getScrappedEvent: state => state.scrapper.event.data,
+        getScrappedGroup: state => state.scrapper.group.data,
         getEventCategories: state => state.mobilizon.config.eventCategories,
         getUploadLimits: state => state.mobilizon.config.uploadLimits,
         getMobilizonConfig: state => state.mobilizon.config,
@@ -198,7 +207,8 @@ export default createStore({
             : null,
         hasMobilizonTokenData: state => state.mobilizon.tokenData.access_token !== null,
         getMobilizonInstanceUrl: state => state.mobilizon.instanceUrl,
-        getScrapperUrl: state => state.scrapper.url,
+        getEventScrapperUrl: state => state.scrapper.event.url,
+        getGroupScrapperUrl: state => state.scrapper.group.url,
         getMobilizonEventIsDraft: state => state.mobilizon.lastSavedIsDraft,
         getLocalEvent: state => state.localEvent,
     },
@@ -260,6 +270,10 @@ export default createStore({
             state.mobilizon.groups = groups
             console.log('Mutation - Mobilizon groups set:', state.mobilizon.groups);
         },
+        addMobilizonGroup(state, group) {
+            state.mobilizon.groups.push(group)
+            console.log('Mutation - Mobilizon group added:', group);
+        },
         setMobilizonIdentities(state, identities) {
             state.mobilizon.identities = identities
             console.log('Mutation - Mobilizon identities set:', state.mobilizon.identities);
@@ -270,6 +284,9 @@ export default createStore({
         },
         setIsSavingEvent(state, isSaving) {
             state.mobilizon.savingEvent = isSaving
+        },
+        setIsSavingGroup(state, isSaving) {
+            state.mobilizon.savingGroup = isSaving
         },
         clearMobilizonSession(state) {
             state.mobilizon.tokenData = {
@@ -296,9 +313,13 @@ export default createStore({
         setSelectedMobilizonGroup(state, id) {
             state.mobilizon.selectedGroupId = id
         },
-        setScrapperData(state, data) {
-            console.log('Mutation - Set scrapper data', data);
-            state.scrapper.data = data
+        setEventScrapperData(state, data) {
+            console.log('Mutation - Set event scrapper data', data);
+            state.scrapper.event.data = data
+        },
+        setGroupScrapperData(state, data) {
+            console.log('Mutation - Set group scrapper data', data);
+            state.scrapper.group.data = data
         },
         setMobilizonConfig(state, config) {
             console.log('Mutation - Set mobilizon config', config);
@@ -328,10 +349,14 @@ export default createStore({
             console.log('Mutation - Set mobilizon instance url', url)
             state.mobilizon.instanceUrl = url
         },
-        setScrapperUrl(state, url) {
-            console.log('Mutation - Set scrapper url', url)
-            state.scrapper.url = url
+        setEventScrapperUrl(state, url) {
+            console.log('Mutation - Set event scrapper url', url)
+            state.scrapper.event.url = url
         },
+        setGroupScrapperUrl(state, url) {
+            console.log('Mutation - Set group scrapper url', url)
+            state.scrapper.group.url = url
+        },        
         setLastSavedIsDraft(state, isDraft) {
             console.log('Mutation - Set last saved is draft', isDraft)
             state.mobilizon.lastSavedIsDraft = isDraft
@@ -369,8 +394,9 @@ export default createStore({
             if (mobilizonTokenData) {
                 commit('setMobilizonTokenData', JSON.parse(mobilizonTokenData))
                 console.log('Action - Mobilizon Token set from localstorage', JSON.parse(mobilizonTokenData))
-                // dispatch('fetchMobilizonGroups')
-                // dispatch('loadMobilizonConfig')
+                // Refresh data
+                dispatch('fetchMobilizonGroups')
+                dispatch('loadMobilizonConfig')
             } else {
                 console.log('Action - No Mobilizon Token data in localstorage')
             }          
@@ -411,10 +437,10 @@ export default createStore({
                 console.log('Action - Mobilizon config set from localstorage', JSON.parse(mobilizonConfig))
             }  
 
-            const scrapperUrl = localStorage.getItem('scrapperUrl')
-            if (scrapperUrl) {
-                commit('setScrapperUrl', JSON.parse(scrapperUrl))
-                console.log('Action - Scrapper URL set from localstorage', JSON.parse(scrapperUrl))
+            const eventScrapperUrl = localStorage.getItem('eventScrapperUrl')
+            if (eventScrapperUrl) {
+                commit('setEventScrapperUrl', JSON.parse(eventScrapperUrl))
+                console.log('Action - Scrapper URL set from localstorage', JSON.parse(eventScrapperUrl))
             }  
 
             const lastSavedUUID = localStorage.getItem('lastSavedUUID')
@@ -436,7 +462,7 @@ export default createStore({
         logoutMobilizon({ commit, dispatch }) {
             console.log('Action - Logout')
             dispatch('resetEvent')
-            dispatch('resetScrapper')
+            dispatch('resetEventScrapper')
             localStorage.removeItem('mobilizonTokenData')
             localStorage.removeItem('mobilizonGroups')
             localStorage.removeItem('mobilizonIdentities')
@@ -508,13 +534,23 @@ export default createStore({
         },
         async scrapEvent({ commit, dispatch }, url) {
             dispatch('resetEvent')
-            dispatch('resetScrapper')
-            commit('setScrapperUrl', url)
+            dispatch('resetEventScrapper')
+            commit('setEventScrapperUrl', url)
+            localStorage.setItem('eventScrapperUrl', JSON.stringify(url))
             commit('setIsLoadingScrapper', true)
-            const data = await scrapperApi.scrap(url)
-            commit('setScrapperData', data)
+            const data = await scrapperApi.scrapEvent(url)
+            commit('setEventScrapperData', data)
             commit('setIsLoadingScrapper', false)    
             return data
+        },
+        async scrapGroup({ commit }, url) {
+            commit('setIsLoadingScrapper', true)
+            const data = await scrapperApi.scrapGroup(url)
+            commit('setGroupScrapperData', data)            
+            commit('setIsLoadingScrapper', false)
+        },
+        resetGroupScrapperData({ commit }) {
+            commit('setGroupScrapperData', null)            
         },
         async uploadImage(store, file) {
 
@@ -554,6 +590,32 @@ export default createStore({
         },
         createErrorFromText({ commit }, text) {
             commit('addMessage', { text, type: 'error' })
+        },
+        async saveMobilizonGroup(store, group) {
+            console.log('Action - Save mobilizon group : ', group);
+
+            const requestHandler = async (token, { commit, state }) => {
+                commit('setIsSavingGroup', true)
+                try {                
+                    const createdGroup = await mobilizonApi.createGroup(group, token)
+                    const formattedGroup = {...createdGroup, memberId: state.mobilizon.selectedIdentityId }
+                    commit('addMobilizonGroup', formattedGroup)
+                    commit('setSelectedMobilizonGroup', formattedGroup.id)
+                } catch (error) { 
+                    if (error instanceof SaveError) {
+                        error.messages.forEach(message => {
+                            commit('addMessage', { text: message, type: 'error' })
+                        })
+                    } else {
+                        throw error
+                    }
+                     
+                    return null
+                } finally {
+                    commit('setIsSavingGroup', false)
+                } 
+            }        
+            return await issueMobilizonRequest(store, requestHandler)
         },
         async saveMobilizonEvent(store, event) {
             console.log('Action - Save mobilizon event : ', event);
@@ -625,11 +687,11 @@ export default createStore({
                 dispatch('createErrorFromText', 'Impossible de se connecter à l\'instance : ' + error)
             }
         },
-        resetScrapper({ commit }) {
+        resetEventScrapper({ commit }) {
             console.log('Action - Reset scrapper')
-            localStorage.removeItem('scrapperUrl')
-            commit('setScrapperUrl', null)
-            commit('setScrapperData', null)
+            localStorage.removeItem('eventScrapperUrl')
+            commit('setEventScrapperUrl', null)
+            commit('setEventScrapperData', null)
         },
         resetEvent({ commit }) {
             console.log('Action - Reset event')
@@ -647,8 +709,8 @@ export default createStore({
         },
         shareUrl({ commit }, url) {
             console.log('Action - Share url');
-            localStorage.setItem('scrapperUrl', JSON.stringify(url))
-            commit('setScrapperUrl', url)
+            localStorage.setItem('eventScrapperUrl', JSON.stringify(url))
+            commit('setEventScrapperUrl', url)
         }
     },
 })

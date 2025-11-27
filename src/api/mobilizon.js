@@ -605,6 +605,180 @@ export class MobilizonApi {
             .filter(result => result.type == 'house')
     }
 
+    async createGroup(group, accessToken) {
+
+        const bannerFormInputName = "b...a...n...n...e...r...m.e.d.i.a.file"
+        const logoFormInputName = "l...o...g...o...m.e.d.i.a.file"
+        const formData = new FormData()
+        formData.append("query", `mutation createGroup(
+                $preferredUsername: String!, 
+                $name: String!, 
+                $summary: String, 
+                $avatar: MediaInput, 
+                $banner: MediaInput, 
+                $physicalAddress: AddressInput, 
+                $visibility: GroupVisibility, 
+                $openness: Openness, 
+                $manuallyApprovesFollowers: Boolean
+            ) {
+                createGroup(
+                    preferredUsername: $preferredUsername
+                    name: $name
+                    summary: $summary
+                    banner: $banner
+                    avatar: $avatar
+                    physicalAddress: $physicalAddress
+                    visibility: $visibility
+                    openness: $openness
+                    manuallyApprovesFollowers: $manuallyApprovesFollowers
+                ) {
+                    ...ActorFragment
+                    ...GroupFragment
+                    banner {
+                        uuid
+                        url
+                        __typename
+                    }
+                    __typename
+                }
+            }
+
+            fragment GroupFragment on Group {
+                id
+                physicalAddress {
+                    ...AdressFragment 
+                }
+            }
+
+            fragment AdressFragment on Address {
+                id
+                description
+                geom
+                street
+                locality
+                postalCode
+                region
+                country
+                type
+                url
+                originId
+                timezone
+                pictureInfo {
+                    url
+                    author {
+                        name
+                        url
+                    }
+                    source {
+                        name
+                        url
+                    }
+                }
+            }
+
+            fragment ActorFragment on Actor {
+                id
+                avatar {
+                    uuid
+                    url
+                    __typename
+                }
+                type
+                preferredUsername
+                name
+                domain
+                summary
+                url
+                __typename
+            }`         
+        )      
+        
+        const data = {
+            "preferredUsername": group.federatedName,
+            "name": group.name,
+            "summary": group.description,
+            "visibility": "PUBLIC",
+            "openness": "MODERATED",
+            "manuallyApprovesFollowers": false,
+            "physicalAddress": group.physicalAddress,
+            "avatar": group.logo ? {
+                media: {
+                    name: group.logo.name,
+                    alt: group.logo.name,
+                    file: logoFormInputName
+                }
+            } : null,
+            "banner": group.banner ? {
+                media: {
+                    name: group.banner.name,
+                    alt: group.banner.name,
+                    file: bannerFormInputName
+                }
+            } : null,
+        }
+
+        formData.append('variables', JSON.stringify(data))
+
+        if (group.banner) {
+            formData.append(bannerFormInputName, group.banner, group.banner.name)
+        }
+        if (group.logo) {
+            formData.append(logoFormInputName, group.logo, group.logo.name)
+        }     
+        
+        const response = await fetch(this.apiUrl, {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${accessToken}`
+            },
+            body: formData
+        })
+
+        const body = (await this.handleResponse(response))
+        
+        if (body.errors) {
+            let messages = []
+            body.errors.forEach(error => {
+                const field = error.field || 'inconnu'
+                const message = error.message || 'erreur inconnue'
+                if (isString(message)) {
+                    if (error.field) {
+                        messages.push(`Champ ${field} : ${message}`)
+                    } else {
+                        messages.push(`${message}`)
+                    }
+                }
+                else if (Array.isArray(message)) {
+                    message.forEach(subMessage => {
+                        if (isString(subMessage)) { 
+                            messages.push(`Champ ${field} : ${subMessage}`)
+                        }
+                        else if (isObject(subMessage)) {
+                            for (let key in subMessage) {
+                                if (Array.isArray(subMessage[key])) {
+                                    subMessage[key].forEach(subSubMessage => {
+                                        messages.push(`Champ ${field} : ${subSubMessage}`)
+                                    })
+                                } else if (isString(subMessage[key])) {
+                                    messages.push(`Champ ${field} : ${subMessage[key]}`)
+                                } else {
+                                    messages.push(`Champ ${field} : Erreur inconnue`)
+                                }
+                            }
+                        } else {
+                            messages.push(`Champ ${field} : Erreur inconnue`)
+                        }
+                    })
+                } else {
+                    messages.push(`Champ ${field} : Erreur inconnue`)
+                }
+            })
+            throw new SaveError(messages)
+        } else {
+            return body.data.createGroup
+        }        
+    }
+
     async createEvent(event, accessToken) {
 
         const bannerFormInputName = "p...i...c...t...u...r...e...m.e.d.i.a.file"

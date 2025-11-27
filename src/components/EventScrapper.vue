@@ -12,12 +12,12 @@ const url = ref(null)
 store.dispatch('setPageTitle', 'URL de l\'événement')
 
 onMounted(() => {
-    url.value = store.getters.getScrapperUrl
+    url.value = store.getters.getEventScrapperUrl
 })
 
 const scrap = async (url) => {    
     await store.dispatch('scrapEvent', url)
-    router.push('/create')
+    router.push('createEvent')
 }
 
 </script>

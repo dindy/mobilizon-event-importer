@@ -15,6 +15,7 @@ const images = ref(props.images)
 const selected = ref(props.selected)
 const tooBig = ref(false)
 const maxHeightRatio = ref(null)
+const maxHeight = ref(null)
 const uploadInput = ref()
 const openUpload = () => {
   uploadInput.value?.click()
@@ -59,10 +60,11 @@ const setUploadedImage = async e => {
 const updateMaxRatio = src => {
     const tempImage = new Image
     tempImage.onload = () => {
+        maxHeight.value = tempImage.height > maxHeight.value ? tempImage.height : maxHeight.value  
         const heightWidthRatio = tempImage.height / tempImage.width
         maxHeightRatio.value = heightWidthRatio > maxHeightRatio.value ?
             heightWidthRatio :
-            maxHeightRatio
+            maxHeightRatio.value
     } 
     tempImage.src = src    
 }
@@ -87,7 +89,7 @@ const updateSelected = (index) => {
             :hide-delimiter-background="true"
             :hide-delimiters="true"
             :continuous="false"
-            :height="`min(50vh, 100vw, var(--max-content-width) * ${maxHeightRatio})`"
+            :height="`min(${maxHeight}px, 50vh, 100vw, var(--max-content-width) * ${maxHeightRatio})`"
         >
             <v-carousel-item
                 v-for="(image, index) in images"

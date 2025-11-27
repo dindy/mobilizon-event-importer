@@ -20,8 +20,8 @@ const localEvent = store.getters.getLocalEvent
 const mobilizonConfig = store.getters.getMobilizonConfig
 const mobilizonInstanceUrl = store.getters.getMobilizonInstanceUrl
 const isInstanceConfigLoaded = store.getters.isInstanceConfigLoaded
-const scrappedData = store.getters.getScrappedData
-const scrapperUrl = store.getters.getScrapperUrl
+const scrappedData = store.getters.getScrappedEvent
+const scrapperUrl = store.getters.getEventScrapperUrl
 
 onMounted(async () => {
     store.dispatch('resetEvent')
@@ -38,7 +38,7 @@ onMounted(async () => {
     if (toImport.value) {
         if (hasTokenData && selectedIdentity && mobilizonConfig) {
             await store.dispatch('scrapEvent', toImport.value)
-            router.push('/create')            
+            router.push('/createEvent')            
         }
     }
 })
@@ -51,7 +51,7 @@ const go = () => {
 }
 
 const scrap = () => {
-    router.push('/scrap')
+    router.push('/scrapEvent')
 }
 </script>
 

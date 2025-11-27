@@ -1,3 +1,5 @@
+import diacriticsMap from './diacriticsMap'
+
 const convertBytesToMegabytes = (bytes) => {
     const mb = (bytes / 1024 / 1024);
     // Format with up to 4 decimals, remove trailing zeros, replace dot with comma
@@ -83,4 +85,14 @@ const getFormattedAddress = (address) => {
     return elements.join(', ')
 }
 
-export { convertBytesToMegabytes, isValidUrl, dataURLtoFile, mergeDateTime, timestampToDate, timestampToTime, blobToDataUrl, getFormattedAddress }
+const removeDiacritics = (str) => {
+    return str.replace(/[^\u0000-\u007E]/g, function (weirdo) {
+        return diacriticsMap[weirdo] || weirdo;
+    });
+}
+
+const removeSpecialChar = (string) => string.replace(/[^a-z0-9\s]/gi, '').replace(/[-\s]/g, '_')
+
+const hasSpecialCharOrNotUnderscore = (string) => /[^a-z0-9_\s]/.test(string)
+
+export { hasSpecialCharOrNotUnderscore, removeSpecialChar, removeDiacritics, convertBytesToMegabytes, isValidUrl, dataURLtoFile, mergeDateTime, timestampToDate, timestampToTime, blobToDataUrl, getFormattedAddress }

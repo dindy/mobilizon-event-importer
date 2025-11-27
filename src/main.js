@@ -13,13 +13,14 @@ import store from './store'
 import Callback from './components/Callback.vue'
 import NotFound from './components/NotFound.vue' 
 import Home from './components/Home.vue' 
-import Scrapper from './components/Scrapper.vue' 
+import EventScrapper from './components/EventScrapper.vue' 
+import GroupScrapper from './components/GroupScrapper.vue' 
 import Event from './components/Event.vue' 
+import Group from './components/Group.vue' 
 import Done from './components/Done.vue' 
 import SelectIdentity from './components/SelectIdentity.vue' 
 import SelectInstance from './components/SelectInstance.vue' 
 import Share from './components/Share.vue' 
-import { useRoute } from 'vue-router'
 
 const routes = [
   { path: '/', component: Home },
@@ -27,8 +28,10 @@ const routes = [
   { path: '/instance', component: SelectInstance },
   { path: '/identity', component: SelectIdentity },
   { path: '/mobilizon/callback', component: Callback },
-  { path: '/scrap', component: Scrapper },
-  { path: '/create', component: Event },
+  { path: '/scrapEvent', component: EventScrapper },
+  { path: '/scrapGroup', component: GroupScrapper },
+  { path: '/createEvent', component: Event },
+  { path: '/createGroup', component: Group },
   { path: '/done', component: Done },
   { path: '/:pathMatch(.*)*', name: 'NotFound', component: NotFound } 
 ]
@@ -81,8 +84,8 @@ router.beforeEach(async (to, from) => {
   const mobilizonConfig = store.getters.getMobilizonConfig
   const mobilizonInstanceUrl = store.getters.getMobilizonInstanceUrl
   const isInstanceConfigLoaded = store.getters.isInstanceConfigLoaded
-  const scrappedData = store.getters.getScrappedData
-  const scrapperUrl = store.getters.getScrapperUrl
+  const scrappedData = store.getters.getScrappedEvent
+  const scrapperUrl = store.getters.getEventScrapperUrl
   const lastUUID = store.getters.getMobilizonEventUUID
 
   const notAuthenticatedAllowedPaths = [
@@ -98,16 +101,16 @@ router.beforeEach(async (to, from) => {
     router.replace('/instance')
   }
 
-  if ((to.path == '/scrap' || to.path == '/create') && !selectedIdentity) {
+  if ((to.path == '/scrapEvent' || to.path == '/createEvent') && !selectedIdentity) {
     router.replace('/identity')
   }
 
-  if (to.path == '/scrap' && localEvent && lastUUID === null && from.path !== '/create') {
-    router.replace('/create')
+  if (to.path == '/scrapEvent' && localEvent && lastUUID === null && from.path !== '/createEvent') {
+    router.replace('/createEvent')
   }
 
-  if (to.path == '/create' && !scrappedData && !localEvent) {
-    router.replace('/scrap')
+  if (to.path == '/createEvent' && !scrappedData && !localEvent) {
+    router.replace('/scrapEvent')
   }
 
   if (to.path === '/' && hasTokenData && mobilizonConfig) {
@@ -115,9 +118,9 @@ router.beforeEach(async (to, from) => {
       console.log(lastUUID);
       
       if (localEvent && lastUUID === null) {
-        router.replace('/create')
+        router.replace('/createEvent')
       } else {
-        router.replace('/scrap')
+        router.replace('/scrapEvent')
       }
     } else {
       router.replace('/identity')

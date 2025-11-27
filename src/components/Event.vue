@@ -4,10 +4,7 @@ import { useStore } from 'vuex';
 import { useRouter } from 'vue-router'
 import { convertBytesToMegabytes, dataURLtoFile, mergeDateTime, timestampToDate, timestampToTime, blobToDataUrl, getFormattedAddress } from '../utils/utils'
 import QuillEditor from './QuillEditor.vue'
-import Map from './Map.vue'
-import SearchAddressFromStringOverlay from './SearchAddressFromStringOverlay.vue'
-import SearchAddressFromCoordsOverlay from './SearchAddressFromCoordsOverlay.vue'
-import LocateFromMapOverlay from './LocateFromMapOverlay.vue'
+import LocationSelect from './LocationSelect.vue'
 import ImageSelect from './ImageSelect.vue'
 
 const router = useRouter()
@@ -98,30 +95,20 @@ const rules = {
 
 const cancel = () => {
     store.dispatch('resetEvent')
-    store.dispatch('resetScrapper')
-    router.push('/scrap')
+    store.dispatch('resetEventScrapper')
+    router.push('/scrapEvent')
 }
 
 /* Initialize default variables */
 const uploadLimits = computed(() => store.getters.getUploadLimits)
-const isLoadingAdressesFromCoords = computed(() => store.getters.isLoadingAdressesFromCoords)
-const isLoadingAdressesFromString = computed(() => store.getters.isLoadingAddressesFromString)
-const foundAddressesFromCoords = computed(() => store.getters.getAddressesFromCoords)
-const foundAddressesFromString = computed(() => store.getters.getAddressesFromString)
 const categories = computed(() => store.getters.getEventCategories)
 const groupAddress = computed(() => store.getters.getSelectedGroupAddress)
 const uploadedCover = ref(null)
-const searchAddressString = ref("")
-const isLoadingGeolocation = ref(false)
 const uploadCoverInput = ref(null)
-const searchAddressFromStringOverlay = ref(false)
-const locateFromMapOverlay = ref(false)
-const validateMapLocationDialog = ref(false)
-const searchAddressFromCoordsOverlay = ref(false)
 const form = ref()
 
 /* Get initial event data either from scrapped data or from saved event */
-const scrapped = store.getters.getScrappedData
+const scrapped = store.getters.getScrappedEvent
 const saved = store.getters.getLocalEvent
 const event = ref({
     banners: null,
@@ -131,8 +118,6 @@ const event = ref({
     isDraft: false,
     url: null,
     selectedBannerId: null,
-    selectedBannerTooBig: null,
-    maxCoverRatio: 0,
     selectedCategory: null,
     startDate: null,
     startTime: null,
@@ -150,7 +135,6 @@ const event = ref({
     latitude: null,
     longitude: null,    
 })
-const mapCenter = computed(() => event.value.latitude && event.value.longitude ? [event.value.latitude, event.value.longitude] : null)
 
 watch(
     () => event,
@@ -212,95 +196,10 @@ if (saved) {
     setSelectedBanner(0)
 }
 
-const updateTempCoords  = (coords, zoom) => {
-    store.dispatch('searchAddressFromCoords', coords, zoom)
-}
-
 const useFoundAddress = (address) => {
-    event.value.physicalAddress.description = address.description
-    event.value.physicalAddress.locality = address.locality
-    event.value.physicalAddress.postalCode = address.postalCode
-    event.value.physicalAddress.street = address.street
-    event.value.physicalAddress.country = address.country
-    if (address.geom) {
-        event.value.latitude = address.geom.split(';')[1]
-        event.value.longitude = address.geom.split(';')[0]
-    }
+    event.value.physicalAddress = address
 }
 
-const searchAddress = (address) => {
-    store.commit('clearAddressesFromString')
-    store.dispatch('searchAddressFromString', getFormattedAddress(address))
-}
-
-const toggleSearchAddressFromStringOverlay = () => {    
-    searchAddressFromStringOverlay.value = !searchAddressFromStringOverlay.value
-    if (searchAddressFromStringOverlay.value) {
-        store.commit('clearAddressesFromString') 
-        searchAddressString.value = getFormattedAddress(event.value.physicalAddress)
-        searchAddress(event.value.physicalAddress)
-    }
-}
-
-const openLocateFromMapOverlay = () => {
-    locateFromMapOverlay.value = true
-}
-
-const closeLocateFromMapOverlay = () => {
-    locateFromMapOverlay.value = false
-}
-
-const toggleLocateFromMapOverlay = () => {    
-    if (locateFromMapOverlay.value) {
-        closeLocateFromMapOverlay()
-    } else {
-        openLocateFromMapOverlay()
-    }
-}
-
-const validateMapLocation = (coords) => {
-    event.value.longitude = coords.longitude
-    event.value.latitude = coords.latitude    
-    closeLocateFromMapOverlay()
-    validateMapLocationDialog.value = true
-    store.dispatch('searchAddressFromCoords', { lng: event.value.longitude, lat: event.value.latitude })
-}
-
-const acceptSearchAddressFromCoordsOverlay = () => {
-    searchAddressFromCoordsOverlay.value = true
-    validateMapLocationDialog.value = false
-} 
-
-const openSearchAddressFromCoordsOverlay = () => {
-    searchAddressFromCoordsOverlay.value = true
-    store.dispatch('searchAddressFromCoords', { lng: event.value.longitude, lat: event.value.latitude })
-}
-
-const toggleSearchAddressFromCoordsOverlay = () => {    
-    if (!searchAddressFromCoordsOverlay.value) {
-        openSearchAddressFromCoordsOverlay()
-    } else {
-        searchAddressFromCoordsOverlay.value = false
-    }
-}
-
-const selectFoundAddressFromStringById = (id) => {
-    const address = store.getters.getAddressFromStringById(id)
-    useFoundAddress(address)
-    searchAddressFromStringOverlay.value = false
-    store.dispatch('searchAddressFromCoords', { lng: event.value.longitude, lat: event.value.latitude })
-}
-
-const selectFoundAddressFromCoordsById = (id) => {
-    const address = store.getters.getAddressFromCoordsById(id)
-    useFoundAddress(address)
-    searchAddressFromCoordsOverlay.value = false   
-    searchAddressFromStringOverlay.value = false 
-}
-
-const address = computed(() => getFormattedAddress(event.value.physicalAddress).split(', ').join('\n'))
-
-const hasAddress = computed(() => getFormattedAddress(event.value.physicalAddress) && getFormattedAddress(event.value.physicalAddress) !== '')
 </script>
 
 <template>
@@ -368,105 +267,14 @@ const hasAddress = computed(() => getFormattedAddress(event.value.physicalAddres
         
         <h1 class="text-subtitle-2 mt-3 mb-3">Localisation</h1>
 
-        <v-textarea 
-            v-if="hasAddress" 
-            class="mb-5" 
-            :hide-details="true" 
-            label="Adresse" 
-            rows="1" 
-            auto-grow 
-            v-model="address" 
-            :disabled="true" 
-        />
-        
-        <v-alert
-            v-if="!hasAddress" 
-            text="Il n'y a pas d'adresse renseignée pour cet événement !"
-            title="Pas d'adresse"
-            type="warning"
-            class="mb-5"
-        ></v-alert>        
-
-        <v-btn prepend-icon="mdi-pencil" @click="toggleSearchAddressFromStringOverlay">Modifier l'adresse</v-btn>
-
-        <div class="map mt-5" v-if="event.latitude && event.longitude">
-            <Map 
-                ref="map"
-                @update-coords="updateCoords" 
-                :coords="[ event.latitude, event.longitude ]" 
-                :center="mapCenter"
-                :alt-coords="null"
-                :zoom="15"
-                :canUpdateCoords="false"
-                />
-        </div>
-
-        <v-alert
-            v-else 
-            text="Il n'y a pas de localisation GPS renseignée pour cet événement !"
-            title="Pas de localisation"
-            type="warning"
-            class="mt-5"
-        ></v-alert>          
-
-        <v-btn class="mt-5" prepend-icon="mdi-map-marker" @click="toggleLocateFromMapOverlay">Modifier la position</v-btn>
-
-        <SearchAddressFromStringOverlay 
-            :show="searchAddressFromStringOverlay"
-            :group-address="groupAddress"
-            :physical-address="event.physicalAddress"
-            :found-addresses="foundAddressesFromString"
-            :is-loading="isLoadingAdressesFromString"
-            @select-address-by-id="selectFoundAddressFromStringById"
-            @toggle-show="toggleSearchAddressFromStringOverlay"
-            @use-address="useFoundAddress"
-            @search-address="searchAddress"
-        />
-
-        <LocateFromMapOverlay
-            :show="locateFromMapOverlay"
-            :isLoading="isLoadingGeolocation"
-            :latitude="event.latitude"
+        <LocationSelect 
+            :address="event.physicalAddress"
             :longitude="event.longitude"
-            @toggle-show="toggleLocateFromMapOverlay"
-            @validate="validateMapLocation"
+            :latitude="event.latitude"
+            :groupAddress="groupAddress"
+            @selectAddress="useFoundAddress"
+            @selectCoords="updateCoords"
         />
-
-        <v-dialog
-            v-model="validateMapLocationDialog"
-            width="auto"
-        >
-            <v-card
-                max-width="400"
-                prepend-icon="mdi-magnify"
-                text="Voulez-vous également mettre à jour l'adresse de l'événement avec une adresse à proximité de la localisation ?"
-                title="Mettre à jour l'adresse"
-            >
-                <template v-slot:actions>
-                <v-btn
-                    class="ms-auto"
-                    color="primary"
-                    text="Oui"
-                    @click="acceptSearchAddressFromCoordsOverlay"
-                ></v-btn>
-                <v-btn
-                    class="ms-auto"
-                    text="Non"
-                    @click="validateMapLocationDialog = false"
-                ></v-btn>
-                </template>
-            </v-card>
-        </v-dialog>
-        
-        <SearchAddressFromCoordsOverlay 
-            :show="searchAddressFromCoordsOverlay"
-            :isLoading="isLoadingAdressesFromCoords"
-            :foundAddresses="foundAddressesFromCoords"
-            @select-address-by-id="selectFoundAddressFromCoordsById"
-            @toggle-show="toggleSearchAddressFromCoordsOverlay"
-        />
-
-        <br/>
         
         <div class="mt-5">
 
@@ -492,7 +300,6 @@ const hasAddress = computed(() => getFormattedAddress(event.value.physicalAddres
                 @click="cancel"
             >Annuler</v-btn>            
         </div>
-
         
     </v-form>
 </template>

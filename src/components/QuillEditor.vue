@@ -1,5 +1,5 @@
 <template>
-  <QuillEditor :modules="modules" :toolbar="toolbarOptions"/>
+  <QuillEditor :modules="modules" :toolbar="toolbarOptions" :options="options"/>
 </template>
 
 <script setup>
@@ -22,7 +22,31 @@ const toolbarOptions = ref(
         [{ 'color': [] }, { 'background': [] }]
     ]
 )
-const modules = [{
+// TODO: Improve accessibility by handling Esc or Tab behavior. The adaptor for VueJS has a bug and don't handle options correctly.
+const options = {
+    modules: {
+        keyboard: {
+            bindings: {
+                tab: {
+                    key: 9,
+                    handler: function () {
+                        console.log("tab works");
+                        // Handle tab
+                    },
+                },
+                handleEnter: {
+                    key: 13,
+                    handler() {
+                        console.log("enter works");
+                        // reference self.theFunctionYouWantToCall()
+                    },
+                },                  
+            }
+        }
+    }
+}
+const modules = [
+    {
     name: 'imageUploader',
     module: ImageUploader,
     options: {
