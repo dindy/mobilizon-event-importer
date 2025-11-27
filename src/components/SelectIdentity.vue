@@ -162,7 +162,7 @@ const importGroup = () => {
             @click="next"
             color="primary"
             prepend-icon="mdi-check"
-        >{{ getActionText() }}</v-btn>
+        >Confirmer</v-btn>
     </div>
 
 </template>
