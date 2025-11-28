@@ -395,7 +395,8 @@ export default createStore({
                 commit('setMobilizonTokenData', JSON.parse(mobilizonTokenData))
                 console.log('Action - Mobilizon Token set from localstorage', JSON.parse(mobilizonTokenData))
                 // Refresh data
-                dispatch('fetchMobilizonGroups')
+                // Await the first one because the same token can only be refreshed once
+                await dispatch('fetchMobilizonGroups')
                 dispatch('loadMobilizonConfig')
             } else {
                 console.log('Action - No Mobilizon Token data in localstorage')
@@ -471,6 +472,7 @@ export default createStore({
             localStorage.removeItem('mobilizonConfig')
             localStorage.removeItem('lastSavedUUID')
             commit('clearMobilizonSession')
+            // location.reload()
         },
         saveMobilizonCode({ commit }, code) {
             console.log('Action - Saving Mobilizon code:', code);
