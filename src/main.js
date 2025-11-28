@@ -36,6 +36,8 @@ const routes = [
   { path: '/:pathMatch(.*)*', name: 'NotFound', component: NotFound } 
 ]
 
+await store.dispatch('init')
+
 const router = createRouter({
   history: createWebHistory(),
   routes
@@ -72,7 +74,6 @@ createApp(App)
   .use(vuetify)
   .mount('#app')
 
-await store.dispatch('init')
   
 router.beforeEach(async (to, from) => {
   
