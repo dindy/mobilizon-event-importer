@@ -22,10 +22,12 @@ const openUpload = () => {
 }
 onMounted(() => {
     images.value = props.images
-    images.value.map((image) => {
-        image.file = dataURLtoFile(image.src)
-        updateMaxRatio(image.src)
-    })    
+    if (images.value) {
+        images.value.map((image) => {
+            image.file = dataURLtoFile(image.src)
+            updateMaxRatio(image.src)
+        })    
+    }
 })
 const setUploadedImage = async e => {
 
@@ -81,6 +83,7 @@ const updateSelected = (index) => {
 <template>
     <div>
         <v-carousel
+            v-if="images"
             crossfade
             selected-class="cover-selected"
             :show-arrows="images.length > 1"
