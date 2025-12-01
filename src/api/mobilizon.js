@@ -150,8 +150,7 @@ export class MobilizonApi {
 
     async getUserGroups(accessToken) { 
 
-        const document = `
-            query LoggedUserMemberships($membershipName: String, $page: Int, $limit: Int) {
+        const document = `query LoggedUserMemberships($membershipName: String, $page: Int, $limit: Int) {
                 loggedUser {
                     id
                     memberships(name: $membershipName, page: $page, limit: $limit) {
@@ -159,7 +158,7 @@ export class MobilizonApi {
                         elements {
                             role
                             actor {
-                                ...ActorFragment
+                                id
                             }
                             parent {
                                 ...ActorFragment
@@ -223,7 +222,11 @@ export class MobilizonApi {
                 'Content-Type': 'application/json',
                 'Authorization': `Bearer ${accessToken}`
             },
-            body: JSON.stringify({ query: document })
+            body: JSON.stringify({
+                query: document,
+                variables: { page: 1, limit: 999 },
+                operationName: 'LoggedUserMemberships'
+            })
         })
 
         return (await this.handleResponse(response)).data
