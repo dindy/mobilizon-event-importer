@@ -1,22 +1,31 @@
-export class RequestError extends Error {
-    constructor(message) {
-        super(message)
-        this.name = "RequestError"
+export class MbzRequestError extends Error {
+    
+    response = null
+    body = null
+
+    constructor(response, body = null) {
+        super('Mobilizon request error.')
+        this.response = response
+        this.body = body
     }
 }
 
-export class ExpiredTokenError extends RequestError {
-    constructor(message) {
-        super(message)
-        this.name = "ExpiredTokenError"
+export class MbzProxyRequestError extends MbzRequestError {
+    constructor(response, body = null) {
+        super(response, body)
     }
 }
 
-export class SaveError extends RequestError {
-    constructor(messages) {
-        super('Erreur lors de la sauvegarde')
-        this.name = "SaveError"
-        this.messages = messages
+export class MbzProxyAuthError extends MbzProxyRequestError {
+    constructor(response, body = null) {
+        super(response, body)
+    }    
+}
+
+export class MbzProxyValidationError extends MbzProxyRequestError {
+    constructor(errors, response, body) {
+        super(response, body)
+        this.messages = errors
     }
 }
 
@@ -25,9 +34,6 @@ const isString = (x) => typeof x === 'string' || x instanceof String
 
 export class MobilizonApi {
 
-    // static instanceUrl = import.meta.env.VITE_MOBILIZON_API_URI
-    // static clientId = import.meta.env.VITE_MOBILIZON_CLIENT_ID
-    // static clientSecret = import.meta.env.VITE_MOBILIZON_CLIENT_SECRET
     instanceUrl = null
     clientId = null
     clientSecret = null    
@@ -41,10 +47,77 @@ export class MobilizonApi {
         return `${this.instanceUrl}/api`
     } 
 
+    getProxyApiUrl(path) {
+        return `${import.meta.env.VITE_MOBILIZON_PROXY_URI}/${path}`
+    }
+
     searchAddressController = null
 
     constructor() {
 
+    }
+
+    async handleProxyResponse(response) { 
+        
+        let body = null
+        
+        if (response.status === 401) {
+            body = await response.json()
+            throw new MbzProxyAuthError(response, body)
+        }
+
+        try {
+            body = await response.json()
+        } catch (error) {
+            throw new MbzProxyRequestError(response)
+        }
+        
+        if (body.mobilizonApiErrorName && body.mobilizonApiErrorName == 'BadRequestError' && body.body.errors) {
+            let messages = []
+            body.body.errors.forEach(error => {
+                const field = error.field || 'inconnu'
+                const message = error.message || 'erreur inconnue'
+                if (isString(message)) {
+                    if (error.field) {
+                        messages.push(`Champ ${field} : ${message}`)
+                    } else {
+                        messages.push(`${message}`)
+                    }
+                }
+                else if (Array.isArray(message)) {
+                    message.forEach(subMessage => {
+                        if (isString(subMessage)) { 
+                            messages.push(`Champ ${field} : ${subMessage}`)
+                        }
+                        else if (isObject(subMessage)) {
+                            for (let key in subMessage) {
+                                if (Array.isArray(subMessage[key])) {
+                                    subMessage[key].forEach(subSubMessage => {
+                                        messages.push(`Champ ${field} : ${subSubMessage}`)
+                                    })
+                                } else if (isString(subMessage[key])) {
+                                    messages.push(`Champ ${field} : ${subMessage[key]}`)
+                                } else {
+                                    messages.push(`Champ ${field} : Erreur inconnue`)
+                                }
+                            }
+                        } else {
+                            messages.push(`Champ ${field} : Erreur inconnue`)
+                        }
+                    })
+                } else {
+                    messages.push(`Champ ${field} : Erreur inconnue`)
+                }
+            })
+
+            throw new MbzProxyValidationError(messages)
+        }
+
+        if (response.status === 200) return body
+
+
+        
+        throw new MbzProxyRequestError(response, body)
     }
 
     async handleResponse(response) {
@@ -53,405 +126,152 @@ export class MobilizonApi {
             
             const body = await response.json()
             return body
-        
-        } else if (response.status === 401) {
-
-            const body = await response.json()
-            
-            if (body.message === 'invalid_token' && body.details === ':token_expired') {
-                throw new ExpiredTokenError('Unauthorized: Token expired')
-            }
         }
 
-        throw new RequestError(response)        
+        throw new MbzRequestError(response, body)        
     }
 
     async registerApp(instanceUrl) {
 
-        const response = await fetch(`${instanceUrl}/apps`, {
-            method: 'POST',
-            body: new URLSearchParams({
-                'name': this.clientName,
-                'redirect_uri': this.redirectUri,
-                'website': this.websiteUrl,
-                'scope': this.scope
+        let instanceDomain = instanceUrl.replace(/https?:\/\//i, '')
+
+        const response = await fetch(this.getProxyApiUrl('auth/register?') + new URLSearchParams({
+                instance: instanceDomain,
+                redirect_uri: this.redirectUri
             })            
-        })
-
-        if (response.status === 200) {
-            const body = await response.json()
-            return body
-        } else if (response.status.toString().startsWith('4')) {
-            const body = await response.json()
-            const error = body.error && body.error_description ?
-                `${body.error} : ${body.error_description}` :
-                `${response.status} ${response.statusText}`
-            throw new RequestError(error)
-        } else {
-            throw new RequestError(`${response.status} ${response.statusText}`)
-        }        
-    }
-
-    getAuthorizationUrl() {
-        return `${this.instanceUrl}/oauth/authorize?` + new URLSearchParams({
-            client_id: this.clientId,
-            redirect_uri: this.redirectUri,
-            scope: this.scope,
-            state: this.state
-        })
-    }
-
-    async exchangeCodeForToken(code) {
+        )
         
-        const response = await fetch(`${this.instanceUrl}/oauth/token?` + new URLSearchParams({
-            client_id: this.clientId,
-            client_secret: this.clientSecret,
-            grant_type: 'authorization_code',
-            code: code,
-            redirect_uri: this.redirectUri,
-            scope: this.scope,
-        }), {
-            method: 'POST',
-        })
-
-        if (response.status === 200) {
-            const body = await response.json()
-            return body
-        } else if (response.status.toString().startsWith('4')) {
-            const body = await response.json()
-            const error = body.error && body.error_description ?
-                `${body.error} : ${body.error_description}` :
-                `${response.status} ${response.statusText}`
-            throw new RequestError(error)
-        } else {
-            throw new RequestError(`${response.status} ${response.statusText}`)
-        }
-
+        return (await this.handleProxyResponse(response)).url      
     }
 
-    async refreshToken(refreshToken) {
-        
-        const response = await fetch(`${this.instanceUrl}/oauth/token?` + new URLSearchParams({
-            client_id: this.clientId,
-            client_secret: this.clientSecret,
-            grant_type: 'refresh_token',
-            refresh_token: refreshToken,
-        }), {
+    async authorizeApp(code, clientId) {
+        const response = await fetch(this.getProxyApiUrl('auth/authorize?'), {
             method: 'POST',
-        })
-            
-        if (response.status === 200) {
-            const body = await response.json()
-            return body
-        }
-        
-        throw new RequestError(`Failed to refresh token: ${response.status} ${response.statusText}`);
-    }
-
-    async getUserGroups(accessToken) { 
-
-        const document = `query LoggedUserMemberships($membershipName: String, $page: Int, $limit: Int) {
-                loggedUser {
-                    id
-                    memberships(name: $membershipName, page: $page, limit: $limit) {
-                        total
-                        elements {
-                            role
-                            actor {
-                                id
-                            }
-                            parent {
-                                ...ActorFragment
-                                ...GroupFragment
-                            }
-                        }
-                    }
-                    actors {      
-                        ...ActorFragment      
-                    }                        
-                }
-            }
-
-            fragment GroupFragment on Group {
-                id
-                physicalAddress {
-                    ...AdressFragment 
-                }
-            }
-
-            fragment AdressFragment on Address {
-                id
-                description
-                geom
-                street
-                locality
-                postalCode
-                region
-                country
-                type
-                url
-                originId
-                timezone
-                pictureInfo {
-                    url
-                    author {
-                        name
-                        url
-                    }
-                    source {
-                        name
-                        url
-                    }
-                }
-            }
-
-            fragment ActorFragment on Actor {
-                id
-                type
-                preferredUsername
-                name
-                avatar {
-                    url
-                }
-            }
-        `
-
-        const response = await fetch(this.apiUrl, {
-            method: 'POST',
+            credentials: "include",
             headers: {
                 'Content-Type': 'application/json',
-                'Authorization': `Bearer ${accessToken}`
             },
             body: JSON.stringify({
-                query: document,
-                variables: { page: 1, limit: 999 },
-                operationName: 'LoggedUserMemberships'
+                code,
+                client_id: clientId
             })
         })
-
-        return (await this.handleResponse(response)).data
+        
+        return (await this.handleProxyResponse(response))
     }
 
-    async uploadImage(file, accessToken) {
+    // async getUserGroups() { 
+
+    //     const document = `query LoggedUserMemberships($membershipName: String, $page: Int, $limit: Int) {
+    //             loggedUser {
+    //                 id
+    //                 memberships(name: $membershipName, page: $page, limit: $limit) {
+    //                     total
+    //                     elements {
+    //                         role
+    //                         actor {
+    //                             id
+    //                         }
+    //                         parent {
+    //                             ...ActorFragment
+    //                             ...GroupFragment
+    //                         }
+    //                     }
+    //                 }
+    //                 actors {      
+    //                     ...ActorFragment      
+    //                 }                        
+    //             }
+    //         }
+
+    //         fragment GroupFragment on Group {
+    //             id
+    //             physicalAddress {
+    //                 ...AdressFragment 
+    //             }
+    //         }
+
+    //         fragment AdressFragment on Address {
+    //             id
+    //             description
+    //             geom
+    //             street
+    //             locality
+    //             postalCode
+    //             region
+    //             country
+    //             type
+    //             url
+    //             originId
+    //             timezone
+    //             pictureInfo {
+    //                 url
+    //                 author {
+    //                     name
+    //                     url
+    //                 }
+    //                 source {
+    //                     name
+    //                     url
+    //                 }
+    //             }
+    //         }
+
+    //         fragment ActorFragment on Actor {
+    //             id
+    //             type
+    //             preferredUsername
+    //             name
+    //             avatar {
+    //                 url
+    //             }
+    //         }
+    //     `
+
+    //     const response = await fetch(this.getProxyApiUrl('mbz/query'), {
+    //         method: 'POST',
+    //         credentials: "include",
+    //         headers: {
+    //             'Content-Type': 'application/json',
+    //         },
+    //         body: JSON.stringify({
+    //             query: document,
+    //             variables: { page: 1, limit: 999 },
+    //             operationName: 'LoggedUserMemberships'
+    //         })
+    //     })
+
+    //     return (await this.handleProxyResponse(response)).data
+    // }
+
+    async uploadImage(file) {
 
         const formData = new FormData()
 
         formData.append("query", `mutation uploadMedia($file: Upload!, $name: String!) {
                 uploadMedia(file: $file, name: $name) {
                     url
-                    id
-                    __typename
                 }
             }`
         )        
         formData.append("variables", `{"name":"${file.name}","file":"image1"}`)        
         formData.append("image1", file, file.name)   
 
-        const response = await fetch(this.apiUrl, {
+        const response = await fetch(this.getProxyApiUrl('mbz/query'), {
             method: 'POST',
-            headers: {
-                'Authorization': `Bearer ${accessToken}`
-            },
+            credentials: "include",
             body: formData
         })
 
-        return (await this.handleResponse(response)).data.uploadMedia
+        return (await this.handleProxyResponse(response)).data.uploadMedia
     }
 
-    async getConfig(accessToken) {
-
-        const query = `
-            query FullConfig {
-                config {
-                    name
-                    description
-                    slogan
-                    version
-                    registrationsOpen
-                    registrationsAllowlist
-                    demoMode
-                    longEvents
-                    durationOfLongEvent
-                    countryCode
-                    languages
-                    primaryColor
-                    secondaryColor
-                    instanceLogo {
-                        url
-                        __typename
-                    }
-                    defaultPicture {
-                        url
-                        name
-                        metadata {
-                            width
-                            height
-                            blurhash
-                            __typename
-                        }
-                        __typename
-                    }
-                    eventCategories {
-                        id
-                        label
-                        __typename
-                    }
-                    anonymous {
-                        participation {
-                            allowed
-                            validation {
-                                email {
-                                    enabled
-                                    confirmationRequired
-                                    __typename
-                                }
-                                captcha {
-                                    enabled
-                                    __typename
-                                }
-                                __typename
-                            }
-                            __typename
-                        }
-                        eventCreation {
-                            allowed
-                            validation {
-                                email {
-                                    enabled
-                                    confirmationRequired
-                                    __typename
-                                }
-                                captcha {
-                                    enabled
-                                    __typename
-                                }
-                                __typename
-                            }
-                            __typename  
-                        }
-                        reports {
-                            allowed
-                            __typename
-                        }
-                        actorId
-                        __typename
-                    }
-                    location {
-                        latitude
-                        longitude
-                        __typename
-                    }
-                    maps {
-                        tiles {
-                            endpoint
-                            attribution
-                            __typename
-                        }
-                        routing {
-                            type
-                            __typename
-                        }
-                        __typename
-                    }
-                    geocoding {
-                        provider
-                        autocomplete
-                        __typename
-                    }
-                    resourceProviders {
-                        type
-                        endpoint
-                        software
-                        __typename
-                    }
-                    features {
-                        groups
-                        eventCreation
-                        eventExternal
-                        antispam
-                        __typename
-                    }
-                    restrictions {
-                        onlyAdminCanCreateGroups
-                        onlyGroupsCanCreateEvents
-                        __typename
-                    }
-                    auth {
-                        ldap
-                        databaseLogin
-                        oauthProviders {
-                            id
-                            label
-                            __typename
-                        }
-                        __typename
-                    }
-                    uploadLimits {
-                        default
-                        avatar
-                        banner
-                        __typename
-                    }
-                    instanceFeeds {
-                        enabled
-                        __typename
-                    }
-                    webPush {
-                        enabled
-                        publicKey
-                        __typename
-                    }
-                    analytics {
-                        id
-                        enabled
-                        configuration {
-                            key
-                            value
-                            type
-                            __typename
-                        }
-                        __typename
-                    }
-                    search {
-                        global {
-                            isEnabled
-                            isDefault
-                            __typename
-                        }
-                        __typename
-                    }
-                    exportFormats {
-                        eventParticipants
-                        __typename
-                    }
-                    __typename
-                }
-            }        
-        ` 
-        
-        const response = await fetch(this.apiUrl, {
-            method: 'POST',
-            headers: {
-                'Authorization': `Bearer ${accessToken}`,
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                operationName: 'FullConfig',
-                query: query,
-                variables: '{}'
-            })
-        })
-
-        return (await this.handleResponse(response)).data.config
-    }
-
-    async searchAddress(queryString, accessToken) {
+    async searchAddress(queryString) {
 
         const query = `
             query SearchAddress($query: String!, $locale: String, $type: AddressSearchType) {
                 searchAddress(query: $query, locale: $locale, type: $type) {
                     ...AdressFragment
-                    __typename
                 }
             }
             
@@ -473,16 +293,12 @@ export class MobilizonApi {
                     author {
                         name
                         url
-                        __typename
                     }
                     source {
                         name
                         url
-                        __typename
                     }
-                    __typename
                 }
-                __typename
             }
         `
         
@@ -497,7 +313,6 @@ export class MobilizonApi {
                 signal: this.searchAddressController.signal,
                 method: 'POST',
                 headers: {
-                    'Authorization': `Bearer ${accessToken}`,
                     'Content-Type': 'application/json',
                 },
                 body: JSON.stringify({
@@ -539,7 +354,7 @@ export class MobilizonApi {
    
     }
 
-    async reverseGeocode(coords, accessToken) {
+    async reverseGeocode(coords) {
 
         const query = `
             query ReverseGeocode($latitude: Float!, $longitude: Float!, $zoom: Int, $locale: String) {
@@ -550,7 +365,6 @@ export class MobilizonApi {
                     locale: $locale
                 ) {
                     ...AdressFragment
-                    __typename
                 }
             }
             fragment AdressFragment on Address {
@@ -569,25 +383,20 @@ export class MobilizonApi {
                 pictureInfo {
                     url
                     author {
-                    name
-                    url
-                    __typename
+                        name
+                        url
                     }
                     source {
-                    name
-                    url
-                    __typename
+                        name
+                        url
                     }
-                    __typename
                 }
-                __typename
             }
         `
         
         const response = await fetch(this.apiUrl, {
             method: 'POST',
             headers: {
-                'Authorization': `Bearer ${accessToken}`,
                 'Content-Type': 'application/json',
             },
             body: JSON.stringify({
@@ -608,7 +417,7 @@ export class MobilizonApi {
             .filter(result => result.type == 'house')
     }
 
-    async createGroup(group, accessToken) {
+    async createGroup(group) {
 
         const bannerFormInputName = "b...a...n...n...e...r...m.e.d.i.a.file"
         const logoFormInputName = "l...o...g...o...m.e.d.i.a.file"
@@ -640,9 +449,7 @@ export class MobilizonApi {
                     banner {
                         uuid
                         url
-                        __typename
                     }
-                    __typename
                 }
             }
 
@@ -684,7 +491,6 @@ export class MobilizonApi {
                 avatar {
                     uuid
                     url
-                    __typename
                 }
                 type
                 preferredUsername
@@ -692,7 +498,6 @@ export class MobilizonApi {
                 domain
                 summary
                 url
-                __typename
             }`         
         )      
         
@@ -729,60 +534,16 @@ export class MobilizonApi {
             formData.append(logoFormInputName, group.logo, group.logo.name)
         }     
         
-        const response = await fetch(this.apiUrl, {
+        const response = await fetch(this.getProxyApiUrl('mbz/query'), {
             method: 'POST',
-            headers: {
-                'Authorization': `Bearer ${accessToken}`
-            },
-            body: formData
+            body: formData,
+            credentials: "include"
         })
 
-        const body = (await this.handleResponse(response))
-        
-        if (body.errors) {
-            let messages = []
-            body.errors.forEach(error => {
-                const field = error.field || 'inconnu'
-                const message = error.message || 'erreur inconnue'
-                if (isString(message)) {
-                    if (error.field) {
-                        messages.push(`Champ ${field} : ${message}`)
-                    } else {
-                        messages.push(`${message}`)
-                    }
-                }
-                else if (Array.isArray(message)) {
-                    message.forEach(subMessage => {
-                        if (isString(subMessage)) { 
-                            messages.push(`Champ ${field} : ${subMessage}`)
-                        }
-                        else if (isObject(subMessage)) {
-                            for (let key in subMessage) {
-                                if (Array.isArray(subMessage[key])) {
-                                    subMessage[key].forEach(subSubMessage => {
-                                        messages.push(`Champ ${field} : ${subSubMessage}`)
-                                    })
-                                } else if (isString(subMessage[key])) {
-                                    messages.push(`Champ ${field} : ${subMessage[key]}`)
-                                } else {
-                                    messages.push(`Champ ${field} : Erreur inconnue`)
-                                }
-                            }
-                        } else {
-                            messages.push(`Champ ${field} : Erreur inconnue`)
-                        }
-                    })
-                } else {
-                    messages.push(`Champ ${field} : Erreur inconnue`)
-                }
-            })
-            throw new SaveError(messages)
-        } else {
-            return body.data.createGroup
-        }        
+        return (await this.handleProxyResponse(response)).data.createGroup
     }
 
-    async createEvent(event, accessToken) {
+    async createEvent(event) {
 
         const bannerFormInputName = "p...i...c...t...u...r...e...m.e.d.i.a.file"
         const formData = new FormData()
@@ -861,56 +622,227 @@ export class MobilizonApi {
             formData.append(bannerFormInputName, event.banner, event.banner.name)
         }
         
-        const response = await fetch(this.apiUrl, {
+        const response = await fetch(this.getProxyApiUrl('mbz/query'), {
             method: 'POST',
-            headers: {
-                'Authorization': `Bearer ${accessToken}`
-            },
+            credentials: "include",
             body: formData
         })
 
-        const body = (await this.handleResponse(response))
-        
-        if (body.errors) {
-            let messages = []
-            body.errors.forEach(error => {
-                const field = error.field || 'inconnu'
-                const message = error.message || 'erreur inconnue'
-                if (isString(message)) {
-                    if (error.field) {
-                        messages.push(`Champ ${field} : ${message}`)
-                    } else {
-                        messages.push(`${message}`)
+        return (await this.handleProxyResponse(response)).data.createEvent.uuid
+    }
+
+    async getConfigAndLoggedUser() {
+        const query = `
+            query Init($membershipName: String, $page: Int, $limit: Int) {
+                config {
+                    name
+                    description
+                    slogan
+                    version
+                    registrationsOpen
+                    registrationsAllowlist
+                    demoMode
+                    longEvents
+                    durationOfLongEvent
+                    countryCode
+                    languages
+                    primaryColor
+                    secondaryColor
+                    instanceLogo {
+                        url
                     }
-                }
-                else if (Array.isArray(message)) {
-                    message.forEach(subMessage => {
-                        if (isString(subMessage)) { 
-                            messages.push(`Champ ${field} : ${subMessage}`)
+                    defaultPicture {
+                        url
+                        name
+                        metadata {
+                            width
+                            height
+                            blurhash
                         }
-                        else if (isObject(subMessage)) {
-                            for (let key in subMessage) {
-                                if (Array.isArray(subMessage[key])) {
-                                    subMessage[key].forEach(subSubMessage => {
-                                        messages.push(`Champ ${field} : ${subSubMessage}`)
-                                    })
-                                } else if (isString(subMessage[key])) {
-                                    messages.push(`Champ ${field} : ${subMessage[key]}`)
-                                } else {
-                                    messages.push(`Champ ${field} : Erreur inconnue`)
+                    }
+                    eventCategories {
+                        id
+                        label
+                    }
+                    anonymous {
+                        participation {
+                            allowed
+                            validation {
+                                email {
+                                    enabled
+                                    confirmationRequired
+                                }
+                                captcha {
+                                    enabled
                                 }
                             }
-                        } else {
-                            messages.push(`Champ ${field} : Erreur inconnue`)
                         }
-                    })
-                } else {
-                    messages.push(`Champ ${field} : Erreur inconnue`)
+                        eventCreation {
+                            allowed
+                            validation {
+                                email {
+                                    enabled
+                                    confirmationRequired
+                                }
+                                captcha {
+                                    enabled
+                                }
+                            }  
+                        }
+                        reports {
+                            allowed
+                        }
+                        actorId
+                    }
+                    location {
+                        latitude
+                        longitude
+                    }
+                    maps {
+                        tiles {
+                            endpoint
+                            attribution
+                        }
+                        routing {
+                            type
+                        }
+                    }
+                    geocoding {
+                        provider
+                        autocomplete
+                    }
+                    resourceProviders {
+                        type
+                        endpoint
+                        software
+                    }
+                    features {
+                        groups
+                        eventCreation
+                        eventExternal
+                        antispam
+                    }
+                    restrictions {
+                        onlyAdminCanCreateGroups
+                        onlyGroupsCanCreateEvents
+                    }
+                    auth {
+                        ldap
+                        databaseLogin
+                        oauthProviders {
+                            id
+                            label
+                        }
+                    }
+                    uploadLimits {
+                        default
+                        avatar
+                        banner
+                    }
+                    instanceFeeds {
+                        enabled
+                    }
+                    webPush {
+                        enabled
+                        publicKey
+                    }
+                    analytics {
+                        id
+                        enabled
+                        configuration {
+                            key
+                            value
+                            type
+                        }
+                    }
+                    search {
+                        global {
+                            isEnabled
+                            isDefault
+                        }
+                    }
+                    exportFormats {
+                        eventParticipants
+                    }
                 }
+
+                loggedUser {
+                    id
+                    memberships(name: $membershipName, page: $page, limit: $limit) {
+                        total
+                        elements {
+                            role
+                            actor {
+                                id
+                            }
+                            parent {
+                                ...ActorFragment
+                                ...GroupFragment
+                            }
+                        }
+                    }
+                    actors {      
+                        ...ActorFragment      
+                    }                        
+                }                
+            }
+                
+            fragment GroupFragment on Group {
+                id
+                physicalAddress {
+                    ...AdressFragment 
+                }
+            }
+
+            fragment AdressFragment on Address {
+                id
+                description
+                geom
+                street
+                locality
+                postalCode
+                region
+                country
+                type
+                url
+                originId
+                timezone
+                pictureInfo {
+                    url
+                    author {
+                        name
+                        url
+                    }
+                    source {
+                        name
+                        url
+                    }
+                }
+            }
+
+            fragment ActorFragment on Actor {
+                id
+                type
+                preferredUsername
+                name
+                avatar {
+                    url
+                }
+            }            
+        ` 
+        
+        const response = await fetch(this.getProxyApiUrl('mbz/query'), {
+            method: 'POST',
+            credentials: "include",
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                query: query,
+                variables: { page: 1, limit: 999 },
             })
-            throw new SaveError(messages)
-        } else {
-            return body.data.createEvent.uuid
-        }
+        })
+
+        return (await this.handleProxyResponse(response)).data        
     }
 }

@@ -16,9 +16,7 @@ const props = defineProps({
 const groupAddress = ref(props.groupAddress)
 
 onMounted(() => {
-    console.log(props.groupAddress);
-    console.log(groupAddress.value);
-    
+
 })
 const physicalAddress = ref(() => JSON.parse(JSON.stringify(props.physicalAddress)))
 

@@ -45,7 +45,7 @@ const close = () => {
 </script>
 
 <template>
-  <v-snackbar :color="type == 'error' ? 'error' : ''" v-model="show">
+  <v-snackbar :color="type || ''" v-model="show">
     {{ text }}
     <template v-slot:actions>
       <v-btn

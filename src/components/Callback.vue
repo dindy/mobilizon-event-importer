@@ -12,10 +12,11 @@ const router = useRouter()
 const store = useStore()
 onMounted(async () => {
     const code = route.query.code
+    const clientId = route.query.client_id
     if (code) {
-      store.dispatch('saveMobilizonCode', code)
-      await store.dispatch('fetchMobilizonGroups')
-      store.dispatch('loadMobilizonConfig')
+      // store.dispatch('saveMobilizonCode', code)
+      await store.dispatch('authorizeApp', { code, clientId })
+      store.dispatch('fetchMobilizonConfigAndLoggedUser')
       router.replace('/identity')
     }
 })

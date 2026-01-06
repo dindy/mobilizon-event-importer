@@ -79,7 +79,6 @@ router.beforeEach(async (to, from) => {
   
   console.log('Router - Before - ' + to.path);
     
-  const hasTokenData = store.getters.hasMobilizonTokenData
   const selectedIdentity = store.getters.getSelectedIdentity
   const localEvent = store.getters.getLocalEvent
   const mobilizonConfig = store.getters.getMobilizonConfig
@@ -88,6 +87,7 @@ router.beforeEach(async (to, from) => {
   const scrappedData = store.getters.getScrappedEvent
   const scrapperUrl = store.getters.getEventScrapperUrl
   const lastUUID = store.getters.getMobilizonEventUUID
+  const isMbzConnected = store.getters.isMobilizonAppAuthorized
 
   const notAuthenticatedAllowedPaths = [
     '/',
@@ -98,7 +98,7 @@ router.beforeEach(async (to, from) => {
 
   const isAllowedWithoutAuth = path => notAuthenticatedAllowedPaths.includes(path)
 
-  if (!hasTokenData && !isAllowedWithoutAuth(to.path)) {
+  if (!isMbzConnected && !isAllowedWithoutAuth(to.path)) {
     router.replace('/instance')
   }
 
@@ -114,10 +114,8 @@ router.beforeEach(async (to, from) => {
     router.replace('/scrapEvent')
   }
 
-  if (to.path === '/' && hasTokenData && mobilizonConfig) {
+  if (to.path === '/' && isMbzConnected && mobilizonConfig) {
     if (selectedIdentity) {
-      console.log(lastUUID);
-      
       if (localEvent && lastUUID === null) {
         router.replace('/createEvent')
       } else {

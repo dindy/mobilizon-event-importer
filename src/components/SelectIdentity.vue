@@ -1,6 +1,6 @@
 <script setup>
 
-import { computed, ref, watch, onMounted } from 'vue'
+import { computed, ref, watch } from 'vue'
 import { useStore } from 'vuex'
 import { useRouter } from 'vue-router'
 
@@ -41,18 +41,6 @@ const next = () => {
     router.push('/scrapEvent')
 }
 
-const getActionText = () => {
-    const identityName = store.getters.getIdentityById(selectedIdentity.value)?.name
-    let message = `Publier avec "${identityName}"`
-    return !selectedGroup.value || skipGroup.value ?
-        `${message}` :
-        `${message} dans "${store.getters.getGroupById(selectedGroup.value)?.name}"`
-}
-
-const clearGroup = () => {
-    skipGroup.value = true
-}
-
 const updateSkipGroup = () => {
     if (!selectedGroup.value && !skipGroup.value && groups.value.length > 0) {
         selectedGroup.value = groups.value[0].id
@@ -64,6 +52,12 @@ const updateIdentity = () => {
 }
 
 const importGroup = () => {
+    if (!store.getters.getSelectedIdentity) {
+        store.dispatch('selectMobilizonIdentityAndGroup', {
+            identity: selectedIdentity.value,
+            group: null
+        })    
+    } 
     router.push('/scrapGroup')
 }
 </script>
