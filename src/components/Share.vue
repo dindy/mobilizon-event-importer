@@ -14,7 +14,7 @@ const text = ref('')
 const url = ref('')
 const toImport = ref(null)
 
-const hasTokenData = store.getters.hasMobilizonTokenData
+const isAppAuth = store.getters.isMobilizonAppAuthorized
 const selectedIdentity = store.getters.getSelectedIdentity
 const localEvent = store.getters.getLocalEvent
 const mobilizonConfig = store.getters.getMobilizonConfig
@@ -36,7 +36,7 @@ onMounted(async () => {
     }
 
     if (toImport.value) {
-        if (hasTokenData && selectedIdentity && mobilizonConfig) {
+        if (isAppAuth && selectedIdentity && mobilizonConfig) {
             await store.dispatch('scrapEvent', toImport.value)
             router.push('/createEvent')            
         }
