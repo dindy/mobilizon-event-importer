@@ -153,7 +153,8 @@ export class MobilizonApi {
             },
             body: JSON.stringify({
                 code,
-                client_id: clientId
+                client_id: clientId,
+                redirect_uri: this.redirectUri
             })
         })
         

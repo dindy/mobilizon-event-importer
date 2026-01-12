@@ -22,6 +22,7 @@ export const issueMobilizonRequest = async ({ dispatch, commit, getters, state }
             console.log('Action - Proxy auth error')
             dispatch('createErrorFromText', 'Erreur d\'authentification. Veuillez vous reconnecter.')
             dispatch('logoutMobilizon')
+            location.reload()
         } else if (error instanceof MbzRequestError) {
             dispatch('createErrorFromText', 'Une erreur de communication avec le serveur est survenue. Veuillez réessayer.')
         }
@@ -37,7 +38,7 @@ export default {
 
         const appVersionSaved = localStorage.getItem('appVersion')
         const currentAppVersion = import.meta.env.VITE_APP_VERSION
-        const isBreakingVersion = import.meta.env.VITE_APP_BREAKING
+        const isBreakingVersion = import.meta.env.VITE_APP_BREAKING_VERSION
 
         if ((!appVersionSaved || compareVersions(appVersionSaved, currentAppVersion) < 0) && isBreakingVersion) {
             console.log('Action - New breaking app version detected')
@@ -52,6 +53,8 @@ export default {
             commit('setMobilizonAppIsAuthorized', JSON.parse(mobilizonAppIsAuthorized))
             // refresh data
             dispatch('fetchMobilizonConfigAndLoggedUser')            
+        } else {
+            commit('setMobilizonAppIsAuthorized', false)
         }
         
         const mobilizonInstanceUrl = localStorage.getItem('mobilizonInstanceUrl')
@@ -135,12 +138,19 @@ export default {
         localStorage.setItem('mobilizonAppIsAuthorized', true)
         commit('setMobilizonAppIsAuthorized', true)
     },
-    selectMobilizonIdentityAndGroup({ commit }, payload) {
-        console.log(`Action - Select identity ${payload.identity} and group ${payload.group}`);
-        localStorage.setItem('selectedMobilizonGroup', JSON.stringify(payload.group))
-        localStorage.setItem('selectedMobilizonIdentity', JSON.stringify(payload.identity))
-        commit('setSelectedMobilizonIdentity', payload.identity)
-        commit('setSelectedMobilizonGroup', payload.group)
+    selectMobilizonIdentityAndGroup({ commit, dispatch }, payload) {
+        dispatch('selectMobilizonIdentity', payload.identity)
+        dispatch('selectMobilizonGroup', payload.group)
+    },
+    selectMobilizonIdentity({ commit }, id) {
+        console.log(`Action - Select identity ${id}`);
+        localStorage.setItem('selectedMobilizonIdentity', id)
+        commit('setSelectedMobilizonIdentity', id)
+    },
+    selectMobilizonGroup({ commit }, id) {
+        console.log(`Action - Select group ${id}`);
+        localStorage.setItem('selectedMobilizonGroup', id)
+        commit('setSelectedMobilizonGroup', id)
     },
     async scrapEvent({ commit, dispatch }, url) {
         dispatch('resetEvent')
@@ -203,7 +213,7 @@ export default {
         
         console.log('Action - Load mobilizon config and groups')
 
-        issueMobilizonRequest(store, async ({ commit }) => {
+        issueMobilizonRequest(store, async ({ commit, dispatch }) => {
             commit('setConfigIsLoading', true)
             commit('setIsLoadingGroups', true)
             
@@ -236,6 +246,11 @@ export default {
 
             commit('setConfigIsLoading', false)
             commit('setIsLoadingGroups', false)
+
+            // Select first identity if no selectedIdentity saved
+            if (!store.getters.getSelectedIdentity) {
+                dispatch('selectMobilizonIdentity', formattedActors[0].id)
+            } 
         })        
     },
     createErrorFromText({ commit }, text) {

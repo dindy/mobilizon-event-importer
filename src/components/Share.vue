@@ -47,7 +47,7 @@ const getText = () => `Vous allez importer l'évènement à l'URL ${toImport.val
 
 const go = () => {
     store.dispatch('shareUrl', toImport.value)
-    router.push('/identity')
+    router.push('/scrapEvent')
 }
 
 const scrap = () => {

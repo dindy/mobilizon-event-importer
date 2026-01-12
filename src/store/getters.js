@@ -15,10 +15,12 @@ export default {
     isLoadingAddressesFromCoords: state => entriesAsObject(state.addressesFromCoords.sources)
         .reduce((loading, source) => loading || source.loading, false),
     getIdentities: state => state.mobilizon.identities,
+    getGroups: state => state.mobilizon.groups,
     getIdentityById: state => identityId => getIdentityById(state, identityId),
     getGroupById: state => groupId => getGroupById(state, groupId),        
     getGroupsByIdentityId: state => identityId => state.mobilizon.groups.filter(group => group.memberId === identityId),
     getSelectedIdentity: state => getIdentityById(state, state.mobilizon.selectedIdentityId),
+    getSelectedIdentityGroups: state => state.mobilizon.groups.filter(group => group.memberId === state.mobilizon.selectedIdentityId),
     getSelectedGroup: state => getGroupById(state, state.mobilizon.selectedGroupId),
     isLoadingGroups: state => state.mobilizon.loadingGroups,
     isLoadingConfig: state => state.mobilizon.loadingConfig,

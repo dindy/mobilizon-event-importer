@@ -18,7 +18,6 @@ import GroupScrapper from './components/GroupScrapper.vue'
 import Event from './components/Event.vue' 
 import Group from './components/Group.vue' 
 import Done from './components/Done.vue' 
-import SelectIdentity from './components/SelectIdentity.vue' 
 import SelectInstance from './components/SelectInstance.vue' 
 import Share from './components/Share.vue' 
 
@@ -26,7 +25,6 @@ const routes = [
   { path: '/', component: Home },
   { path: '/share', component: Share },
   { path: '/instance', component: SelectInstance },
-  { path: '/identity', component: SelectIdentity },
   { path: '/mobilizon/callback', component: Callback },
   { path: '/scrapEvent', component: EventScrapper },
   { path: '/scrapGroup', component: GroupScrapper },
@@ -98,12 +96,10 @@ router.beforeEach(async (to, from) => {
 
   const isAllowedWithoutAuth = path => notAuthenticatedAllowedPaths.includes(path)
 
+  console.log('isMbzConnected', isMbzConnected);
+  
   if (!isMbzConnected && !isAllowedWithoutAuth(to.path)) {
     router.replace('/instance')
-  }
-
-  if ((to.path == '/scrapEvent' || to.path == '/createEvent') && !selectedIdentity) {
-    router.replace('/identity')
   }
 
   if (to.path == '/scrapEvent' && localEvent && lastUUID === null && from.path !== '/createEvent') {
@@ -114,16 +110,11 @@ router.beforeEach(async (to, from) => {
     router.replace('/scrapEvent')
   }
 
-  if (to.path === '/' && isMbzConnected && mobilizonConfig) {
-    if (selectedIdentity) {
-      if (localEvent && lastUUID === null) {
-        router.replace('/createEvent')
-      } else {
-        router.replace('/scrapEvent')
-      }
+  if (to.path === '/' && isMbzConnected) {
+    if (localEvent && lastUUID === null) {
+      router.replace('/createEvent')
     } else {
-      router.replace('/identity')
+      router.replace('/scrapEvent')
     }
   }
-
 })
