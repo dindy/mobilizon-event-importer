@@ -20,9 +20,13 @@ import Group from './components/Group.vue'
 import Done from './components/Done.vue' 
 import SelectInstance from './components/SelectInstance.vue' 
 import Share from './components/Share.vue' 
+import Welcome from './components/Welcome.vue' 
+import RegisterFeed from './components/RegisterFeed.vue' 
+import Automations from './components/Automations.vue' 
 
 const routes = [
-  { path: '/', component: Home },
+  { path: '/', component: Welcome },
+  { path: '/home', component: Home },
   { path: '/share', component: Share },
   { path: '/instance', component: SelectInstance },
   { path: '/mobilizon/callback', component: Callback },
@@ -30,6 +34,8 @@ const routes = [
   { path: '/scrapGroup', component: GroupScrapper },
   { path: '/createEvent', component: Event },
   { path: '/createGroup', component: Group },
+  { path: '/registerFeed', component: RegisterFeed },
+  { path: '/automations', component: Automations },
   { path: '/done', component: Done },
   { path: '/:pathMatch(.*)*', name: 'NotFound', component: NotFound } 
 ]
@@ -114,7 +120,7 @@ router.beforeEach(async (to, from) => {
     if (localEvent && lastUUID === null) {
       router.replace('/createEvent')
     } else {
-      router.replace('/scrapEvent')
+      router.replace('/home')
     }
   }
 })

@@ -1,12 +1,13 @@
 <script setup>
 import { computed, onMounted, ref } from 'vue'
 import { useStore } from 'vuex'
-import { useRouter } from 'vue-router'
+import { RouterLink, useRouter, useRoute } from 'vue-router'
 import IdentitySelect from './IdentitySelect.vue'
 import GroupSelect from './GroupSelect.vue'
 
 const store = useStore()
 const router = useRouter()
+const route = useRoute()
 const title = computed(() => store.getters.getPageTitle)
 const isMobilizonUserAuthenticated = computed(() => store.getters.isMobilizonUserAuthenticated)
 const identity = computed(() => store.getters.getSelectedIdentity)
@@ -24,7 +25,8 @@ const logout = () => {
 
 <template>
     <v-app-bar >
-        <!-- <img src="/logo.svg" height="32px" width="32px"/> -->
+        <img class="logo" v-if="route.path == '/home'" src="/logo.svg" height="24px" width="24px"/>
+        <v-btn v-else @click="router.push('/home')" icon="mdi-home"></v-btn>
         <v-app-bar-title class="ms-0">{{ title }}</v-app-bar-title>
         <template v-slot:append>
             <v-avatar :class="[identity.avatar?.url ? '' : 'bg-secondary']" :title="identity.name" :alt="identity.name" color="white" v-if="identity">
@@ -64,3 +66,10 @@ const logout = () => {
         </template>            
     </v-app-bar>  
 </template>
+
+<style scoped>
+    .logo {
+        margin-left:var(--sm-space);
+        margin-right:var(--sm-space);
+    }
+</style>

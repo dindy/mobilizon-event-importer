@@ -115,8 +115,6 @@ export class MobilizonApi {
 
         if (response.status === 200) return body
 
-
-        
         throw new MbzProxyRequestError(response, body)
     }
 
@@ -845,5 +843,24 @@ export class MobilizonApi {
         })
 
         return (await this.handleProxyResponse(response)).data        
+    }
+
+    async createAutomation(url, type, personId, groupId)
+    {
+        const response = await fetch(this.getProxyApiUrl('automation'), {
+            method: 'POST',
+            credentials: "include",
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                url,
+                type,
+                personId,
+                groupId
+            })
+        })
+        
+        return (await this.handleProxyResponse(response))        
     }
 }

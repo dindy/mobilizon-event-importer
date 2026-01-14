@@ -92,10 +92,12 @@ export default {
         state.scrapper.isLoading = isLoading
     },
     setSelectedMobilizonIdentity(state, id) {
-        state.mobilizon.selectedIdentityId = id
+        console.log(`Mutation - Set selected mbz identity`, id);
+        state.mobilizon.selectedIdentityId = parseInt(id)
     },
     setSelectedMobilizonGroup(state, id) {
-        state.mobilizon.selectedGroupId = id
+        console.log(`Mutation - Set selected mbz group`, id);
+        state.mobilizon.selectedGroupId = parseInt(id)
     },
     setEventScrapperData(state, data) {
         console.log('Mutation - Set event scrapper data', data);
@@ -138,5 +140,8 @@ export default {
     },
     setLocalEvent(state, event) {
         state.localEvent = event
+    },
+    setIsRegisteringAutomation(state, isRegistering) {
+        state.automations.isRegistering = isRegistering
     }
 }

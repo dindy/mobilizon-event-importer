@@ -30,6 +30,9 @@ export default {
             url: null                    
         }
     },
+    automations: {
+        isCreating: false,
+    },
     geo: {
         isLoadingAdressesFromString: false,
         isLoadingAdressesFromStringRequestIndex: null,

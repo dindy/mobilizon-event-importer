@@ -86,14 +86,14 @@ export default {
         
         const selectedMobilizonIdentity = localStorage.getItem('selectedMobilizonIdentity')
         if (selectedMobilizonIdentity) {
-            commit('setSelectedMobilizonIdentity', JSON.parse(selectedMobilizonIdentity))
+            dispatch('selectMobilizonIdentity', JSON.parse(selectedMobilizonIdentity))
             console.log('Action - Selected mobilizon identity set from localstorage', JSON.parse(selectedMobilizonIdentity))
         }  
         
         const selectedMobilizonGroup = localStorage.getItem('selectedMobilizonGroup')
         if (selectedMobilizonGroup) {
-            commit('setSelectedMobilizonGroup', JSON.parse(selectedMobilizonGroup))
-            console.log('Action - Selected mobilizon identity set from localstorage', JSON.parse(selectedMobilizonGroup))
+            dispatch('selectMobilizonGroup', JSON.parse(selectedMobilizonGroup))
+            console.log('Action - Selected mobilizon group set from localstorage', JSON.parse(selectedMobilizonGroup))
         }              
 
         const mobilizonConfig = localStorage.getItem('mobilizonConfig')
@@ -213,7 +213,7 @@ export default {
         
         console.log('Action - Load mobilizon config and groups')
 
-        issueMobilizonRequest(store, async ({ commit, dispatch }) => {
+        issueMobilizonRequest(store, async ({ commit, dispatch, state }) => {
             commit('setConfigIsLoading', true)
             commit('setIsLoadingGroups', true)
             
@@ -224,17 +224,18 @@ export default {
             // Set config
             commit('setMobilizonConfig', config)
 
-            // Set idenities and groups
+            // Set identities and groups
             const groups = loggedUser.memberships
             const actors = loggedUser.actors
             const formattedGroups = groups.elements
                 .filter(group => group.role === 'MODERATOR' || group.role === 'ADMINISTRATOR')
                 .map(group => ({
-                    ...group.parent,
-                    memberId: group.actor.id
+                    ...group.parent, 
+                    id: parseInt(group.parent.id),
+                    memberId: parseInt(group.actor.id)
                 }))
             const formattedActors = actors.map(actor => ({
-                id: actor.id,
+                id: parseInt(actor.id),
                 name: actor.name,
                 preferredUsername: actor.preferredUsername,
                 avatar: actor.avatar ? {...actor.avatar} : null,
@@ -246,11 +247,11 @@ export default {
 
             commit('setConfigIsLoading', false)
             commit('setIsLoadingGroups', false)
-
-            // Select first identity if no selectedIdentity saved
-            if (!store.getters.getSelectedIdentity) {
+            
+            if (!state.mobilizon.selectedIdentityId) {
                 dispatch('selectMobilizonIdentity', formattedActors[0].id)
-            } 
+                dispatch('selectMobilizonGroup', null)
+            }
         })        
     },
     createErrorFromText({ commit }, text) {
@@ -259,13 +260,13 @@ export default {
     async saveMobilizonGroup(store, group) {
         console.log('Action - Save mobilizon group : ', group);
 
-        const requestHandler = async ({ commit, state }) => {
+        const requestHandler = async ({ dispatch, commit, state }) => {
             commit('setIsSavingGroup', true)
             try {                
                 const createdGroup = await mobilizonApi.createGroup(group)
                 const formattedGroup = {...createdGroup, memberId: state.mobilizon.selectedIdentityId }
                 commit('addMobilizonGroup', formattedGroup)
-                commit('setSelectedMobilizonGroup', formattedGroup.id)
+                dispatch('selectMobilizonGroup', formattedGroup.id)
             } catch (error) { 
                 if (error instanceof MbzProxyValidationError) {
                     error.messages.forEach(message => {
@@ -372,5 +373,24 @@ export default {
         console.log('Action - Share url');
         localStorage.setItem('eventScrapperUrl', JSON.stringify(url))
         commit('setEventScrapperUrl', url)
+    },
+    async registerFeed({ state, commit, dispatch }, { url, type }) {
+        const personId = state.mobilizon.selectedIdentityId
+        const groupId = state.mobilizon.selectedGroupId
+        console.log(`Action - Register feed`, url, personId, groupId)
+        commit('setIsRegisteringAutomation', true)
+        try {
+            await mobilizonApi.createAutomation(url, type, personId, groupId)
+            return true
+        } catch (error) {
+            if (error.body && error.body.name === "AutomationAlreadyExists") {                
+                dispatch('createErrorFromText', `Ce flux est déjà enregistré pour ${groupId ? 'ce groupe' : 'cet utilisateur'}.`)
+            } else {
+                dispatch('createErrorFromText', `Erreur lors de la création de l'automatisation : ${error.message}. Veuillez réessayer.`)
+            }
+            return false
+        } finally {
+            commit('setIsRegisteringAutomation', false)
+        }
     }
 }

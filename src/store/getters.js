@@ -20,6 +20,7 @@ export default {
     getGroupById: state => groupId => getGroupById(state, groupId),        
     getGroupsByIdentityId: state => identityId => state.mobilizon.groups.filter(group => group.memberId === identityId),
     getSelectedIdentity: state => getIdentityById(state, state.mobilizon.selectedIdentityId),
+    getSelectedIdentityId: state => state.mobilizon.selectedIdentityId,
     getSelectedIdentityGroups: state => state.mobilizon.groups.filter(group => group.memberId === state.mobilizon.selectedIdentityId),
     getSelectedGroup: state => getGroupById(state, state.mobilizon.selectedGroupId),
     isLoadingGroups: state => state.mobilizon.loadingGroups,
@@ -50,5 +51,6 @@ export default {
     getGroupScrapperUrl: state => state.scrapper.group.url,
     getMobilizonEventIsDraft: state => state.mobilizon.lastSavedIsDraft,
     getLocalEvent: state => state.localEvent,
-    isMobilizonAppAuthorized: state => state.mobilizon.authorized
+    isMobilizonAppAuthorized: state => state.mobilizon.authorized,
+    isRegisteringAutomation: state => state.automations.isRegistering
 }

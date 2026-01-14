@@ -5,9 +5,10 @@ import { useRouter } from 'vue-router'
 
 const router = useRouter()
 const store = useStore()
+const selectedIdentity = computed(() => store.getters.getSelectedIdentity)
 const storedSelectedGroup = computed(() => store.getters.getSelectedGroup)
 const groups = computed(() => [
-    { avatar: null, add: true, name: "Importer un groupe facebook", id: -1 },
+    { avatar: null, add: true, name: "Importer un groupe", id: -1 },
     ...store.getters.getSelectedIdentityGroups])
 const selectedGroup = ref(storedSelectedGroup.value?.id)
 const emit = defineEmits('closeMenu')
@@ -21,6 +22,9 @@ const updateGroup = () => {
         store.dispatch('selectMobilizonGroup', selectedGroup.value)
     }
 }
+watch(selectedIdentity, (newVal, oldVal) => {
+    selectedGroup.value = null
+})
 </script>
 
 <template>

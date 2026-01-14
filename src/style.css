@@ -110,7 +110,7 @@
 .v-toolbar__content {
     max-width: var(--max-content-width);
     margin-left: max(0px, (100vw - var(--max-content-width)) / 2);    
-    padding-left: var(--sm-space);
+    /* padding-left: var(--sm-space); */
 }
 
 .v-application__wrap {
