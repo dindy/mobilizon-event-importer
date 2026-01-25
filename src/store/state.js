@@ -1,4 +1,6 @@
 export default {
+    isFirstRoute: true,
+    history: [],
     pageTitle: null,
     messages: [],
     mobilizon: {
@@ -32,6 +34,11 @@ export default {
     },
     automations: {
         isCreating: false,
+        isFetching: false,
+        isFetchingHistory: false,
+        currentActorAutomations: [],
+        logs: [],
+        events: [],
     },
     geo: {
         isLoadingAdressesFromString: false,

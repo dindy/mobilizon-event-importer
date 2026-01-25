@@ -16,10 +16,11 @@ const displayAppBar = () => route.path != '/'
 <template>
     <v-app>
         <AppBar v-if="displayAppBar()"/>
-          
-        <div class="main" :class="{'with-offset': displayAppBar()}">
-            <Toaster/>
-            <router-view />    
-        </div>
+        <v-main>          
+            <v-container>
+                <Toaster/>
+                <router-view />
+            </v-container>
+        </v-main>     
     </v-app>
 </template>

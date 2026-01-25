@@ -99,6 +99,7 @@ const updateCoords = (coords, zoom = null) => {
 const cancel = () => {
     store.dispatch('resetGroupScrapperData')
     router.push('/scrapEvent')
+    store.commit('removeLastPathsFromHistory', 2)
 }
 
 const submit = async () => {

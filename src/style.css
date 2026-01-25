@@ -107,7 +107,7 @@
     color: rgb(var(--v-theme-error));
 }
 
-.v-toolbar__content {
+.v-toolbar__content, .v-toolbar__extension {
     max-width: var(--max-content-width);
     margin-left: max(0px, (100vw - var(--max-content-width)) / 2);    
     /* padding-left: var(--sm-space); */
@@ -123,4 +123,9 @@
     flex-direction: column;
     align-items: center;
     height: calc(100vh - 2 * var(--sm-space));
+}
+
+.fab-page .v-btn {
+    bottom: 36px;
+    right: 16px;
 }

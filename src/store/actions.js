@@ -377,7 +377,7 @@ export default {
     async registerFeed({ state, commit, dispatch }, { url, type }) {
         const personId = state.mobilizon.selectedIdentityId
         const groupId = state.mobilizon.selectedGroupId
-        console.log(`Action - Register feed`, url, personId, groupId)
+        console.log(`Action - Registering feed`, url, personId, groupId)
         commit('setIsRegisteringAutomation', true)
         try {
             await mobilizonApi.createAutomation(url, type, personId, groupId)
@@ -392,5 +392,54 @@ export default {
         } finally {
             commit('setIsRegisteringAutomation', false)
         }
+    },
+    async fetchAutomations({ state, commit, dispatch }) {
+        console.log(`Action - Fetching automations`);
+        const personId = state.mobilizon.selectedIdentityId
+        const groupId = state.mobilizon.selectedGroupId        
+        commit('setIsFetchingAutomations', true)
+        commit('setAutomations', [])
+        commit('resetAutomationHistory')
+        try {
+            const automations = await mobilizonApi.getAutomations(personId, groupId)
+            commit('setAutomations', automations)
+            commit('setIsFetchingAutomations', false)
+        // Handles Abort Exception
+        } catch (error) {
+            if ( ! (error instanceof DOMException) ) {
+                dispatch('createErrorFromText', `Erreur lors de la récupération des automatisations : ${error.message}. Veuillez réessayer.`)
+            } else {
+                console.log(error.message);
+            }
+        }   
+    },
+    async fetchAutomationHistory({ state, commit, dispatch }, automationId) {
+        console.log(`Action - Fetching automation history`, automationId)    
+        commit('setIsFetchingAutomationHistory', true)
+        try {
+            const history = await mobilizonApi.getAutomationHistory(automationId)
+            commit('setAutomationHistory', history)
+        // Handles Abort Exception
+        } catch (error) {
+            if ( ! (error instanceof DOMException) ) {
+                dispatch('createErrorFromText', `Erreur lors de la récupération de l'historique de l'automatisation : ${error.message}. Veuillez réessayer.`)
+            } else {
+                console.log(error.message);
+            }
+        } finally {
+            commit('setIsFetchingAutomationHistory', false)
+        }
+    },
+    async loadAutomation({ commit, dispatch }, automationId) {
+        console.log(`Action - Loading automation`, automationId)
+        commit('resetAutomationHistory')
+        dispatch('fetchAutomationHistory', automationId)
+    },
+    async executeAutomation({ commit, state }, automationId) {
+        console.log(`Action - Executing automation`, automationId)
+        commit('setIsExecutingAutomation', { isExecuting: true, automationId })
+        const history = await mobilizonApi.executeAutomation(automationId)
+        commit('setAutomationHistory', history)
+        commit('setIsExecutingAutomation', {isExecuting: false, automationId})
     }
 }

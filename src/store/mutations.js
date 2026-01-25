@@ -143,5 +143,42 @@ export default {
     },
     setIsRegisteringAutomation(state, isRegistering) {
         state.automations.isRegistering = isRegistering
+    },
+    setIsFetchingAutomations(state, isFetching) {
+        console.log('Mutation - Set is fetching automations', isFetching)
+        state.automations.isFetching = isFetching
+    },
+    setAutomations(state, automations) {
+        console.log('Mutation - Set automations', automations)
+        state.automations.currentActorAutomations = automations.map(aut => ({ ...aut, isExecuting: false }))
+    },
+    setAutomationHistory(state, { logs, events }) {
+        console.log('Mutation - Set automation history', logs, events)
+        state.automations.logs = logs
+        state.automations.events = events
+    },
+    resetAutomationHistory(state) {
+        console.log('Mutation - Reset automation history')
+        state.automations.logs = []
+        state.automations.events = []
+    },
+    setIsFetchingAutomationHistory(state, isFetching) {
+        console.log('Mutation - Set is fetching automation history', isFetching)
+        state.automations.isFetchingHistory = isFetching
+    }, 
+    setIsExecutingAutomation(state, { automationId, isExecuting }) {
+        console.log('Mutation - Set is executing', automationId, isExecuting)
+        state.automations.currentActorAutomations = state.automations.currentActorAutomations.map(aut => ({ ...aut, isExecuting: aut.id == automationId ? isExecuting : aut.isExecuting }))
+    },
+    addPathToHistory(state, path) {
+        console.log('Mutation - Push path', path)
+        state.history.push(path)
+    },
+    removeLastPathsFromHistory(state, n) {
+        console.log(`Mutation - Remove last ${n} path(s)`)
+        state.history.splice(-1 * n)
+    },
+    setIsFirstRoute(state, isFirstRoute) {
+        state.isFirstRoute = isFirstRoute
     }
 }

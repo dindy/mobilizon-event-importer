@@ -97,6 +97,7 @@ const cancel = () => {
     store.dispatch('resetEvent')
     store.dispatch('resetEventScrapper')
     router.push('/scrapEvent')
+    store.commit('removeLastPathsFromHistory', 2)
 }
 
 /* Initialize default variables */

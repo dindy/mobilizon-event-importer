@@ -4,6 +4,8 @@ import { useStore } from 'vuex'
 import { RouterLink, useRouter, useRoute } from 'vue-router'
 import IdentitySelect from './IdentitySelect.vue'
 import GroupSelect from './GroupSelect.vue'
+import Avatar from './Avatar.vue'
+import state from '../store/state'
 
 const store = useStore()
 const router = useRouter()
@@ -17,32 +19,35 @@ const identityGroups = computed(() => store.getters.getSelectedIdentityGroups)
 const isLoadingGroups = computed(() => store.getters.isLoadingGroups)
 const isIdentityMenuOpened = ref(false)
 const closeIdentityMenu = () => isIdentityMenuOpened.value = false
+const isMbzConnected = computed(() => store.getters.isMobilizonAppAuthorized)
 const logout = () => {
     store.dispatch('logoutMobilizon')
     router.push('/')
+}
+const prevRoute = computed(() => store.getters.getPreviousPath)
+const goPrev = () => {
+    console.log(prevRoute);
+    
+    router.push(prevRoute.value)
+    store.commit('removeLastPathsFromHistory', 2)
 }
 </script>
 
 <template>
     <v-app-bar >
-        <img class="logo" v-if="route.path == '/home'" src="/logo.svg" height="24px" width="24px"/>
-        <v-btn v-else @click="router.push('/home')" icon="mdi-home"></v-btn>
+        <img class="logo" v-if="!isMbzConnected || route.path == '/home'" src="/logo.svg" height="24px" width="24px"/>
+        <v-btn v-else @click="goPrev" icon="mdi-arrow-left"></v-btn>
+        <!-- <v-btn v-else @click="router.push('/home')" icon="mdi-home"></v-btn> -->
         <v-app-bar-title class="ms-0">{{ title }}</v-app-bar-title>
         <template v-slot:append>
-            <v-avatar :class="[identity.avatar?.url ? '' : 'bg-secondary']" :title="identity.name" :alt="identity.name" color="white" v-if="identity">
-                <v-img v-if="identity.avatar?.url" :src="identity.avatar?.url"></v-img>   
-                <v-icon v-else color="warning" icon="mdi-account"></v-icon>
-            </v-avatar>
-            <v-avatar :class="[group.avatar?.url ? '' : 'bg-secondary', 'border-md', 'border-surface']" :title="group.name" :alt="group.name" color="white" class="ml-n5" v-if="group">
-                <v-img v-if="group.avatar?.url" :src="group.avatar?.url"></v-img>
-                <v-icon v-else color="warning" icon="mdi-account-group"></v-icon>
-            </v-avatar>
-            <v-infinite-scroll class="flex-row" v-if="isLoadingGroups"></v-infinite-scroll>
+            <Avatar :class="[identity.avatar?.url ? '' : 'bg-secondary']" :actor="identity" v-if="identity"></Avatar>
+            <Avatar type="group" :class="[group.avatar?.url ? '' : 'bg-secondary', 'border-md', 'border-surface-light', 'border-opacity-100']" class="ml-n5"  :actor="group" v-if="group"></Avatar>
+            <v-infinite-scroll class="flex-row" v-if="isLoadingGroups && identities.length == 0"></v-infinite-scroll>
             <v-menu
                 v-model="isIdentityMenuOpened"
                 :close-on-content-click="false"
                 location="bottom end"   
-                v-if="identities.length > 0 && !isLoadingGroups"     
+                v-if="identities.length > 0"     
             >
                 <template v-slot:activator="{ props }">
                     <v-btn
@@ -63,7 +68,7 @@ const logout = () => {
                     <v-list-item value="1" prepend-icon="mdi-logout" title="Me déconnecter" v-if="isMobilizonUserAuthenticated" @click="logout"></v-list-item>
                 </v-list>
             </v-menu>
-        </template>            
+        </template>
     </v-app-bar>  
 </template>
 

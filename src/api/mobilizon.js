@@ -42,6 +42,9 @@ export class MobilizonApi {
     state = 'import-mobilizon-state'
     clientName = 'mobilizon-importer-1'
     websiteUrl = 'https://website.mobilizon.webworkers.agency'
+    searchAddressController = null
+    getAutomationsController = null
+    getAutomationHistoryController = null
     
     get apiUrl() {
         return `${this.instanceUrl}/api`
@@ -50,8 +53,6 @@ export class MobilizonApi {
     getProxyApiUrl(path) {
         return `${import.meta.env.VITE_MOBILIZON_PROXY_URI}/${path}`
     }
-
-    searchAddressController = null
 
     constructor() {
 
@@ -862,5 +863,57 @@ export class MobilizonApi {
         })
         
         return (await this.handleProxyResponse(response))        
+    }
+
+    async getAutomations(personId, groupId)
+    {
+        if (this.getAutomationsController) this.getAutomationsController.abort()
+    
+        this.getAutomationsController = new AbortController()
+
+        const response = await fetch(this.getProxyApiUrl('automations?' + new URLSearchParams({
+                person_id: personId,
+                group_id: groupId || ''
+            })), {
+            method: 'GET',
+            credentials: "include",
+            signal: this.getAutomationsController.signal,
+            headers: {
+                'Content-Type': 'application/json',
+            },
+        })
+
+        return (await this.handleProxyResponse(response))
+    }
+
+    async getAutomationHistory(automationId)
+    {
+        if (this.getAutomationHistoryController) this.getAutomationHistoryController.abort()
+    
+        this.getAutomationHistoryController = new AbortController()
+        
+        const response = await fetch(this.getProxyApiUrl(`automation/${automationId}/history`), {
+            method: 'GET',
+            credentials: "include",
+            signal: this.getAutomationHistoryController.signal,
+            headers: {
+                'Content-Type': 'application/json',
+            },
+        })
+
+        return (await this.handleProxyResponse(response))
+    }
+
+    async executeAutomation(automationId)
+    {        
+        const response = await fetch(this.getProxyApiUrl(`automation/${automationId}/execute`), {
+            method: 'GET',
+            credentials: "include",
+            headers: {
+                'Content-Type': 'application/json',
+            },
+        })
+
+        return (await this.handleProxyResponse(response))
     }
 }

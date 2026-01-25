@@ -8,6 +8,7 @@ import { aliases, mdi } from 'vuetify/iconsets/mdi'
 import '@mdi/font/css/materialdesignicons.css' // Ensure you are using css-loader
 import 'unfonts.css'
 import './style.css'
+
 import App from './App.vue'
 import store from './store'
 import Callback from './components/Callback.vue'
@@ -23,6 +24,7 @@ import Share from './components/Share.vue'
 import Welcome from './components/Welcome.vue' 
 import RegisterFeed from './components/RegisterFeed.vue' 
 import Automations from './components/Automations.vue' 
+import AutomationHistory from './components/AutomationHistory.vue' 
 
 const routes = [
   { path: '/', component: Welcome },
@@ -36,6 +38,7 @@ const routes = [
   { path: '/createGroup', component: Group },
   { path: '/registerFeed', component: RegisterFeed },
   { path: '/automations', component: Automations },
+  { path: '/automation/:id', name: 'automationHistory', component: AutomationHistory },
   { path: '/done', component: Done },
   { path: '/:pathMatch(.*)*', name: 'NotFound', component: NotFound } 
 ]
@@ -78,11 +81,10 @@ createApp(App)
   .use(vuetify)
   .mount('#app')
 
-  
 router.beforeEach(async (to, from) => {
   
   console.log('Router - Before - ' + to.path);
-    
+  
   const selectedIdentity = store.getters.getSelectedIdentity
   const localEvent = store.getters.getLocalEvent
   const mobilizonConfig = store.getters.getMobilizonConfig
@@ -93,34 +95,26 @@ router.beforeEach(async (to, from) => {
   const lastUUID = store.getters.getMobilizonEventUUID
   const isMbzConnected = store.getters.isMobilizonAppAuthorized
 
-  const notAuthenticatedAllowedPaths = [
+  store.commit('addPathToHistory', to.path)
+
+  const startPath = to.path
+  const entryPaths = [
     '/',
+    '/home',
     '/instance',
     '/mobilizon/callback',
     '/share/',
   ]
 
-  const isAllowedWithoutAuth = path => notAuthenticatedAllowedPaths.includes(path)
-
-  console.log('isMbzConnected', isMbzConnected);
-  
-  if (!isMbzConnected && !isAllowedWithoutAuth(to.path)) {
-    router.replace('/instance')
-  }
-
-  if (to.path == '/scrapEvent' && localEvent && lastUUID === null && from.path !== '/createEvent') {
-    router.replace('/createEvent')
-  }
-
-  if (to.path == '/createEvent' && !scrappedData && !localEvent) {
-    router.replace('/scrapEvent')
-  }
-
-  if (to.path === '/' && isMbzConnected) {
-    if (localEvent && lastUUID === null) {
-      router.replace('/createEvent')
-    } else {
-      router.replace('/home')
+  if (store.getters.isFirstRoute) {
+    if (!entryPaths.includes(startPath)) {
+      const isMbzConnected = store.getters.isMobilizonAppAuthorized
+      if (isMbzConnected) {
+        router.replace('/home')
+      } else {
+        router.replace('/')
+      }
     }
+    store.commit('setIsFirstRoute', false)
   }
 })

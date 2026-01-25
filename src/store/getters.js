@@ -52,5 +52,21 @@ export default {
     getMobilizonEventIsDraft: state => state.mobilizon.lastSavedIsDraft,
     getLocalEvent: state => state.localEvent,
     isMobilizonAppAuthorized: state => state.mobilizon.authorized,
-    isRegisteringAutomation: state => state.automations.isRegistering
+    isRegisteringAutomation: state => state.automations.isRegistering,
+    getActorAutomations: state => state.automations.currentActorAutomations,
+    isFetchingAutomations: state => state.automations.isFetching,
+    isFetchingAutomationHistory: state => state.automations.isFetchingHistory,
+    getAutomationLogs: state => state.automations.logs,
+    getAutomationEvents: state => state.automations.events,
+    getAutomationById: state => id => state.automations.currentActorAutomations.filter(aut => aut.id == id)[0] || null,
+    isExecutingAutomationById: state => id => state.automations.currentActorAutomations.filter(aut => aut.id == id)[0]?.isExecuting,
+    getAutomationHistory: state => ([
+        ...state.automations.logs.map(log => ({...log, itemType: 'log', itemId: `log${log.id}`})),
+        ...state.automations.events.map(event => ({...event, itemType: 'event', itemId: `event${event.id}`}))
+    ])
+        .sort((item1, item2) => new Date(item1.createdAt) < new Date(item2.createdAt))
+        .sort((item1, item2) => new Date(item1.id) < new Date(item2.id))
+        .sort((item1, item2) => item1.itemType > item2.itemType),
+    getPreviousPath: state => state.history[state.history.length - 2] || null,
+    isFirstRoute: state => state.isFirstRoute
 }
