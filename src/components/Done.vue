@@ -22,7 +22,7 @@ const seeEvent = () => {
 const newEvent = () => {
     store.dispatch('resetEvent')
     store.dispatch('resetEventScrapper')
-    router.push('/scrapEvent')
+    store.dispatch('navigateTo','/scrapEvent')
 }
 
 const seeEventText = () => isDraft ? "Page de l'événement (brouillon)" : "Page de l'événement"

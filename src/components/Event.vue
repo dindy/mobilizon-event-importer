@@ -59,7 +59,7 @@ const submit = async action => {
     const uuid = store.getters.getMobilizonEventUUID
     
     if (uuid) {
-        router.push('/done')
+        store.dispatch('navigateTo', '/done')
     }
 }
 
@@ -96,8 +96,7 @@ const rules = {
 const cancel = () => {
     store.dispatch('resetEvent')
     store.dispatch('resetEventScrapper')
-    router.push('/scrapEvent')
-    store.commit('removeLastPathsFromHistory', 2)
+    store.dispatch('navigateTo', '/scrapEvent')
 }
 
 /* Initialize default variables */

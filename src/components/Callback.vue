@@ -17,7 +17,7 @@ onMounted(async () => {
       // store.dispatch('saveMobilizonCode', code)
       await store.dispatch('authorizeApp', { code, clientId })
       store.dispatch('fetchMobilizonConfigAndLoggedUser')
-      router.replace('/home')
+      store.dispatch('navigateTo', '/home')
     }
 })
 </script> 

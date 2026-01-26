@@ -38,7 +38,7 @@ onMounted(async () => {
     if (toImport.value) {
         if (isAppAuth && selectedIdentity && mobilizonConfig) {
             await store.dispatch('scrapEvent', toImport.value)
-            router.push('/createEvent')            
+            store.dispatch('navigateTo', '/createEvent')            
         }
     }
 })
@@ -47,11 +47,11 @@ const getText = () => `Vous allez importer l'évènement à l'URL ${toImport.val
 
 const go = () => {
     store.dispatch('shareUrl', toImport.value)
-    router.push('/scrapEvent')
+    store.dispatch('navigateTo', '/scrapEvent')
 }
 
 const scrap = () => {
-    router.push('/scrapEvent')
+    store.dispatch('navigateTo', '/scrapEvent')
 }
 </script>
 

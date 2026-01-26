@@ -13,7 +13,7 @@ store.dispatch('setPageTitle', 'URL du flux')
 const register = async (url) => {    
     const success = await store.dispatch('registerFeed', { url, type: 'ics' })
     if (success) {
-        router.push('/automations')
+        store.dispatch('navigateTo', '/automations')
     }
 }
 

@@ -38,7 +38,7 @@ const next = () => {
         identity: selectedIdentity.value,
         group: skipGroup.value ? null : selectedGroup.value || null,
     })
-    router.push('/scrapEvent')
+    store.dispatch('navigateTo', '/scrapEvent')
 }
 
 const updateSkipGroup = () => {
@@ -58,7 +58,7 @@ const importGroup = () => {
             group: null
         })    
     } 
-    router.push('/scrapGroup')
+    store.dispatch('navigateTo', '/scrapGroup')
 }
 </script>
 

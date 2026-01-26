@@ -173,6 +173,7 @@ export default {
     addPathToHistory(state, path) {
         console.log('Mutation - Push path', path)
         state.history.push(path)
+        console.log('Mutation - History : ', state.history)
     },
     removeLastPathsFromHistory(state, n) {
         console.log(`Mutation - Remove last ${n} path(s)`)
@@ -180,5 +181,8 @@ export default {
     },
     setIsFirstRoute(state, isFirstRoute) {
         state.isFirstRoute = isFirstRoute
+    },
+    clearHistory(state) {
+        state.history = []
     }
 }

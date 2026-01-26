@@ -22,22 +22,17 @@ const closeIdentityMenu = () => isIdentityMenuOpened.value = false
 const isMbzConnected = computed(() => store.getters.isMobilizonAppAuthorized)
 const logout = () => {
     store.dispatch('logoutMobilizon')
-    router.push('/')
 }
 const prevRoute = computed(() => store.getters.getPreviousPath)
 const goPrev = () => {
-    console.log(prevRoute);
-    
-    router.push(prevRoute.value)
-    store.commit('removeLastPathsFromHistory', 2)
+    store.dispatch('navigateBack')
 }
 </script>
 
 <template>
     <v-app-bar >
-        <img class="logo" v-if="!isMbzConnected || route.path == '/home'" src="/logo.svg" height="24px" width="24px"/>
+        <img class="logo" v-if="!isMbzConnected || route.path == '/home' || !prevRoute" src="/logo.svg" height="24px" width="24px"/>
         <v-btn v-else @click="goPrev" icon="mdi-arrow-left"></v-btn>
-        <!-- <v-btn v-else @click="router.push('/home')" icon="mdi-home"></v-btn> -->
         <v-app-bar-title class="ms-0">{{ title }}</v-app-bar-title>
         <template v-slot:append>
             <Avatar :class="[identity.avatar?.url ? '' : 'bg-secondary']" :actor="identity" v-if="identity"></Avatar>

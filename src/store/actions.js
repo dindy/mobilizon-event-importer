@@ -8,6 +8,7 @@ import {
 import { ScrapperApi } from '../api/scrapper.js'
 import { GeoApi } from '../api/geo.js'
 import compareVersions from '../utils/compareVersions.js'
+import { router } from '../main.js'
 
 const mobilizonApi = new MobilizonApi()
 const scrapperApi = new ScrapperApi()
@@ -130,7 +131,8 @@ export default {
         localStorage.removeItem('mobilizonAppIsAuthorized')
         commit('setMobilizonAppIsAuthorized', false)
         commit('clearMobilizonSession')
-        // location.reload()
+        commit('clearHistory')
+        dispatch('navigateTo', '/')
     },
     async authorizeApp({ commit, state }, data) {
         console.log('Action - Authorizing app with code ' + data.code)
@@ -264,7 +266,11 @@ export default {
             commit('setIsSavingGroup', true)
             try {                
                 const createdGroup = await mobilizonApi.createGroup(group)
-                const formattedGroup = {...createdGroup, memberId: state.mobilizon.selectedIdentityId }
+                const formattedGroup = {
+                    ...createdGroup, 
+                    id: parseInt(createdGroup.id),
+                    memberId: state.mobilizon.selectedIdentityId
+                }
                 commit('addMobilizonGroup', formattedGroup)
                 dispatch('selectMobilizonGroup', formattedGroup.id)
             } catch (error) { 
@@ -441,5 +447,27 @@ export default {
         const history = await mobilizonApi.executeAutomation(automationId)
         commit('setAutomationHistory', history)
         commit('setIsExecutingAutomation', {isExecuting: false, automationId})
+    },
+    navigateToAndReplace({ commit, state }, path) { 
+        console.log(`Action - Navigating to ${path} and replace current route`)
+        const lastPath = state.history[state.history.length - 2] || null
+        if (lastPath) {
+            commit('removeLastPathsFromHistory', 1)
+        }
+        commit('addPathToHistory', path)
+        router.replace(path)
+    },
+    navigateTo({ commit, state }, path) {
+        console.log(`Action - Navigating to ${path}`)
+        commit('addPathToHistory', path)
+        router.push(path)
+    },
+    navigateBack({ commit, state }) {
+        const lastPath = state.history[state.history.length - 2] || null
+        console.log(`Action - Navigating to previous route : ${lastPath}`)
+        if (lastPath) {
+            commit('removeLastPathsFromHistory', 1)
+            router.push(lastPath)
+        }
     }
 }

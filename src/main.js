@@ -27,94 +27,111 @@ import Automations from './components/Automations.vue'
 import AutomationHistory from './components/AutomationHistory.vue' 
 
 const routes = [
-  { path: '/', component: Welcome },
-  { path: '/home', component: Home },
-  { path: '/share', component: Share },
-  { path: '/instance', component: SelectInstance },
-  { path: '/mobilizon/callback', component: Callback },
-  { path: '/scrapEvent', component: EventScrapper },
-  { path: '/scrapGroup', component: GroupScrapper },
-  { path: '/createEvent', component: Event },
-  { path: '/createGroup', component: Group },
-  { path: '/registerFeed', component: RegisterFeed },
-  { path: '/automations', component: Automations },
-  { path: '/automation/:id', name: 'automationHistory', component: AutomationHistory },
-  { path: '/done', component: Done },
-  { path: '/:pathMatch(.*)*', name: 'NotFound', component: NotFound } 
+    { path: '/', component: Welcome },
+    { path: '/home', component: Home },
+    { path: '/share', component: Share },
+    { path: '/instance', component: SelectInstance },
+    { path: '/mobilizon/callback', component: Callback },
+    { path: '/scrapEvent', component: EventScrapper },
+    { path: '/scrapGroup', component: GroupScrapper },
+    { path: '/createEvent', component: Event },
+    { path: '/createGroup', component: Group },
+    { path: '/registerFeed', component: RegisterFeed },
+    { path: '/automations', component: Automations },
+    { path: '/automation/:id', name: 'automationHistory', component: AutomationHistory },
+    { path: '/done', component: Done },
+    { path: '/:pathMatch(.*)*', name: 'NotFound', component: NotFound } 
 ]
 
 await store.dispatch('init')
 
-const router = createRouter({
-  history: createWebHistory(),
-  routes
+export const router = createRouter({
+    history: createWebHistory(),
+    routes
 })
 
 const vuetify = createVuetify({
-  components,
-  directives,
-  theme: {
-    defaultTheme: 'customTheme',
-    themes: {
-      customTheme: {
-        // dark: false,
-        colors: {
-          primary: 'rgb(0, 165, 207)',
-          info: 'rgb(0, 165, 207)',
-          warning: 'rgb(255, 203, 107)',
-          success: 'rgb(37, 161, 142)',
+    components,
+    directives,
+    theme: {
+        defaultTheme: 'customTheme',
+        themes: {
+            customTheme: {
+                // dark: false,
+                colors: {
+                    primary: 'rgb(0, 165, 207)',
+                    info: 'rgb(0, 165, 207)',
+                    warning: 'rgb(255, 203, 107)',
+                    success: 'rgb(37, 161, 142)',
+                },
+            },
         },
-      },
-    },
-  },  
-  icons: {
-    defaultSet: 'mdi',
-    aliases,
-    sets: {
-      mdi,
-    },
-  },  
+    },  
+    icons: {
+        defaultSet: 'mdi',
+        aliases,
+        sets: {
+            mdi,
+        },
+    },  
 })
 createApp(App)
-  .use(router)
-  .use(store)
-  .use(vuetify)
-  .mount('#app')
+.use(router)
+.use(store)
+.use(vuetify)
+.mount('#app')
 
 router.beforeEach(async (to, from) => {
-  
-  console.log('Router - Before - ' + to.path);
-  
-  const selectedIdentity = store.getters.getSelectedIdentity
-  const localEvent = store.getters.getLocalEvent
-  const mobilizonConfig = store.getters.getMobilizonConfig
-  const mobilizonInstanceUrl = store.getters.getMobilizonInstanceUrl
-  const isInstanceConfigLoaded = store.getters.isInstanceConfigLoaded
-  const scrappedData = store.getters.getScrappedEvent
-  const scrapperUrl = store.getters.getEventScrapperUrl
-  const lastUUID = store.getters.getMobilizonEventUUID
-  const isMbzConnected = store.getters.isMobilizonAppAuthorized
-
-  store.commit('addPathToHistory', to.path)
-
-  const startPath = to.path
-  const entryPaths = [
-    '/',
-    '/home',
-    '/instance',
-    '/mobilizon/callback',
-    '/share/',
-  ]
-
-  if (store.getters.isFirstRoute) {
-    if (!entryPaths.includes(startPath)) {
-      const isMbzConnected = store.getters.isMobilizonAppAuthorized
-      if (isMbzConnected) {
-        router.replace('/home')
-      } else {
-        router.replace('/')
-      }
+    
+    console.log('Router - Before - ' + to.path);
+    
+    const selectedIdentity = store.getters.getSelectedIdentity
+    const localEvent = store.getters.getLocalEvent
+    const mobilizonConfig = store.getters.getMobilizonConfig
+    const mobilizonInstanceUrl = store.getters.getMobilizonInstanceUrl
+    const isInstanceConfigLoaded = store.getters.isInstanceConfigLoaded
+    const scrappedData = store.getters.getScrappedEvent
+    const scrapperUrl = store.getters.getEventScrapperUrl
+    const lastUUID = store.getters.getMobilizonEventUUID
+    const isMbzConnected = store.getters.isMobilizonAppAuthorized
+    
+    const startPath = to.path
+    const entryPaths = [
+        '/',
+        '/home',
+        '/instance',
+        '/mobilizon/callback',
+        '/share/',
+    ]
+    
+    if (store.getters.isFirstRoute) {
+        
+        console.log('Router - Before - First route : ' + startPath);
+        
+        if (!entryPaths.includes(startPath)) {
+            
+            const isMbzConnected = store.getters.isMobilizonAppAuthorized
+            console.log(`Router - Before - Not an entry path`)
+            console.log(`Router - Before - Is mobilizon connected ?`, isMbzConnected)
+            
+            if (isMbzConnected) {
+                store.dispatch('navigateTo', '/home')
+            } else {
+                store.dispatch('navigateTo', '/')
+            }
+            
+        } else {
+            // Redirect to home
+            if ((startPath == '/' || startPath == '/instance') && isMbzConnected) {
+                store.dispatch('navigateTo', '/home')
+            // Redirect to root
+            } else if (startPath == '/home' && !isMbzConnected) {
+                store.dispatch('navigateTo', '/')
+            // No redirection but set /home in history
+            } else {
+                store.commit('addPathToHistory', '/home')
+            }
+        }
+        store.commit('setIsFirstRoute', false)
     }
-    store.commit('setIsFirstRoute', false)
-  }
 })

@@ -10,7 +10,7 @@ const next = () => {
   if (route.query.domain) {
     store.dispatch('registerApp', route.query.domain)
   } else {
-    router.push('/instance')
+    store.dispatch('navigateTo', '/instance')
   }  
 }
 </script>

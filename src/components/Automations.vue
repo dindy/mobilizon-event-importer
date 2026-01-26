@@ -44,7 +44,7 @@ watch(actor, (newActor) => {
                 :title="automation.type" 
                 :subtitle="automation.url"
                 :key="automation.id"
-                @click="router.push(`/automation/${automation.id}`)"
+                @click="store.dispatch('navigateTo',`/automation/${automation.id}`)"
                 >
             </v-list-item>
             <v-list-subheader v-else>Aucune automatisation</v-list-subheader>
@@ -60,7 +60,7 @@ watch(actor, (newActor) => {
             size="large"
             absolute
             transition="slide-x-transition"
-            @click="router.push('/registerFeed')"
+            @click="store.dispatch('navigateTo','/registerFeed')"
         ></v-fab>    
 
     </v-fade-transition>

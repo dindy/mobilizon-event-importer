@@ -29,8 +29,7 @@ onMounted(() => {
     load()
 })
 watch(actor, (newActor) => {
-    router.replace('/automations')
-    store.commit('removeLastPathsFromHistory', 2)
+    store.dispatch('navigateToAndReplace', '/automations')
 })
 </script>
 <template>

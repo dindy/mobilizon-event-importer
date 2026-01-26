@@ -17,7 +17,7 @@ const updateGroup = () => {
     if (selectedGroup.value == -1) {
         store.dispatch('selectMobilizonGroup', null)
         selectedGroup.value = null
-        router.push('/scrapGroup')
+        store.dispatch('navigateTo', '/scrapGroup')
     } else {
         store.dispatch('selectMobilizonGroup', selectedGroup.value)
     }

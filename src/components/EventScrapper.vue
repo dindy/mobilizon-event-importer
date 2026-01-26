@@ -16,7 +16,7 @@ onMounted(() => {
 
 const scrap = async (url) => {    
     await store.dispatch('scrapEvent', url)
-    router.push('createEvent')
+    store.dispatch('navigateTo', '/createEvent')
 }
 
 </script>

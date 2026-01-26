@@ -26,7 +26,7 @@ store.dispatch('setPageTitle', 'Accueil')
                 <p>Importez un événement depuis son adresse Facebook, Instagram, HelloAsso, Dice, Shotgun, Eventbrite ou toute autre plateforme qui utilise des metadonnées standards.</p>
             </v-card-text>
             <v-card-actions>
-                <v-btn @click="router.push('/scrapEvent')" text="Importer un événement"></v-btn>
+                <v-btn @click="store.dispatch('navigateTo', '/scrapEvent')" text="Importer un événement"></v-btn>
             </v-card-actions>
         </v-card>
         <v-card
@@ -42,8 +42,8 @@ store.dispatch('setPageTitle', 'Accueil')
                 <p class="mt-3">Seuls les flux ICS (iCalendar) sont actuellement supportés.</p>
             </v-card-text>        
             <v-card-actions>
-                <!-- <v-btn @click="router.push('/registerFeed')" text="Ajouter un flux"></v-btn> -->
-                <v-btn @click="router.push('/automations')" text="Gérer les automatisations"></v-btn>
+                <!-- <v-btn @click="store.dispatch('navigateTo', '/registerFeed')" text="Ajouter un flux"></v-btn> -->
+                <v-btn @click="store.dispatch('navigateTo', '/automations')" text="Gérer les automatisations"></v-btn>
             </v-card-actions>        
         </v-card>
     </div>
