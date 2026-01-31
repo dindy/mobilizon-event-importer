@@ -98,7 +98,7 @@ const updateCoords = (coords, zoom = null) => {
 
 const cancel = () => {
     store.dispatch('resetGroupScrapperData')
-    router.push('/identity')
+    store.dispatch('navigateTo', '/scrapEvent')
 }
 
 const submit = async () => {
@@ -127,7 +127,8 @@ const submit = async () => {
 
     await store.dispatch('saveMobilizonGroup', data)
 
-    router.push('/identity')
+    store.dispatch('navigateBack')
+    store.dispatch('navigateBack')
 }
 </script>
 <template>

@@ -8,6 +8,7 @@ import { aliases, mdi } from 'vuetify/iconsets/mdi'
 import '@mdi/font/css/materialdesignicons.css' // Ensure you are using css-loader
 import 'unfonts.css'
 import './style.css'
+
 import App from './App.vue'
 import store from './store'
 import Callback from './components/Callback.vue'
@@ -18,114 +19,119 @@ import GroupScrapper from './components/GroupScrapper.vue'
 import Event from './components/Event.vue' 
 import Group from './components/Group.vue' 
 import Done from './components/Done.vue' 
-import SelectIdentity from './components/SelectIdentity.vue' 
 import SelectInstance from './components/SelectInstance.vue' 
 import Share from './components/Share.vue' 
+import Welcome from './components/Welcome.vue' 
+import RegisterFeed from './components/RegisterFeed.vue' 
+import Automations from './components/Automations.vue' 
+import AutomationHistory from './components/AutomationHistory.vue' 
 
 const routes = [
-  { path: '/', component: Home },
-  { path: '/share', component: Share },
-  { path: '/instance', component: SelectInstance },
-  { path: '/identity', component: SelectIdentity },
-  { path: '/mobilizon/callback', component: Callback },
-  { path: '/scrapEvent', component: EventScrapper },
-  { path: '/scrapGroup', component: GroupScrapper },
-  { path: '/createEvent', component: Event },
-  { path: '/createGroup', component: Group },
-  { path: '/done', component: Done },
-  { path: '/:pathMatch(.*)*', name: 'NotFound', component: NotFound } 
+    { path: '/', component: Welcome },
+    { path: '/home', component: Home },
+    { path: '/share', component: Share },
+    { path: '/instance', component: SelectInstance },
+    { path: '/mobilizon/callback', component: Callback },
+    { path: '/scrapEvent', component: EventScrapper },
+    { path: '/scrapGroup', component: GroupScrapper },
+    { path: '/createEvent', component: Event },
+    { path: '/createGroup', component: Group },
+    { path: '/registerFeed', component: RegisterFeed },
+    { path: '/automations', component: Automations },
+    { path: '/automation/:id', name: 'automationHistory', component: AutomationHistory },
+    { path: '/done', component: Done },
+    { path: '/:pathMatch(.*)*', name: 'NotFound', component: NotFound } 
 ]
 
 await store.dispatch('init')
 
-const router = createRouter({
-  history: createWebHistory(),
-  routes
+export const router = createRouter({
+    history: createWebHistory(),
+    routes
 })
 
 const vuetify = createVuetify({
-  components,
-  directives,
-  theme: {
-    defaultTheme: 'customTheme',
-    themes: {
-      customTheme: {
-        // dark: false,
-        colors: {
-          primary: 'rgb(0, 165, 207)',
-          info: 'rgb(0, 165, 207)',
-          warning: 'rgb(255, 203, 107)',
-          success: 'rgb(37, 161, 142)',
+    components,
+    directives,
+    theme: {
+        defaultTheme: 'customTheme',
+        themes: {
+            customTheme: {
+                // dark: false,
+                colors: {
+                    primary: 'rgb(0, 165, 207)',
+                    info: 'rgb(0, 165, 207)',
+                    warning: 'rgb(255, 203, 107)',
+                    success: 'rgb(37, 161, 142)',
+                },
+            },
         },
-      },
-    },
-  },  
-  icons: {
-    defaultSet: 'mdi',
-    aliases,
-    sets: {
-      mdi,
-    },
-  },  
+    },  
+    icons: {
+        defaultSet: 'mdi',
+        aliases,
+        sets: {
+            mdi,
+        },
+    },  
 })
 createApp(App)
-  .use(router)
-  .use(store)
-  .use(vuetify)
-  .mount('#app')
+.use(router)
+.use(store)
+.use(vuetify)
+.mount('#app')
 
-  
 router.beforeEach(async (to, from) => {
-  
-  console.log('Router - Before - ' + to.path);
     
-  const hasTokenData = store.getters.hasMobilizonTokenData
-  const selectedIdentity = store.getters.getSelectedIdentity
-  const localEvent = store.getters.getLocalEvent
-  const mobilizonConfig = store.getters.getMobilizonConfig
-  const mobilizonInstanceUrl = store.getters.getMobilizonInstanceUrl
-  const isInstanceConfigLoaded = store.getters.isInstanceConfigLoaded
-  const scrappedData = store.getters.getScrappedEvent
-  const scrapperUrl = store.getters.getEventScrapperUrl
-  const lastUUID = store.getters.getMobilizonEventUUID
-
-  const notAuthenticatedAllowedPaths = [
-    '/',
-    '/instance',
-    '/mobilizon/callback',
-    '/share/',
-  ]
-
-  const isAllowedWithoutAuth = path => notAuthenticatedAllowedPaths.includes(path)
-
-  if (!hasTokenData && !isAllowedWithoutAuth(to.path)) {
-    router.replace('/instance')
-  }
-
-  if ((to.path == '/scrapEvent' || to.path == '/createEvent') && !selectedIdentity) {
-    router.replace('/identity')
-  }
-
-  if (to.path == '/scrapEvent' && localEvent && lastUUID === null && from.path !== '/createEvent') {
-    router.replace('/createEvent')
-  }
-
-  if (to.path == '/createEvent' && !scrappedData && !localEvent) {
-    router.replace('/scrapEvent')
-  }
-
-  if (to.path === '/' && hasTokenData && mobilizonConfig) {
-    if (selectedIdentity) {
-      console.log(lastUUID);
-      
-      if (localEvent && lastUUID === null) {
-        router.replace('/createEvent')
-      } else {
-        router.replace('/scrapEvent')
-      }
-    } else {
-      router.replace('/identity')
+    console.log('Router - Before - ' + to.path);
+    
+    const selectedIdentity = store.getters.getSelectedIdentity
+    const localEvent = store.getters.getLocalEvent
+    const mobilizonConfig = store.getters.getMobilizonConfig
+    const mobilizonInstanceUrl = store.getters.getMobilizonInstanceUrl
+    const isInstanceConfigLoaded = store.getters.isInstanceConfigLoaded
+    const scrappedData = store.getters.getScrappedEvent
+    const scrapperUrl = store.getters.getEventScrapperUrl
+    const lastUUID = store.getters.getMobilizonEventUUID
+    const isMbzConnected = store.getters.isMobilizonAppAuthorized
+    
+    const startPath = to.path
+    const entryPaths = [
+        '/',
+        '/home',
+        '/instance',
+        '/mobilizon/callback',
+        '/share/',
+    ]
+    
+    if (store.getters.isFirstRoute) {
+        
+        console.log('Router - Before - First route : ' + startPath);
+        
+        if (!entryPaths.includes(startPath)) {
+            
+            const isMbzConnected = store.getters.isMobilizonAppAuthorized
+            console.log(`Router - Before - Not an entry path`)
+            console.log(`Router - Before - Is mobilizon connected ?`, isMbzConnected)
+            
+            if (isMbzConnected) {
+                store.dispatch('navigateTo', '/home')
+            } else {
+                store.dispatch('navigateTo', '/')
+            }
+            
+        } else {
+            // Redirect to home
+            if ((startPath == '/' || startPath == '/instance') && isMbzConnected) {
+                store.dispatch('navigateTo', '/home')
+            // Redirect to root
+            } else if (startPath == '/home' && !isMbzConnected) {
+                store.dispatch('navigateTo', '/')
+            // No redirection but set /home in history
+            } else {
+                store.commit('addPathToHistory', '/home')
+            }
+        }
+        store.commit('setIsFirstRoute', false)
     }
-  }
-
 })

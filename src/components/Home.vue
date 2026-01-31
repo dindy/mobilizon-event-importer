@@ -1,17 +1,52 @@
 <script setup>
 import { computed } from 'vue'
 import { useStore } from 'vuex'
-import { MobilizonApi } from '../api/mobilizon'
-import Welcome from './Welcome.vue'
+import { useRouter } from 'vue-router'
+
+const router = useRouter()
 const store = useStore()
-const mobilizonUserIsAuthenticated = computed(() => store.getters.getIdentities.length > 0)
 const isLoadingGroups = computed(() => store.getters.isLoadingGroups)
-const isConnectingToMobilizon = computed(() => store.getters.isConnectingToMobilizon)
+const isLoadingConfig = computed(() => store.getters.isLoadingConfig)
+const isConnected = computed(() => store.getters.isMobilizonAppAuthorized)
+store.dispatch('setPageTitle', 'Accueil')
 </script>
 
 <template>
-    <v-infinite-scroll v-if="isConnectingToMobilizon || isLoadingGroups"></v-infinite-scroll>
-    <Welcome v-else/>
+    <v-infinite-scroll v-if="isLoadingConfig || isLoadingGroups"></v-infinite-scroll>
+    <div v-else>
+        <v-card
+            prepend-icon="mdi-calendar-plus"
+            color="secondary"
+            variant="outlined"
+            title="Imports ponctuels" 
+            subtitle="Importez un événement depuis son URL"
+            class="bg-white"
+        >
+            <v-card-text>
+                <p>Importez un événement depuis son adresse Facebook, Instagram, HelloAsso, Dice, Shotgun, Eventbrite ou toute autre plateforme qui utilise des metadonnées standards.</p>
+            </v-card-text>
+            <v-card-actions>
+                <v-btn @click="store.dispatch('navigateTo', '/scrapEvent')" text="Importer un événement"></v-btn>
+            </v-card-actions>
+        </v-card>
+        <v-card
+            prepend-icon="mdi-calendar-multiple"
+            color="secondary"
+            variant="outlined"        
+            class="mt-5" 
+            title="Imports automatiques" 
+            subtitle="Importez automatiquement les événements d'un flux"
+        >
+            <v-card-text>
+                <p>L'application enregistre l'URL d'une source d'événements et importera automatiquement les nouveaux événements à interval régulier.</p>
+                <p class="mt-3">Seuls les flux ICS (iCalendar) sont actuellement supportés.</p>
+            </v-card-text>        
+            <v-card-actions>
+                <!-- <v-btn @click="store.dispatch('navigateTo', '/registerFeed')" text="Ajouter un flux"></v-btn> -->
+                <v-btn @click="store.dispatch('navigateTo', '/automations')" text="Gérer les automatisations"></v-btn>
+            </v-card-actions>        
+        </v-card>
+    </div>
 </template>
 
 <style scoped>

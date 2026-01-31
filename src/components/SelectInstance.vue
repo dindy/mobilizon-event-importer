@@ -71,6 +71,7 @@ const updateUrl = (e) => {
             prepend-icon="mdi-login"
             type="submit"
             color="primary"
+            :loading="store.getters.isRegisteringApp"
         >Se connecter</v-btn>          
     </v-form>
 </template>

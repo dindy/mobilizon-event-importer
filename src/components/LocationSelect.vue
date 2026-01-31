@@ -21,7 +21,7 @@ const emit = defineEmits('selectAddress', 'selectCoords')
 const physicalAddress = ref(props.address)
 const latitude = ref(props.latitude)
 const longitude = ref(props.longitude)
-const groupAddress = ref(props.groupAddress)
+const groupAddress = computed(() => props.groupAddress)
 
 const isLoadingAdressesFromCoords = computed(() => store.getters.isLoadingAdressesFromCoords)
 const isLoadingAdressesFromString = computed(() => store.getters.isLoadingAddressesFromString)
@@ -135,6 +135,7 @@ const mapCenter = computed(() => latitude.value && longitude.value ? [latitude.v
 
 <template>
     <div class="location-select">
+
         <v-textarea 
             v-if="hasAddress" 
             class="" 

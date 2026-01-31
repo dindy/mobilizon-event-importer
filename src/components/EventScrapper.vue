@@ -2,7 +2,6 @@
 import { ref, computed, onMounted } from 'vue'
 import { useStore } from 'vuex'
 import { useRouter } from 'vue-router'
-import { isValidUrl } from '../utils/utils.js'
 import UrlForm from './UrlForm.vue'
 
 const router = useRouter()
@@ -17,7 +16,7 @@ onMounted(() => {
 
 const scrap = async (url) => {    
     await store.dispatch('scrapEvent', url)
-    router.push('createEvent')
+    store.dispatch('navigateTo', '/createEvent')
 }
 
 </script>

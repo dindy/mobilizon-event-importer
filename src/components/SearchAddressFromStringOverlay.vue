@@ -10,15 +10,13 @@ const props = defineProps({
     groupAddress: Object,
     physicalAddress: Object,
     foundAddresses: Array,
-    isLoading: Boolean
+    isLoading: Boolean,
 })
 
-const groupAddress = ref(props.groupAddress)
+const groupAddress = computed(() => props.groupAddress)
 
 onMounted(() => {
-    console.log(props.groupAddress);
-    console.log(groupAddress.value);
-    
+
 })
 const physicalAddress = ref(() => JSON.parse(JSON.stringify(props.physicalAddress)))
 
@@ -36,7 +34,7 @@ const toggleShow = () => emit('toggleShow')
 
 const useGroupAddress = () => {
     toggleShow()
-    emit('useAddress', props.groupAddress)
+    emit('useAddress', groupAddress.value)
 }
 
 const searchAddress = () => {
@@ -68,7 +66,7 @@ const validate = () => {
         content-class="overlay-content-wrapper"
         class="screen-overlay"
     >
-        <div class="overlay-content">      
+        <div class="overlay-content">  
             <v-btn v-if="groupAddress" prepend-icon="mdi-map-marker-account" @click="useGroupAddress">Utiliser l'adresse du groupe</v-btn>
             <!-- <v-btn v-if="latitude && longitude" prepend-icon="mdi-map-marker" @click="openSearchAddressFromCoordsOverlay">Utiliser la position</v-btn> -->
             <div>

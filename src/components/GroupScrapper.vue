@@ -13,7 +13,7 @@ store.dispatch('setPageTitle', 'URL du groupe')
 
 const scrap = async (url) => {    
     await store.dispatch('scrapGroup', url)
-    router.push('/createGroup')
+    store.dispatch('navigateTo', '/createGroup')
 }
 
 </script>
