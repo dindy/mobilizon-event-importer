@@ -8,7 +8,7 @@ import {
 import { ScrapperApi } from '../api/scrapper.js'
 import { GeoApi } from '../api/geo.js'
 import compareVersions from '../utils/compareVersions.js'
-import { router } from '../main.js'
+import { router } from '../router.js'
 
 const mobilizonApi = new MobilizonApi()
 const scrapperApi = new ScrapperApi()

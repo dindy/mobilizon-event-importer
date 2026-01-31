@@ -1,5 +1,5 @@
 import { createApp } from 'vue'
-import { createRouter, createWebHistory } from 'vue-router'
+
 import 'vuetify/styles'
 import { createVuetify } from 'vuetify'
 import * as components from 'vuetify/components'
@@ -25,30 +25,9 @@ import Welcome from './components/Welcome.vue'
 import RegisterFeed from './components/RegisterFeed.vue' 
 import Automations from './components/Automations.vue' 
 import AutomationHistory from './components/AutomationHistory.vue' 
-
-const routes = [
-    { path: '/', component: Welcome },
-    { path: '/home', component: Home },
-    { path: '/share', component: Share },
-    { path: '/instance', component: SelectInstance },
-    { path: '/mobilizon/callback', component: Callback },
-    { path: '/scrapEvent', component: EventScrapper },
-    { path: '/scrapGroup', component: GroupScrapper },
-    { path: '/createEvent', component: Event },
-    { path: '/createGroup', component: Group },
-    { path: '/registerFeed', component: RegisterFeed },
-    { path: '/automations', component: Automations },
-    { path: '/automation/:id', name: 'automationHistory', component: AutomationHistory },
-    { path: '/done', component: Done },
-    { path: '/:pathMatch(.*)*', name: 'NotFound', component: NotFound } 
-]
+import router from './router.js'
 
 await store.dispatch('init')
-
-export const router = createRouter({
-    history: createWebHistory(),
-    routes
-})
 
 const vuetify = createVuetify({
     components,
