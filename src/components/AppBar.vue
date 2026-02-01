@@ -1,21 +1,20 @@
 <script setup>
-import { computed, onMounted, ref } from 'vue'
+import { computed, ref } from 'vue'
 import { useStore } from 'vuex'
-import { RouterLink, useRouter, useRoute } from 'vue-router'
+import { useRouter, useRoute } from 'vue-router'
+import { componentTranslate } from '../i18n/utils.js'
 import IdentitySelect from './IdentitySelect.vue'
 import GroupSelect from './GroupSelect.vue'
 import Avatar from './Avatar.vue'
-import state from '../store/state'
 
 const store = useStore()
-const router = useRouter()
 const route = useRoute()
+const $ct = componentTranslate('AppBar')
 const title = computed(() => store.getters.getPageTitle)
 const isMobilizonUserAuthenticated = computed(() => store.getters.isMobilizonUserAuthenticated)
 const identity = computed(() => store.getters.getSelectedIdentity)
 const group = computed(() => store.getters.getSelectedGroup)
 const identities = computed(() => store.getters.getIdentities)
-const identityGroups = computed(() => store.getters.getSelectedIdentityGroups)
 const isLoadingGroups = computed(() => store.getters.isLoadingGroups)
 const isIdentityMenuOpened = ref(false)
 const closeIdentityMenu = () => isIdentityMenuOpened.value = false
@@ -32,13 +31,37 @@ const goPrev = () => {
 
 <template>
     <v-app-bar >
-        <img class="logo" v-if="!isMbzConnected || route.path == '/home' || !prevRoute" src="/logo.svg" height="24px" width="24px"/>
-        <v-btn v-else @click="goPrev" icon="mdi-arrow-left"></v-btn>
-        <v-app-bar-title class="ms-0">{{ title }}</v-app-bar-title>
+        <img 
+            class="logo" 
+            v-if="!isMbzConnected || route.path == '/home' || !prevRoute" 
+            src="/logo.svg" 
+            height="24px" 
+            width="24px"/>
+        <v-btn 
+            v-else 
+            @click="goPrev" 
+            icon="mdi-arrow-left"
+        ></v-btn>
+        <v-app-bar-title 
+            class="ms-0"
+        >{{ title }}</v-app-bar-title>
         <template v-slot:append>
-            <Avatar :class="[identity.avatar?.url ? '' : 'bg-secondary']" :actor="identity" v-if="identity"></Avatar>
-            <Avatar type="group" :class="[group.avatar?.url ? '' : 'bg-secondary', 'border-md', 'border-surface-light', 'border-opacity-100']" class="ml-n5"  :actor="group" v-if="group"></Avatar>
-            <v-infinite-scroll class="flex-row" v-if="isLoadingGroups && identities.length == 0"></v-infinite-scroll>
+            <Avatar 
+                :class="[identity.avatar?.url ? '' : 'bg-secondary']" 
+                :actor="identity" 
+                v-if="identity"
+            ></Avatar>
+            <Avatar 
+                type="group" 
+                :class="[group.avatar?.url ? '' : 'bg-secondary', 'border-md', 'border-surface-light', 'border-opacity-100']" 
+                class="ml-n5"  
+                :actor="group" 
+                v-if="group"
+            ></Avatar>
+            <v-infinite-scroll 
+                class="flex-row" 
+                v-if="isLoadingGroups && identities.length == 0"
+            ></v-infinite-scroll>
             <v-menu
                 v-model="isIdentityMenuOpened"
                 :close-on-content-click="false"
@@ -61,7 +84,12 @@ const goPrev = () => {
                     <v-list-item v-if="identity">
                         <GroupSelect @closeMenu="closeIdentityMenu"/>          
                     </v-list-item>
-                    <v-list-item value="1" prepend-icon="mdi-logout" title="Me déconnecter" v-if="isMobilizonUserAuthenticated" @click="logout"></v-list-item>
+                    <v-list-item 
+                        value="1" 
+                        prepend-icon="mdi-logout" 
+                        :title="$ct('logout')" 
+                        v-if="isMobilizonUserAuthenticated" 
+                        @click="logout"></v-list-item>
                 </v-list>
             </v-menu>
         </template>

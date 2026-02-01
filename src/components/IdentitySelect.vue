@@ -1,8 +1,10 @@
 <script setup>
 import { ref } from 'vue'
 import { useStore } from 'vuex'
+import { componentTranslate } from '../i18n/utils.js'
 
 const store = useStore()
+const $ct = componentTranslate('IdentitySelect')
 const identities = store.getters.getIdentities
 const identity = store.getters.getSelectedIdentity
 const selectedIdentity = ref(identity.id)
@@ -14,7 +16,7 @@ const updateIdentity = () => store.dispatch('selectMobilizonIdentityAndGroup', {
 
 <template>
     <v-select 
-        label="Sélectionnez une identité"
+        :label="$ct('label')"
         :items="identities"
         item-title="name" 
         item-value="id" 

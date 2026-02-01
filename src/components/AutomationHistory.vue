@@ -1,9 +1,11 @@
 <script setup>
-import { ref, computed, watch, onMounted, onBeforeMount } from 'vue'
+import { computed, watch, onMounted } from 'vue'
 import { useStore } from 'vuex'
-import { useRouter, useRoute } from 'vue-router'
+import { useRoute } from 'vue-router'
+import { useI18n } from 'vue-i18n'
+import { componentTranslate } from '../i18n/utils.js'
 
-const router = useRouter()
+const { t } = useI18n()
 const route = useRoute()
 const store = useStore()
 const history = computed(() => store.getters.getAutomationHistory)
@@ -24,30 +26,41 @@ const load = () => store.dispatch('loadAutomation', route.params.id)
 const refresh = () => store.dispatch('fetchAutomationHistory', route.params.id) 
 const manageForGroup = computed(() => store.getters.getSelectedGroup)
 const actor = computed(() => manageForGroup.value || store.getters.getSelectedIdentity)
-store.dispatch('setPageTitle', 'Détails de l\'automatisation')
+const $ct = componentTranslate(`AutomationHistory`)
+
+store.dispatch('setPageTitle', $ct('title'))
+
 onMounted(() => {
     load()
 })
+
 watch(actor, (newActor) => {
     store.dispatch('navigateToAndReplace', '/automations')
 })
 </script>
+
 <template>
     <v-card :loading="isFetching || isExecuting">
-        <v-card-title>Logs et événements importés</v-card-title>   
-        <v-card-subtitle><span class="text-wrap">{{ automation.url }}</span></v-card-subtitle>
+        <v-card-title>{{ $ct('logsAndEvents') }}</v-card-title>   
+        <v-card-subtitle>
+            <span class="text-wrap">{{ automation.url }}</span>
+        </v-card-subtitle>
         <v-card-actions>
-            <v-btn @click="store.dispatch('executeAutomation', automation.id)" class="float-right" text="Exécuter"></v-btn>
+            <v-btn 
+                @click="store.dispatch('executeAutomation', automation.id)" 
+                class="float-right" 
+                :text="$ct('execute')"
+            ></v-btn>
         </v-card-actions>
         <v-list>
 
-            <v-list-subheader v-if="!isFetching && history.length == 0">Cette automatisation n'a pas encore été exécutée.</v-list-subheader>
+            <v-list-subheader v-if="!isFetching && history.length == 0">{{ $ct('noHistory') }}</v-list-subheader>
 
             <v-list-group v-if="events.length > 0" value="events">
                 <template v-slot:activator="{ props }">
                     <v-list-item
                         v-bind="props"
-                        title="Evénements"
+                        :title="$ct('events')"
                     ></v-list-item>
                 </template>   
 
@@ -62,7 +75,7 @@ watch(actor, (newActor) => {
                             {{ (new Date(event.eventDate)).toLocaleString() }}
                         </div>
                         <div>
-                            <span class="text-body-1">{{ event.type == 'created' ? 'Création' : 'Modification' }} de '{{ event.title }}'</span>
+                            <span class="text-body-1">{{ event.type == 'created' ? $ct('created') : $ct('updated') }} de '{{ event.title }}'</span>
                         </div>
                     </template>
                 </v-list-item>
@@ -72,7 +85,7 @@ watch(actor, (newActor) => {
                 <template v-slot:activator="{ props }">
                     <v-list-item
                         v-bind="props"
-                        title="Logs"
+                        :title="$ct('logs')"
                     ></v-list-item>
                 </template>   
 

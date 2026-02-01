@@ -2,19 +2,18 @@
 
 import { ref, computed, watch, onMounted } from 'vue'
 import { useStore } from 'vuex'
-import { useRouter } from 'vue-router'
+import { componentTranslate } from '../i18n/utils.js'
 import Avatar from './Avatar.vue'
-import Group from './Group.vue'
 
-const router = useRouter()
 const store = useStore()
 const manageForGroup = computed(() => store.getters.getSelectedGroup)
 const actor = computed(() => manageForGroup.value || store.getters.getSelectedIdentity)
 const automations = computed(() => store.getters.getActorAutomations)
 const isFetching = computed(() => store.getters.isFetchingAutomations)
 const fabIsHidden = ref(true)
+const $ct = componentTranslate(`Automations`)
 
-store.dispatch('setPageTitle', 'Automatisations')
+store.dispatch('setPageTitle', $ct('title'))
 onMounted(() => {
     fabIsHidden.value = false
     store.dispatch('fetchAutomations')
@@ -27,14 +26,14 @@ watch(actor, (newActor) => {
 <template>
     <v-card
         :title="actor.name"
-        subtitle="Automatisations enregistrées" 
+        :subtitle="$ct('subtitle')" 
         :loading="isFetching">
         <template v-slot:prepend>
             <Avatar :type="manageForGroup ? 'group' : 'person'" :actor="actor"></Avatar>
         </template>
         <v-list>
             <v-list-subheader v-if="isFetching || (automations.length > 0)">
-                Automatisations enregistrées
+                {{ $ct('subtitle') }}
             </v-list-subheader>   
             <v-list-item 
                 :value="automation.id" 
@@ -47,7 +46,7 @@ watch(actor, (newActor) => {
                 @click="store.dispatch('navigateTo',`/automation/${automation.id}`)"
                 >
             </v-list-item>
-            <v-list-subheader v-else>Aucune automatisation</v-list-subheader>
+            <v-list-subheader v-else>{{ $ct('noAutomations') }}</v-list-subheader>
         </v-list>
     </v-card>
     <v-fade-transition>

@@ -2,12 +2,15 @@
 import { onMounted, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useStore } from 'vuex'
+import { componentTranslate } from '../i18n/utils.js'
 import { isValidUrl } from '../utils/utils'
 
 const route = useRoute()
 const store = useStore()
 const router = useRouter()
-store.dispatch('setPageTitle', 'Partager l\'événement')
+const $ct = componentTranslate('Share')
+
+store.dispatch('setPageTitle', $ct('title'))
 
 const title = ref('')
 const text = ref('')

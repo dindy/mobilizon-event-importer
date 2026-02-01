@@ -1,10 +1,12 @@
 <template>
   <div>
-    <h1>404 - Page non trouvée</h1>
-    <p>La page demandée n'existe pas.</p>
+    <h1>{{ $ct('title') }}</h1>
+    <p>{{ $ct('message') }}</p>
   </div>
 </template>
 
 <script setup>
-// No script needed for this simple
+import { componentTranslate } from '../i18n/utils.js'
+
+const $ct = componentTranslate('NotFound')
 </script>

@@ -1,14 +1,15 @@
 <script setup>
 import { computed } from 'vue'
 import { useStore } from 'vuex'
-import { useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
+import { componentTranslate } from '../i18n/utils.js'
 
-const { t } = useI18n()
 const store = useStore()
 const isLoadingGroups = computed(() => store.getters.isLoadingGroups)
 const isLoadingConfig = computed(() => store.getters.isLoadingConfig)
-store.dispatch('setPageTitle', t('title.home'))
+const $ct = componentTranslate(`Home`)
+
+store.dispatch('setPageTitle', $ct('title'))
 </script>
 
 <template>
@@ -18,15 +19,15 @@ store.dispatch('setPageTitle', t('title.home'))
             prepend-icon="mdi-calendar-plus"
             color="secondary"
             variant="outlined"
-            :title="$t('tpl.occasional_import.title')" 
-            :subtitle="$t('tpl.occasional_import.subtitle')"
+            :title="$ct('occasional_import.title')" 
+            :subtitle="$ct('occasional_import.subtitle')"
             class="bg-white"
         >
             <v-card-text>
-                <p>{{ $t('tpl.occasional_import.text') }}</p>
+                <p>{{ $ct('occasional_import.text') }}</p>
             </v-card-text>
             <v-card-actions>
-                <v-btn @click="store.dispatch('navigateTo', '/scrapEvent')" :text="$t('tpl.occasional_import.btn')"></v-btn>
+                <v-btn @click="store.dispatch('navigateTo', '/scrapEvent')" :text="$ct('occasional_import.btn')"></v-btn>
             </v-card-actions>
         </v-card>
         <v-card
@@ -34,15 +35,15 @@ store.dispatch('setPageTitle', t('title.home'))
             color="secondary"
             variant="outlined"        
             class="mt-5" 
-            :title="$t('tpl.automation.title')" 
-            :subtitle="$t('tpl.automation.subtitle')"
+            :title="$ct('automation.title')" 
+            :subtitle="$ct('automation.subtitle')"
         >
             <v-card-text>
-                <p>{{ $t('tpl.automation.text.0') }}</p>
-                <p class="mt-3">{{ $t('tpl.automation.text.1') }}</p>
+                <p>{{ $ct('automation.text.0') }}</p>
+                <p class="mt-3">{{ $ct('automation.text.1') }}</p>
             </v-card-text>        
             <v-card-actions>
-                <v-btn @click="store.dispatch('navigateTo', '/automations')" :text="$t('tpl.automation.btn')"></v-btn>
+                <v-btn @click="store.dispatch('navigateTo', '/automations')" :text="$ct('automation.btn')"></v-btn>
             </v-card-actions>        
         </v-card>
     </div>

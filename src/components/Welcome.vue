@@ -1,9 +1,12 @@
 <script setup>
 import { useRouter, useRoute } from 'vue-router'
 import { useStore } from 'vuex';
+import { componentTranslate } from '../i18n/utils.js'
+
 const store = useStore()
 const router = useRouter()
 const route = useRoute()
+const $ct = componentTranslate('Welcome')
 
 const next = () => {
   
@@ -30,7 +33,7 @@ const next = () => {
       </template>
       <template v-slot:actions>
         <v-btn
-          text="Me connecter"
+          :text="$ct('login')"
           @click="next"
           color="primary"
         ></v-btn>

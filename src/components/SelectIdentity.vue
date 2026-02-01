@@ -3,9 +3,12 @@
 import { computed, ref, watch } from 'vue'
 import { useStore } from 'vuex'
 import { useRouter } from 'vue-router'
+import { componentTranslate } from '../i18n/utils.js'
 
 const router = useRouter()
 const store = useStore()
+const $ct = componentTranslate('SelectIdentity')
+
 store.dispatch('setPageTitle', 'Identité')
 
 const globalSelectedIdentity = store.getters.getSelectedIdentity
@@ -66,7 +69,7 @@ const importGroup = () => {
     <v-infinite-scroll v-if="isConnectingToMobilizon || isLoadingGroups"></v-infinite-scroll>
     <div class="form" v-else>
         <v-select 
-            label="Sélectionnez une identité"
+            :label="$ct('selectIdentity')"
             :items="identities"
             item-title="name" 
             item-value="id" 
@@ -102,7 +105,7 @@ const importGroup = () => {
         </v-select>
 
         <v-autocomplete 
-            label="Sélectionnez un groupe"
+            :label="$ct('selectGroup')"
             :items="groups"
             item-title="name" 
             item-value="id" 

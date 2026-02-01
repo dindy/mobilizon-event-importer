@@ -10,7 +10,7 @@ const selectedLanguage = languages.find(lang =>
 )
 
 const i18n = createI18n({
-    locale: selectedLanguage || defaultLanguage,
+    locale: 'en',//selectedLanguage || defaultLanguage,
     fallbackLocale: defaultLanguage,
     messages: {
         fr,
