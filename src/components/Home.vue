@@ -2,13 +2,13 @@
 import { computed } from 'vue'
 import { useStore } from 'vuex'
 import { useRouter } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 
-const router = useRouter()
+const { t } = useI18n()
 const store = useStore()
 const isLoadingGroups = computed(() => store.getters.isLoadingGroups)
 const isLoadingConfig = computed(() => store.getters.isLoadingConfig)
-const isConnected = computed(() => store.getters.isMobilizonAppAuthorized)
-store.dispatch('setPageTitle', 'Accueil')
+store.dispatch('setPageTitle', t('title.home'))
 </script>
 
 <template>
@@ -18,15 +18,15 @@ store.dispatch('setPageTitle', 'Accueil')
             prepend-icon="mdi-calendar-plus"
             color="secondary"
             variant="outlined"
-            title="Imports ponctuels" 
-            subtitle="Importez un événement depuis son URL"
+            :title="$t('tpl.occasional_import.title')" 
+            :subtitle="$t('tpl.occasional_import.subtitle')"
             class="bg-white"
         >
             <v-card-text>
-                <p>Importez un événement depuis son adresse Facebook, Instagram, HelloAsso, Dice, Shotgun, Eventbrite ou toute autre plateforme qui utilise des metadonnées standards.</p>
+                <p>{{ $t('tpl.occasional_import.text') }}</p>
             </v-card-text>
             <v-card-actions>
-                <v-btn @click="store.dispatch('navigateTo', '/scrapEvent')" text="Importer un événement"></v-btn>
+                <v-btn @click="store.dispatch('navigateTo', '/scrapEvent')" :text="$t('tpl.occasional_import.btn')"></v-btn>
             </v-card-actions>
         </v-card>
         <v-card
@@ -34,16 +34,15 @@ store.dispatch('setPageTitle', 'Accueil')
             color="secondary"
             variant="outlined"        
             class="mt-5" 
-            title="Imports automatiques" 
-            subtitle="Importez automatiquement les événements d'un flux"
+            :title="$t('tpl.automation.title')" 
+            :subtitle="$t('tpl.automation.subtitle')"
         >
             <v-card-text>
-                <p>L'application enregistre l'URL d'une source d'événements et importera automatiquement les nouveaux événements à interval régulier.</p>
-                <p class="mt-3">Seuls les flux ICS (iCalendar) sont actuellement supportés.</p>
+                <p>{{ $t('tpl.automation.text.0') }}</p>
+                <p class="mt-3">{{ $t('tpl.automation.text.1') }}</p>
             </v-card-text>        
             <v-card-actions>
-                <!-- <v-btn @click="store.dispatch('navigateTo', '/registerFeed')" text="Ajouter un flux"></v-btn> -->
-                <v-btn @click="store.dispatch('navigateTo', '/automations')" text="Gérer les automatisations"></v-btn>
+                <v-btn @click="store.dispatch('navigateTo', '/automations')" :text="$t('tpl.automation.btn')"></v-btn>
             </v-card-actions>        
         </v-card>
     </div>

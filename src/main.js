@@ -12,6 +12,7 @@ import './style.css'
 import App from './App.vue'
 import store from './store'
 import router from './router.js'
+import i18n from './i18n/i18n.js'
 
 await store.dispatch('init')
 
@@ -44,6 +45,7 @@ createApp(App)
 .use(router)
 .use(store)
 .use(vuetify)
+.use(i18n)
 .mount('#app')
 
 router.beforeEach(async (to, from) => {
