@@ -68,5 +68,6 @@ export default {
         .sort((item1, item2) => new Date(item1.id) < new Date(item2.id))
         .sort((item1, item2) => item1.itemType > item2.itemType),
     getPreviousPath: state => state.history[state.history.length - 2] || null,
-    isFirstRoute: state => state.isFirstRoute
+    isFirstRoute: state => state.isFirstRoute,
+    getSharingUrl: state => state.sharingUrl
 }

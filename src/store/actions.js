@@ -115,6 +115,12 @@ export default {
             commit('setMobilizonCreatedEventUuid', lastSavedUUID)
             console.log('Action - Last event saved UUID set from localstorage', lastSavedUUID)
         }  
+
+        const sharingUrl = localStorage.getItem('sharingUrl')
+        if (sharingUrl) {
+            commit('setSharingUrl', sharingUrl && sharingUrl !== '' ? sharingUrl : null)
+            console.log('Action - Sharing URL set from localstorage', sharingUrl)
+        }  
         
         return true
     },
@@ -259,6 +265,9 @@ export default {
     createErrorFromText({ commit }, text) {
         commit('addMessage', { text, type: 'error' })
     },
+    informUser({ commit }, text) {
+        commit('addMessage', { text, type: 'info' })
+    },        
     async saveMobilizonGroup(store, group) {
         console.log('Action - Save mobilizon group : ', group);
 
@@ -469,5 +478,10 @@ export default {
             commit('removeLastPathsFromHistory', 1)
             router.push(lastPath)
         }
+    },
+    saveSharingUrl({ commit }, url) {
+        console.log(`Action - Sharing url ${url}`)
+        localStorage.setItem('sharingUrl', url || '')
+        commit('setSharingUrl', url)
     }
 }

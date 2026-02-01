@@ -186,5 +186,9 @@ export default {
     clearHistory(state) {
         console.log(`Mutation - Clear history`);
         state.history = []
+    },
+    setSharingUrl(state, sharingUrl) {
+        console.log(`Mutation - Set sharing url`, sharingUrl)
+        state.sharingUrl = sharingUrl
     }
 }

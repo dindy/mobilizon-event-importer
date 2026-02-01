@@ -47,18 +47,11 @@ createApp(App)
 .mount('#app')
 
 router.beforeEach(async (to, from) => {
-    
+
     console.log('Router - Before - ' + to.path);
     
-    const selectedIdentity = store.getters.getSelectedIdentity
-    const localEvent = store.getters.getLocalEvent
-    const mobilizonConfig = store.getters.getMobilizonConfig
-    const mobilizonInstanceUrl = store.getters.getMobilizonInstanceUrl
-    const isInstanceConfigLoaded = store.getters.isInstanceConfigLoaded
-    const scrappedData = store.getters.getScrappedEvent
-    const scrapperUrl = store.getters.getEventScrapperUrl
-    const lastUUID = store.getters.getMobilizonEventUUID
     const isMbzConnected = store.getters.isMobilizonAppAuthorized
+    const mbzInstanceUrl = store.getters.getMobilizonInstanceUrl
     
     const startPath = to.path
     const entryPaths = [
@@ -67,6 +60,7 @@ router.beforeEach(async (to, from) => {
         '/instance',
         '/mobilizon/callback',
         '/share/',
+        '/share',
     ]
     
     if (store.getters.isFirstRoute) {
@@ -101,5 +95,16 @@ router.beforeEach(async (to, from) => {
             }
         }
         store.commit('setIsFirstRoute', false)
+    
+    } else {
+        
+        if (!entryPaths.includes(startPath) && !isMbzConnected) { 
+
+            if (mbzInstanceUrl) {
+                store.dispatch('navigateTo', '/instance')
+            } else {
+                store.dispatch('navigateTo', '/')
+            }
+        }
     }
 })

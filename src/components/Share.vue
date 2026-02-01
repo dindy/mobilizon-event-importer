@@ -36,9 +36,18 @@ onMounted(async () => {
     }
 
     if (toImport.value) {
-        if (isAppAuth && selectedIdentity && mobilizonConfig) {
+        if (isAppAuth) {
             await store.dispatch('scrapEvent', toImport.value)
             store.dispatch('navigateTo', '/createEvent')            
+        } else {
+            const mbzInstanceUrl = store.getters.getMobilizonInstanceUrl
+            store.dispatch('saveSharingUrl', toImport.value)
+            store.dispatch('informUser', `Veuillez vous connecter pour partager l'événement.`)
+            if (mbzInstanceUrl) {
+                store.dispatch('navigateTo', '/instance')
+            } else {
+                store.dispatch('navigateTo', '/')
+            }            
         }
     }
 })
@@ -57,8 +66,7 @@ const scrap = () => {
 
 <template>
     <div v-if="!store.getters.isLoadingScrapper">
-        <v-alert title="Partager l'évènement" variant="outlined" type="info" v-if="toImport" :text="getText()"></v-alert>
-        <v-alert title="Partage impossible"  type="warning" v-else text="Nous sommes désolés mais aucune URL valide n'a été détectée."></v-alert>
+        <v-alert title="Partage impossible"  type="warning" v-if="!toImport" text="Nous sommes désolés mais aucune URL valide n'a été détectée."></v-alert>
         <v-btn
             v-if="toImport"
             class="mt-5"

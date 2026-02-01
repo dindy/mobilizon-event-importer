@@ -1,4 +1,5 @@
 export default {
+    sharingUrl: null,
     isFirstRoute: true,
     history: [],
     pageTitle: null,

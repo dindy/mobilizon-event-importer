@@ -17,7 +17,13 @@ onMounted(async () => {
       // store.dispatch('saveMobilizonCode', code)
       await store.dispatch('authorizeApp', { code, clientId })
       store.dispatch('fetchMobilizonConfigAndLoggedUser')
-      store.dispatch('navigateTo', '/home')
+
+      if (store.getters.getSharingUrl) {
+        store.dispatch('navigateTo', '/share/?url=' + store.getters.getSharingUrl)
+        store.dispatch('saveSharingUrl', null)
+      } else {
+        store.dispatch('navigateTo', '/home')
+      }
     }
 })
 </script> 
