@@ -22,6 +22,7 @@ const closeIdentityMenu = () => isIdentityMenuOpened.value = false
 const isMbzConnected = computed(() => store.getters.isMobilizonAppAuthorized)
 const logout = () => {
     store.dispatch('logoutMobilizon')
+    store.dispatch('navigateTo', '/')
 }
 const prevRoute = computed(() => store.getters.getPreviousPath)
 const goPrev = () => {

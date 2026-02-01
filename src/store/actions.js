@@ -23,7 +23,7 @@ export const issueMobilizonRequest = async ({ dispatch, commit, getters, state }
             console.log('Action - Proxy auth error')
             dispatch('createErrorFromText', 'Erreur d\'authentification. Veuillez vous reconnecter.')
             dispatch('logoutMobilizon')
-            location.reload()
+            store.dispatch('navigateTo', '/')
         } else if (error instanceof MbzRequestError) {
             dispatch('createErrorFromText', 'Une erreur de communication avec le serveur est survenue. Veuillez réessayer.')
         }
@@ -132,7 +132,6 @@ export default {
         commit('setMobilizonAppIsAuthorized', false)
         commit('clearMobilizonSession')
         commit('clearHistory')
-        history.replaceState(null, '', '/')
     },
     async authorizeApp({ commit, state }, data) {
         console.log('Action - Authorizing app with code ' + data.code)
