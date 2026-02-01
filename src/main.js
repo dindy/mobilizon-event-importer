@@ -75,7 +75,6 @@ router.beforeEach(async (to, from) => {
         
         if (!entryPaths.includes(startPath)) {
             
-            const isMbzConnected = store.getters.isMobilizonAppAuthorized
             console.log(`Router - Before - Not an entry path`)
             console.log(`Router - Before - Is mobilizon connected ?`, isMbzConnected)
             
@@ -86,6 +85,10 @@ router.beforeEach(async (to, from) => {
             }
             
         } else {
+
+            console.log(`Router - Before - It's an entry path`)
+            console.log(`Router - Before - Is mobilizon connected ?`, isMbzConnected)
+            
             // Redirect to home
             if ((startPath == '/' || startPath == '/instance') && isMbzConnected) {
                 store.dispatch('navigateTo', '/home')
@@ -93,7 +96,7 @@ router.beforeEach(async (to, from) => {
             } else if (startPath == '/home' && !isMbzConnected) {
                 store.dispatch('navigateTo', '/')
             // No redirection but set /home in history
-            } else {
+            } else if (isMbzConnected) {
                 store.commit('addPathToHistory', '/home')
             }
         }

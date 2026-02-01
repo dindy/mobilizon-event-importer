@@ -132,7 +132,7 @@ export default {
         commit('setMobilizonAppIsAuthorized', false)
         commit('clearMobilizonSession')
         commit('clearHistory')
-        dispatch('navigateTo', '/')
+        history.replaceState(null, '', '/')
     },
     async authorizeApp({ commit, state }, data) {
         console.log('Action - Authorizing app with code ' + data.code)

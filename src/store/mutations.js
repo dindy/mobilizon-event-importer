@@ -180,9 +180,11 @@ export default {
         state.history.splice(-1 * n)
     },
     setIsFirstRoute(state, isFirstRoute) {
+        console.log(`Mutation - Set is first route to ${isFirstRoute}`)
         state.isFirstRoute = isFirstRoute
     },
     clearHistory(state) {
+        console.log(`Mutation - Clear history`);
         state.history = []
     }
 }
