@@ -9,6 +9,7 @@ import { ScrapperApi } from '../api/scrapper.js'
 import { GeoApi } from '../api/geo.js'
 import compareVersions from '../utils/compareVersions.js'
 import router from '../router.js'
+import versionData from '../version.js'
 
 const mobilizonApi = new MobilizonApi()
 const scrapperApi = new ScrapperApi()
@@ -38,8 +39,8 @@ export default {
         console.log('Action - Checking version')
 
         const appVersionSaved = localStorage.getItem('appVersion')
-        const currentAppVersion = import.meta.env.VITE_APP_VERSION
-        const isBreakingVersion = import.meta.env.VITE_APP_BREAKING_VERSION
+        const currentAppVersion = versionData.version
+        const isBreakingVersion = versionData.isBreaking
 
         if ((!appVersionSaved || compareVersions(appVersionSaved, currentAppVersion) < 0) && isBreakingVersion) {
             console.log('Action - New breaking app version detected')
