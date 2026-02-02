@@ -11,7 +11,10 @@ export default {
         feed_already_exists_user: "Ce flux est déjà enregistré pour cet utilisateur.",
         create_automation_error: "Erreur lors de la création de l'automatisation : {error}. Veuillez réessayer.",
         fetch_automations_error: "Erreur lors de la récupération des automatisations : {error}. Veuillez réessayer.",
-        fetch_automation_history_error: "Erreur lors de la récupération de l'historique de l'automatisation : {error}. Veuillez réessayer."
+        fetch_automation_history_error: "Erreur lors de la récupération de l'historique de l'automatisation : {error}. Veuillez réessayer.",
+        mobilizon_request_error: "Erreur de requête Mobilizon.",
+        field_error: "Champ {field} : {message}",
+        unknown_error: "Erreur inconnue"
     },
     components: {
         AutomationHistory: {

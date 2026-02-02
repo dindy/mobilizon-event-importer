@@ -9,7 +9,10 @@ export default {
         feed_already_exists_user: "This feed is already registered for this user.",
         create_automation_error: "Error creating the automation: {error}. Please try again.",
         fetch_automations_error: "Error fetching automations: {error}. Please try again.",
-        fetch_automation_history_error: "Error fetching automation history: {error}. Please try again."
+        fetch_automation_history_error: "Error fetching automation history: {error}. Please try again.",
+        mobilizon_request_error: "Mobilizon request error.",
+        field_error: "Field {field} : {message}",
+        unknown_error: "Unknown error"
     },
     components: {
         AutomationHistory: {
