@@ -2,13 +2,15 @@
 import { ref, computed, watch, onMounted } from 'vue'
 import { useStore } from 'vuex'
 import { useRouter } from 'vue-router'
+import { componentTranslate } from '../i18n/utils.js'
 
 const router = useRouter()
 const store = useStore()
+const $ct = componentTranslate('GroupSelect')
 const selectedIdentity = computed(() => store.getters.getSelectedIdentity)
 const storedSelectedGroup = computed(() => store.getters.getSelectedGroup)
 const groups = computed(() => [
-    { avatar: null, add: true, name: "Importer un groupe", id: -1 },
+    { avatar: null, add: true, name: $ct('add'), id: -1 },
     ...store.getters.getSelectedIdentityGroups])
 const selectedGroup = ref(storedSelectedGroup.value?.id)
 const emit = defineEmits('closeMenu')
@@ -29,7 +31,7 @@ watch(selectedIdentity, (newVal, oldVal) => {
 
 <template>
     <v-select 
-        label="Sélectionnez un groupe"
+        :label="$ct('label')"
         :items="groups"
         item-title="name" 
         item-value="id" 

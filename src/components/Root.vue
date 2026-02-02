@@ -2,14 +2,16 @@
 import { computed, onMounted } from 'vue'
 import { useStore } from 'vuex'
 import { useRouter, useRoute } from 'vue-router'
+import { componentTranslate } from '../i18n/utils.js'
 import Toaster from './Toaster.vue'
 import AppBar from './AppBar.vue'
 
 const store = useStore()
 const router = useRouter()
 const route = useRoute()
+const $ct = componentTranslate('Root')
 
-store.dispatch('setPageTitle', 'Instance Mobilizon')
+store.dispatch('setPageTitle', $ct('title'))
 const displayAppBar = () => route.path != '/'
 </script>
 

@@ -2,6 +2,7 @@
 import { computed, ref, watch } from 'vue'
 import { useStore } from 'vuex';
 import { useRouter } from 'vue-router'
+import { componentTranslate } from '../i18n/utils.js'
 import { convertBytesToMegabytes, dataURLtoFile, mergeDateTime, timestampToDate, timestampToTime, blobToDataUrl, getFormattedAddress } from '../utils/utils'
 import QuillEditor from './QuillEditor.vue'
 import LocationSelect from './LocationSelect.vue'
@@ -9,7 +10,9 @@ import ImageSelect from './ImageSelect.vue'
 
 const router = useRouter()
 const store = useStore()
-store.dispatch('setPageTitle', 'Détails de l\'événement')
+const $ct = componentTranslate('Event')
+
+store.dispatch('setPageTitle', $ct('title'))
 
 const dispatchError = (error) => {
     store.dispatch('createErrorFromText', error)
@@ -51,7 +54,7 @@ const submit = async action => {
     const { valid } = await form.value.validate()
 
     if (!valid) {
-        store.dispatch('createErrorFromText', 'Le formulaire comporte des erreurs. Merci de vérifier les données.')
+        store.dispatch('createErrorFromText', $ct('formErrors'))
         return
     }
 
@@ -77,20 +80,20 @@ const isStartDateSuperiorToEndDate = () => {
 const rules = {
     maxEndDate: value => {
         if (isStartDateSuperiorToEndDate()) {
-            return event.value.startDate <= event.value.endDate || 'La date de début est supérieure à la date de fin.'
+            return event.value.startDate <= event.value.endDate || $ct('startDateSuperior')
         }
         return true
     },
     maxEndTime: value => {
         if (isStartDateSuperiorToEndDate()) {
             if (event.value.startDate <= event.value.endDate) {
-                return event.value.startTime <= event.value.endTime || 'L\'heure de début est supérieure à l\'heure de fin.'
+                return event.value.startTime <= event.value.endTime || $ct('startTimeSuperior')
             }
         }
         return true
     },
-    notEmpty: value => (value && value !== '') || 'Le champ ne doit pas être vide.',
-    titleLength: value => value.length <= 200 || 'Le titre ne peut pas comporter plus de 200 caractères.'
+    notEmpty: value => (value && value !== '') || $ct('emptyField'),
+    titleLength: value => value.length <= 200 || $ct('titleTooLong')
 }
 
 const cancel = () => {
@@ -182,9 +185,9 @@ if (saved) {
     event.value.hasEndDate = endTimestamp ? true : false    
     if (hosts && hosts.length > 0) {
         if (hosts.length == 1) {
-            event.value.description += `<br><p>Organisé par ${getLinkOrJustName(hosts[0].name, hosts[0].url)}</p>`
+            event.value.description += `<br><p>${$ct('organized_by')} ${getLinkOrJustName(hosts[0].name, hosts[0].url)}</p>`
         } else {
-            event.value.description += `<br><p>Organisateurs :<ul>`
+            event.value.description += `<br><p>${$ct('organized_by')} : <ul>`
             hosts.forEach((host) => {
                 event.value.description += `<li>${getLinkOrJustName(host.name, host.url)}</li>`
             })
@@ -206,32 +209,32 @@ const useFoundAddress = (address) => {
     <v-form ref="form" validate-on="input eager" @submit.prevent="">
         
         <v-alert
-            text="Nous faisons de notre mieux pour récupérer les informations mais certaines données peuvent être manquantes ou erronées."
-            title="Vérifiez les infos SVP !"
+            :text="$ct('checkInfoText')"
+            :title="$ct('checkInfo')"
             type="info"
             class="mb-5"
             :closable="true"
         ></v-alert> 
 
-        <h1 class="text-subtitle-2 mb-3">Date et heure</h1>
+        <h1 class="text-subtitle-2 mb-3">{{ $ct('dateAndTime') }}</h1>
         
-        <v-text-field :rules="[rules.notEmpty]" class="required" required label="Date de début" id="start-date" type="date" v-model="event.startDate" />
+        <v-text-field :rules="[rules.notEmpty]" class="required" required :label="$ct('startDate')" id="start-date" type="date" v-model="event.startDate" />
         
-        <v-text-field :rules="[rules.notEmpty]" class="required" required label="Heure de début" id="start-time" type="time" v-model="event.startTime" />
+        <v-text-field :rules="[rules.notEmpty]" class="required" required :label="$ct('startTime')" id="start-time" type="time" v-model="event.startTime" />
         
-        <v-checkbox label="L'événement a une date de fin" v-model="event.hasEndDate" id="has-end-date"></v-checkbox>
+        <v-checkbox :label="$ct('hasEndDate')" v-model="event.hasEndDate" id="has-end-date"></v-checkbox>
 
         <div v-if="event.hasEndDate">
-            <v-text-field :rules="[rules.maxEndDate]" label="Date de fin" id="end-date" type="date" v-model="event.endDate"  />            
-            <v-text-field :rules="[rules.maxEndTime]" label="Heure de fin" id="end-time" type="time" v-model="event.endTime"  />    
+            <v-text-field :rules="[rules.maxEndDate]" :label="$ct('endDate')" id="end-date" type="date" v-model="event.endDate"  />            
+            <v-text-field :rules="[rules.maxEndTime]" :label="$ct('endTime')" id="end-time" type="time" v-model="event.endTime"  />    
         </div>
 
-        <h1 class="text-subtitle-2 mb-3">Image d'en-tête</h1>
+        <h1 class="text-subtitle-2 mb-3">{{ $ct('headerImage') }}</h1>
 
         <v-alert
             v-if="!getSelectedBanner()"
-            text="Aucune image de couverture n'a été trouvée. Vous pouvez en téléverser une vous-même."
-            title="Pas de d'image de couverture"
+            :text="$ct('noCoverImageText')"
+            :title="$ct('noCoverImage')"
             type="warning"
         />
 
@@ -239,33 +242,33 @@ const useFoundAddress = (address) => {
             :maxSize="uploadLimits.banner"
             :images="event.banners"
             :selected="event.selectedBannerId"
-            upload-button-label="Téléverser"
+            :upload-button-label="$ct('uploadButton')"
             @display-error="dispatchError"
             @set-selected-image-index="setSelectedBanner"
         />
 
-        <h1 class="text-subtitle-2 mt-5 mb-3">Description</h1>
+        <h1 class="text-subtitle-2 mt-5 mb-3">{{ $ct('description') }}</h1>
 
-        <v-text-field :rules="[rules.notEmpty, rules.titleLength]" class="required" label="Titre" required id="title" v-model="event.title"/>        
+        <v-text-field :rules="[rules.notEmpty, rules.titleLength]" class="required" :label="$ct('title_label')" required id="title" v-model="event.title"/>        
         
         <QuillEditor :upload-limit="uploadLimits.default" contentType="html" v-model:content="event.description" id="description"  theme="snow" />
 
-        <v-text-field class="mt-5" label="Adresse web" type="url" v-model="event.url"/>
+        <v-text-field class="mt-5" :label="$ct('url')" type="url" v-model="event.url"/>
         
-        <v-text-field class="" label="Adresse web de la billetterie" type="url" v-model="event.ticketsUrl"/>
+        <v-text-field class="" :label="$ct('ticketsUrl')" type="url" v-model="event.ticketsUrl"/>
         
         <v-autocomplete
             :items="categories" 
             item-title="label" 
             item-value="id" 
-            label="Catégorie" 
+            :label="$ct('category')" 
             v-model="event.selectedCategory"
             :clearable="true"
-            no-data-text="Aucun résultat correspondant"
+            :no-data-text="$ct('noDataText')"
         >
         </v-autocomplete>
         
-        <h1 class="text-subtitle-2 mt-3 mb-3">Localisation</h1>
+        <h1 class="text-subtitle-2 mt-3 mb-3">{{ $ct('location') }}</h1>
 
         <LocationSelect 
             :address="event.physicalAddress"
@@ -284,7 +287,7 @@ const useFoundAddress = (address) => {
                 type="submit"
                 :loading="store.getters.isSavingEvent"
                 @click="submit('submit')"
-            >Enregistrer</v-btn>
+            >{{ $ct('submit') }}</v-btn>
     
             <v-btn 
                 class="mr-5 mb-5" 
@@ -292,13 +295,13 @@ const useFoundAddress = (address) => {
                 type="submit"
                 :loading="store.getters.isSavingEvent"
                 @click="submit('submitAsDraft')"
-            >Enregistrer comme brouillon</v-btn>
+            >{{ $ct('submitDraft') }}</v-btn>
 
             <v-btn 
                 class="mb-5" 
                 color="warning" 
                 @click="cancel"
-            >Annuler</v-btn>            
+            >{{ $ct('cancel') }}</v-btn>            
         </div>
         
     </v-form>

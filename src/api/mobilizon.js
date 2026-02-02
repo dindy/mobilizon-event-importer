@@ -1,10 +1,12 @@
+import { messageTranslate } from '../i18n/utils.js'
+
 export class MbzRequestError extends Error {
     
     response = null
     body = null
 
     constructor(response, body = null) {
-        super('Mobilizon request error.')
+        super(messageTranslate('mobilizon_request_error'))
         this.response = response
         this.body = body
     }
@@ -80,7 +82,7 @@ export class MobilizonApi {
                 const message = error.message || 'erreur inconnue'
                 if (isString(message)) {
                     if (error.field) {
-                        messages.push(`Champ ${field} : ${message}`)
+                        messages.push(messageTranslate('field_error', { field, message }))
                     } else {
                         messages.push(`${message}`)
                     }
@@ -88,26 +90,26 @@ export class MobilizonApi {
                 else if (Array.isArray(message)) {
                     message.forEach(subMessage => {
                         if (isString(subMessage)) { 
-                            messages.push(`Champ ${field} : ${subMessage}`)
+                            messages.push(messageTranslate('field_error', { field, message: subMessage }))
                         }
                         else if (isObject(subMessage)) {
                             for (let key in subMessage) {
                                 if (Array.isArray(subMessage[key])) {
                                     subMessage[key].forEach(subSubMessage => {
-                                        messages.push(`Champ ${field} : ${subSubMessage}`)
+                                        messages.push(messageTranslate('field_error', { field, message: subSubMessage }))
                                     })
                                 } else if (isString(subMessage[key])) {
-                                    messages.push(`Champ ${field} : ${subMessage[key]}`)
+                                    messages.push(messageTranslate('field_error', { field, message: subMessage[key] }))
                                 } else {
-                                    messages.push(`Champ ${field} : Erreur inconnue`)
+                                    messages.push(messageTranslate('field_error', { field, message: messageTranslate('unknown_error') }))
                                 }
                             }
                         } else {
-                            messages.push(`Champ ${field} : Erreur inconnue`)
+                            messages.push(messageTranslate('field_error', { field, message: messageTranslate('unknown_error') }))
                         }
                     })
                 } else {
-                    messages.push(`Champ ${field} : Erreur inconnue`)
+                    messages.push(messageTranslate('field_error', { field, message: messageTranslate('unknown_error') }))
                 }
             })
 

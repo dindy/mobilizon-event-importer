@@ -2,13 +2,15 @@
 import { ref, computed, onMounted } from 'vue'
 import { useStore } from 'vuex'
 import { useRouter } from 'vue-router'
+import { componentTranslate } from '../i18n/utils.js'
 import UrlForm from './UrlForm.vue'
 
 const router = useRouter()
 const store = useStore()
 const url = ref(null)
+const $ct = componentTranslate('EventScrapper')
 
-store.dispatch('setPageTitle', 'URL de l\'événement')
+store.dispatch('setPageTitle', $ct('title'))
 
 onMounted(() => {
     url.value = store.getters.getEventScrapperUrl
@@ -23,10 +25,10 @@ const scrap = async (url) => {
 
 <template>
     <UrlForm
-        placeholder="https://www.facebook.com/events/123456789"
-        label="Entrez une adresse web (facebook, instagram ou autre)"
+        :placeholder="$ct('placeholder')"
+        :label="$ct('label')"
         :default="url"
-        buttonText="Importer"
+        :buttonText="$ct('button')"
         :is-loading="store.getters.isLoadingScrapper"
         @send="scrap"
     />

@@ -1,7 +1,9 @@
 <script setup>
 import { computed, ref, onMounted, watch } from 'vue'
+import { componentTranslate } from '../i18n/utils.js'
 import Map from './Map.vue'
 const defaultMapCenter = [43.63421932550079, -1.1998593807220461] // Pey mon village <3
+const $ct = componentTranslate('LocateFromMapOverlay')
 const emit = defineEmits('toggleShow', 'validate')
 const props = defineProps({
     show: Boolean,
@@ -81,7 +83,7 @@ const validateMapLocation = () => emit('validate', {
                 :loading="isLoading" 
                 prepend-icon="mdi-crosshairs-gps" 
                 @click="geolocateUser"
-            >Me géolocaliser</v-btn>                
+            >{{ $ct('geolocateButton') }}</v-btn>                
             <div class="map-select">
                 <Map 
                     ref="map2"
@@ -93,9 +95,9 @@ const validateMapLocation = () => emit('validate', {
                     :canUpdateCoords="true"
                 />         
             </div>              
-            <div class="map-select-caption text-caption font-italic">Cliquez sur la carte ou glissez-déposez le marqueur pour modifier la position.</div>       
-            <v-btn color="" prepend-icon="mdi-close" @click="toggleShow">Annuler</v-btn>            
-            <v-btn class="" @click="validateMapLocation" prepend-icon="mdi-check" color="success">Valider</v-btn>
+            <div class="map-select-caption text-caption font-italic">{{ $ct('mapCaption') }}</div>       
+            <v-btn color="" prepend-icon="mdi-close" @click="toggleShow">{{ $ct('cancel') }}</v-btn>            
+            <v-btn class="" @click="validateMapLocation" prepend-icon="mdi-check" color="success">{{ $ct('validate') }}</v-btn>
         </div>
     </v-overlay>    
 </template>

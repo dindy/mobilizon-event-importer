@@ -1,6 +1,9 @@
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref } from 'vue'
+import { componentTranslate } from '../i18n/utils.js'
 import { isValidUrl } from '../utils/utils.js'
+
+const $ct = componentTranslate('UrlForm')
 
 const props = defineProps({
     placeholder: String,
@@ -29,8 +32,8 @@ const paste = async () => {
 }
 
 const rules = {
-    notEmpty: value => value === '' ? 'Le champ est vide.' : true,
-    validUrl: value => !isValidUrl(value) ? 'L\'URL n\'est pas valide.' : true,
+    notEmpty: value => value === '' ? $ct('emptyField') : true,
+    validUrl: value => !isValidUrl(value) ? $ct('invalidUrl') : true,
 }
 
 </script>
@@ -51,6 +54,6 @@ const rules = {
             :loading="props.isLoading" 
             type="submit"
             color="primary"
-        >Importer</v-btn>
+        >{{ props.buttonText }}</v-btn>
     </v-form>    
 </template>

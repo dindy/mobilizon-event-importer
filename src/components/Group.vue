@@ -2,19 +2,17 @@
 import { computed, ref, watch } from 'vue'
 import { useStore } from 'vuex';
 import { useRouter } from 'vue-router'
+import { componentTranslate } from '../i18n/utils.js'
 import QuillEditor from './QuillEditor.vue'
-import Map from './Map.vue'
-import SearchAddressFromStringOverlay from './SearchAddressFromStringOverlay.vue'
-import SearchAddressFromCoordsOverlay from './SearchAddressFromCoordsOverlay.vue'
-import LocateFromMapOverlay from './LocateFromMapOverlay.vue'
 import ImageSelect from './ImageSelect.vue'
 import LocationSelect from './LocationSelect.vue'
 import { hasSpecialCharOrNotUnderscore, removeSpecialChar, removeDiacritics } from '../utils/utils'
 
 const router = useRouter()
 const store = useStore()
+const $ct = componentTranslate('Group')
 
-store.dispatch('setPageTitle', 'Détails du groupe')
+store.dispatch('setPageTitle', $ct('title'))
 
 const scrapped = store.getters.getScrappedGroup
 const uploadLimits = computed(() => store.getters.getUploadLimits)
@@ -76,9 +74,9 @@ const getSelectedLogo = () => group.value.selectedLogoId !== null ?
     null
 
 const rules = {
-    notEmpty: value => (value && value !== '') || 'Le champ ne doit pas être vide.',
-    nameLength: value => value.length <= 200 || 'Le titre ne peut pas comporter plus de 200 caractères.',
-    federatedName: value => !hasSpecialCharOrNotUnderscore(value) || 'Seuls les caractères alphanumériques minuscules et les tirets bas sont acceptés.'
+    notEmpty: value => (value && value !== '') || $ct('emptyField'),
+    nameLength: value => value.length <= 200 || $ct('nameLength'),
+    federatedName: value => !hasSpecialCharOrNotUnderscore(value) || $ct('invalidFederatedName')
 }
 
 const dispatchError = (error) => {
@@ -121,7 +119,7 @@ const submit = async () => {
     const { valid } = await form.value.validate()
 
     if (!valid) {
-        store.dispatch('createErrorFromText', 'Le formulaire comporte des erreurs. Merci de vérifier les données.')
+        store.dispatch('createErrorFromText', $ct('formErrors'))
         return
     }
 
@@ -134,18 +132,18 @@ const submit = async () => {
 <template>
     <v-form class="form" ref="form" validate-on="input eager" @submit.prevent="">
         <v-alert
-            text="Nous faisons de notre mieux pour récupérer les informations mais certaines données peuvent être manquantes ou erronées."
-            title="Vérifiez les infos SVP !"
+            :text="$ct('checkInfoText')"
+            :title="$ct('checkInfo')"
             type="info"
             :closable="true"
         ></v-alert> 
         
-        <h1 class="text-subtitle-2">Image de couverture</h1>
+        <h1 class="text-subtitle-2">{{ $ct('banner') }}</h1>
         
         <v-alert
             v-if="!getSelectedBanner()"
-            text="Aucune image de couverture n'a été trouvée. Vous pouvez en téléverser une vous-même."
-            title="Pas de d'image de couverture"
+            :text="$ct('noCoverImageText')"
+            :title="$ct('noCoverImage')"
             type="warning"
         />
 
@@ -153,17 +151,17 @@ const submit = async () => {
             :maxSize="uploadLimits.banner"
             :images="group.banners"
             :selected="group.selectedBannerId"
-            upload-button-label="Téléverser"
+            :upload-button-label="$ct('uploadButton')"
             @display-error="dispatchError"
             @set-selected-image-index="setSelectedBanner"
         />        
 
-        <h1 class="text-subtitle-2">Logo</h1>
+        <h1 class="text-subtitle-2">{{ $ct('logo') }}</h1>
 
         <v-alert
             v-if="!getSelectedLogo()"
-            text="Aucun logo n'a été trouvé. Vous pouvez en téléverser un vous-même."
-            title="Pas de logo"
+            :text="$ct('noLogoText')"
+            :title="$ct('noLogo')"
             type="warning"
         />
 
@@ -171,24 +169,24 @@ const submit = async () => {
             :maxSize="uploadLimits.avatar"
             :images="group.logos"
             :selected="group.selectedLogoId"
-            upload-button-label="Téléverser"
+            :upload-button-label="$ct('uploadButton')"
             @display-error="dispatchError"
             @set-selected-image-index="setSelectedLogo"
         />  
 
-        <h1 class="text-subtitle-2">Nom</h1>
+        <h1 class="text-subtitle-2">{{ $ct('nameSection') }}</h1>
 
-        <v-text-field :rules="[rules.notEmpty, rules.nameLength]" class="required" label="Nom du groupe" required id="name" v-model="group.name"/>    
+        <v-text-field :rules="[rules.notEmpty, rules.nameLength]" class="required" :label="$ct('name_label')" required id="name" v-model="group.name"/>    
         
-        <v-text-field :rules="[rules.notEmpty, rules.federatedName]" class="required" label="Nom fédéré du groupe" required id="federatedName" v-model="group.federatedName" :suffix="getInstanceHostname()" />   
+        <v-text-field :rules="[rules.notEmpty, rules.federatedName]" class="required" :label="$ct('federatedName_label')" required id="federatedName" v-model="group.federatedName" :suffix="getInstanceHostname()" />   
 
-        <h1 class="text-subtitle-2">Description</h1>
+        <h1 class="text-subtitle-2">{{ $ct('description') }}</h1>
         
         <div>
             <QuillEditor :upload-limit="uploadLimits.default" contentType="html" v-model:content="group.description" id="description" theme="snow" />
         </div>
         
-        <h1 class="text-subtitle-2">Localisation</h1>
+        <h1 class="text-subtitle-2">{{ $ct('location') }}</h1>
         
         <LocationSelect 
             :address="group.physicalAddress"
@@ -205,13 +203,13 @@ const submit = async () => {
                 type="submit"
                 :loading="store.getters.isSavingGroup"
                 @click="submit('submit')"
-            >Enregistrer</v-btn>
+            >{{ $ct('submit') }}</v-btn>
         
             <v-btn 
                 class="" 
                 color="warning" 
                 @click="cancel"
-            >Annuler</v-btn>    
+            >{{ $ct('cancel') }}</v-btn>    
         </div>
     </v-form>
     

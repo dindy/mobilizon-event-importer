@@ -1,10 +1,13 @@
 <script setup>
+import { componentTranslate } from '../i18n/utils.js'
 import { useStore } from 'vuex';
 import { useRouter } from 'vue-router'
 
 const router = useRouter()
 const store = useStore()
-store.dispatch('setPageTitle', 'Evenement importé')
+const $ct = componentTranslate('Done')
+
+store.dispatch('setPageTitle', $ct('title'))
 const isDraft = store.getters.getMobilizonEventIsDraft
 
 const seeEvent = () => {
@@ -25,13 +28,13 @@ const newEvent = () => {
     store.dispatch('navigateTo','/scrapEvent')
 }
 
-const seeEventText = () => isDraft ? "Page de l'événement (brouillon)" : "Page de l'événement"
+const seeEventText = () => isDraft ? $ct('seeEventDraft') : $ct('seeEvent')
 
 </script>
 <template>
     <v-alert
-        text="Votre événement a été enregistré avec succès !"
-        title="Evénement enregistré"
+        :text="$ct('successText')"
+        :title="$ct('success')"
         type="success"
         class=""
     ></v-alert>       
@@ -47,5 +50,5 @@ const seeEventText = () => isDraft ? "Page de l'événement (brouillon)" : "Page
         class="mt-5" 
         color="primary" 
         @click="newEvent" 
-    >Importer un autre événement</v-btn>
+    >{{ $ct('importAnother') }}</v-btn>
 </template>

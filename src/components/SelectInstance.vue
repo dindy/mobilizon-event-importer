@@ -3,8 +3,10 @@
 import { computed, ref, watch } from 'vue'
 import { useStore } from 'vuex'
 import { useRouter } from 'vue-router'
+import { componentTranslate } from '../i18n/utils.js'
 import { onMounted } from 'vue'
 import { isValidUrl } from '../utils/utils.js'
+const $ct = componentTranslate('SelectInstance')
 const removeScheme = url => {
 
     if (url.startsWith('https://')) {
@@ -25,15 +27,15 @@ const next = () => {
 }
 
 const isInstanceUrlValid = computed(() => isValidUrl(instanceUrl.value))
-store.dispatch('setPageTitle', 'Instance Mobilizon')
+store.dispatch('setPageTitle', $ct('title'))
 const paste = async () => {
     let value = await navigator.clipboard.readText()
     instanceUrl.value = removeScheme(value)
 }
 
 const rules = {
-    notEmpty: value => value === '' ? 'Le champ est vide.' : true,
-    validUrl: value => !isValidUrl('https://' + value) ? 'L\'URL n\'est pas valide.' : true,
+    notEmpty: value => value === '' ? $ct('emptyField') : true,
+    validUrl: value => !isValidUrl('https://' + value) ? $ct('invalidUrl') : true,
 }
 const updateUrl = (e) => {
     if (e.startsWith('https://')) {
@@ -47,8 +49,8 @@ const updateUrl = (e) => {
     <v-form validate-on="submit" @submit.prevent="next">
 
         <v-alert
-            text="C'est l'adresse web de la page d'accueil du site auquel vous souhaitez vous connecter. Par exemple https://mobilizon.fr ou https://keskonfait.fr."
-            title="Quelle est l'URL de votre instance Mobilizon ?"
+            :text="$ct('alertText')"
+            :title="$ct('alertTitle')"
             type="info"
             class="mb-5"
             :closable="true"
@@ -60,8 +62,8 @@ const updateUrl = (e) => {
             @update:model-value="updateUrl"
             :rules="[rules.notEmpty, rules.validUrl]"
             validate-on="input"
-            label="URL de l'instance Mobilizon"
-            placeholder="mobilizon.fr"
+            :label="$ct('label')"
+            :placeholder="$ct('placeholder')"
             append-inner-icon="mdi-content-paste"
             @click:append-inner="paste" 
             prefix="https://" 
@@ -72,6 +74,6 @@ const updateUrl = (e) => {
             type="submit"
             color="primary"
             :loading="store.getters.isRegisteringApp"
-        >Se connecter</v-btn>          
+        >{{ $ct('loginButton') }}</v-btn>          
     </v-form>
 </template>
