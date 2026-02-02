@@ -305,6 +305,7 @@ export default {
         const requestHandler = async ({ commit, state }) => {
             commit('setIsSavingEvent', true)
             try {                
+                commit('setMobilizonCreatedEventUuid', null)
                 const uuid = await mobilizonApi.createEvent(
                     {
                         ...event,
