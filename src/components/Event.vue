@@ -185,9 +185,9 @@ if (saved) {
     event.value.hasEndDate = endTimestamp ? true : false    
     if (hosts && hosts.length > 0) {
         if (hosts.length == 1) {
-            event.value.description += `<br><p>Organisé par ${getLinkOrJustName(hosts[0].name, hosts[0].url)}</p>`
+            event.value.description += `<br><p>${$ct('organized_by')} ${getLinkOrJustName(hosts[0].name, hosts[0].url)}</p>`
         } else {
-            event.value.description += `<br><p>Organisateurs :<ul>`
+            event.value.description += `<br><p>${$ct('organized_by')} : <ul>`
             hosts.forEach((host) => {
                 event.value.description += `<li>${getLinkOrJustName(host.name, host.url)}</li>`
             })
@@ -264,7 +264,7 @@ const useFoundAddress = (address) => {
             :label="$ct('category')" 
             v-model="event.selectedCategory"
             :clearable="true"
-            no-data-text="Aucun résultat correspondant"
+            :no-data-text="$ct('noDataText')"
         >
         </v-autocomplete>
         

@@ -1,3 +1,5 @@
+import ImageSelect from "../components/ImageSelect.vue";
+
 export default {
     components: {
         AutomationHistory: {
@@ -69,7 +71,10 @@ export default {
             startDateSuperior: "La date de début est supérieure à la date de fin.",
             startTimeSuperior: "L'heure de début est supérieure à l'heure de fin.",
             emptyField: "Le champ ne doit pas être vide.",
-            titleTooLong: "Le titre ne peut pas comporter plus de 200 caractères."
+            titleTooLong: "Le titre ne peut pas comporter plus de 200 caractères.",
+            noDataText: "Aucun résultat correspondant",
+            url: "Lien vers l'événement",
+            organized_by: "Organisé par",
         },
         Group: {
             title: "Détails du groupe",
@@ -84,7 +89,10 @@ export default {
             submit: "Enregistrer",
             cancel: "Annuler",
             emptyField: "Le champ ne doit pas être vide.",
-            invalidFederatedName: "Seuls les caractères alphanumériques minuscules et les tirets bas sont acceptés."
+            invalidFederatedName: "Seuls les caractères alphanumériques minuscules et les tirets bas sont acceptés.",
+            nameSection: "Nom",
+            noLogo: "Pas de logo",
+            noLogoText: "Aucun logo n'a été trouvé. Vous pouvez en téléverser un vous-même."
         },
         Done: {
             title: "Evenement importé",
@@ -106,21 +114,108 @@ export default {
             placeholder: "https://www.facebook.com/nom_du_group",
             button: "Importer"
         },
-        SelectIdentity: {
-            selectIdentity: "Sélectionnez une identité",
-            selectGroup: "Sélectionnez un groupe"
-        },
         IdentitySelect: {
             label: "Sélectionnez une identité"
         },
         GroupSelect: {
-            label: "Sélectionnez un groupe"
+            label: "Sélectionnez un groupe",
+            add: "Importer un groupe"
+        },
+        
+        RegisterFeed: {
+            title: "URL du flux",
+            placeholder: "https://example.com/feed.ics",
+            label: "Entrez l'URL d'un fichier ics ou ical",
+            button: "Enregistrer"
         },
         Share: {
-            title: "Partager l'événement"
+            title: "Partager l'événement",
+            invalid_url_title: "Partage impossible",
+            invalid_url_text: "Nous sommes désolés mais aucune URL valide n'a été détectée.",
+            confirm: "Confirmer",
+            indicate_url: "Indiquer une URL",
+            loading_event: "Chargement de l'événement en cours",
+            login_to_share: "Veuillez vous connecter pour partager l'événement."
         },
         Welcome: {
-            login: "Me connecter"
+            login: "Me connecter",
+            title: "Importer des événements",
+            text1: "Cette application vous permet d'importer des événements depuis Facebook, Instagram ou d'autres réseaux dans votre instance Mobilizon.",
+            text2: "Pour commencer, connectez-vous à votre compte Mobilizon"
+        },
+        QuillEditor: {
+            too_big_error: "The file is too big (max {max} MB)",
+        },        
+        ImageSelect: {
+            too_big_error: "L'image est trop lourde (max {max} Mo)",
+            uploadButton: "Téléverser",
+            conversion_error: "Erreur lors de la conversion de l'image en base64"
+        },
+        LocateFromMapOverlay: {
+            geolocateButton: "Me géolocaliser",
+            mapCaption: "Cliquez sur la carte ou glissez-déposez le marqueur pour modifier la position.",
+            cancel: "Annuler",
+            validate: "Valider"
+        },
+        SearchAddressFromCoordsOverlay: {
+            nearbyAddresses: "Addresses à proximité de la position",
+            searching: "Recherche en cours",
+            noResults: "Aucun résultat",
+            close: "Fermer"
+        },
+        SearchAddressFromStringOverlay: {
+            useGroupAddress: "Utiliser l'adresse du groupe",
+            placeName: "Nom du lieu",
+            street: "N° et voie",
+            city: "Ville",
+            postalCode: "Code postal",
+            results: "Résultats",
+            noAddressFound: "Aucune adresse trouvée",
+            incompleteCriteria: "Indiquez une ville ou un code postal pour améliorer la recherche."
+        },
+        LocationSelect: {
+            addressLabel: "Adresse",
+            noAddressText: "Il n'y a pas d'adresse renseignée pour cet événement !",
+            noAddress: "Pas d'adresse",
+            editAddress: "Modifier l'adresse",
+            noLocationText: "Il n'y a pas de localisation GPS renseignée pour cet événement !",
+            noLocation: "Pas de localisation",
+            editPosition: "Modifier la position",
+            updateAddressQuestion: "Voulez-vous également mettre à jour l'adresse de l'événement avec une adresse à proximité de la localisation ?",
+            updateAddress: "Mettre à jour l'adresse",
+            yes: "Oui",
+            no: "Non"
+        },
+        UrlForm: {
+            emptyField: "Le champ est vide.",
+            invalidUrl: "L'URL n'est pas valide."
+        },
+        SelectInstance: {
+            title: "Instance Mobilizon",
+            alertTitle: "Quelle est l'URL de votre instance Mobilizon ?",
+            alertText: "C'est l'adresse web de la page d'accueil du site auquel vous souhaitez vous connecter. Par exemple https://mobilizon.fr ou https://keskonfait.fr.",
+            label: "URL de l'instance Mobilizon",
+            placeholder: "mobilizon.fr",
+            emptyField: "Le champ est vide.",
+            invalidUrl: "L'URL n'est pas valide.",
+            loginButton: "Se connecter"
+        },
+        SearchAddressFromStringOverlay: {
+            useGroupAddress: "Utiliser l'adresse du groupe",
+            placeName: "Nom du lieu",
+            street: "N° et voie",
+            city: "Ville",
+            postalCode: "Code postal",
+            results: "Résultats",
+            noAddressFound: "Aucune adresse trouvée",
+            incompleteCriteria: "Indiquez une ville ou un code postal pour améliorer la recherche.",
+            noResultTitle: "Pas de résultat",
+            createPlaceTitle: "Créez le lieu",
+            createPlaceQuestion: "Vous ne trouvez pas votre lieu ?",
+            createPlaceDescription: "Créez le sur ",
+            createPlaceDescriptionEnd: "pour le rendre visible ici et pour des millions d'utilisateurs !",
+            cancel: "Annuler",
+            validate: "Valider"
         }
     },
 }

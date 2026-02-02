@@ -1,6 +1,9 @@
 <script setup>
 import { computed, ref, onMounted } from 'vue'
+import { componentTranslate } from '../i18n/utils.js'
 import { getFormattedAddress } from '../utils/utils'
+
+const $ct = componentTranslate('SearchAddressFromCoordsOverlay')
 
 const emit = defineEmits('toggleShow', 'select-address-by-id')
 const props = defineProps({
@@ -34,7 +37,7 @@ const selectAddress = e => emit('selectAddressById', e.id)
                     v-if="!isLoading && foundAddresses && foundAddresses.length > 0" 
                     lines="two"
                     @click:select="selectAddress">
-                    <v-list-subheader>Addresses à proximité de la position</v-list-subheader>
+                    <v-list-subheader>{{ $ct('nearbyAddresses') }}</v-list-subheader>
                     <v-list-item
                         v-for="address in foundAddresses"    
                         :value="address.id" 
@@ -44,11 +47,11 @@ const selectAddress = e => emit('selectAddressById', e.id)
                     ></v-list-item>
                 </v-list>
                 <v-list v-else>
-                    <v-list-subheader v-if="isLoading">Recherche en cours</v-list-subheader>
-                    <v-list-subheader v-else>Aucun résultat</v-list-subheader>
+                    <v-list-subheader v-if="isLoading">{{ $ct('searching') }}</v-list-subheader>
+                    <v-list-subheader v-else>{{ $ct('noResults') }}</v-list-subheader>
                 </v-list>
             </v-card>
-            <v-btn class="float-right" color="" prepend-icon="mdi-close" @click="toggleShow">Fermer</v-btn>
+            <v-btn class="float-right" color="" prepend-icon="mdi-close" @click="toggleShow">{{ $ct('close') }}</v-btn>
         </div>
     </v-overlay>    
 </template>

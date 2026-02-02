@@ -1,13 +1,12 @@
 <script setup>
 import { onMounted, ref } from 'vue'
-import { useRoute, useRouter } from 'vue-router'
+import { useRoute } from 'vue-router'
 import { useStore } from 'vuex'
 import { componentTranslate } from '../i18n/utils.js'
 import { isValidUrl } from '../utils/utils'
 
 const route = useRoute()
 const store = useStore()
-const router = useRouter()
 const $ct = componentTranslate('Share')
 
 store.dispatch('setPageTitle', $ct('title'))
@@ -18,13 +17,6 @@ const url = ref('')
 const toImport = ref(null)
 
 const isAppAuth = store.getters.isMobilizonAppAuthorized
-const selectedIdentity = store.getters.getSelectedIdentity
-const localEvent = store.getters.getLocalEvent
-const mobilizonConfig = store.getters.getMobilizonConfig
-const mobilizonInstanceUrl = store.getters.getMobilizonInstanceUrl
-const isInstanceConfigLoaded = store.getters.isInstanceConfigLoaded
-const scrappedData = store.getters.getScrappedEvent
-const scrapperUrl = store.getters.getEventScrapperUrl
 
 onMounted(async () => {
     store.dispatch('resetEvent')
@@ -45,7 +37,7 @@ onMounted(async () => {
         } else {
             const mbzInstanceUrl = store.getters.getMobilizonInstanceUrl
             store.dispatch('saveSharingUrl', toImport.value)
-            store.dispatch('informUser', `Veuillez vous connecter pour partager l'événement.`)
+            store.dispatch('informUser', $ct('login_to_share'))
             if (mbzInstanceUrl) {
                 store.dispatch('navigateTo', '/instance')
             } else {
@@ -54,8 +46,6 @@ onMounted(async () => {
         }
     }
 })
-
-const getText = () => `Vous allez importer l'évènement à l'URL ${toImport.value}`
 
 const go = () => {
     store.dispatch('shareUrl', toImport.value)
@@ -69,22 +59,22 @@ const scrap = () => {
 
 <template>
     <div v-if="!store.getters.isLoadingScrapper">
-        <v-alert title="Partage impossible"  type="warning" v-if="!toImport" text="Nous sommes désolés mais aucune URL valide n'a été détectée."></v-alert>
+        <v-alert :title="$ct('invalid_url_title')"  type="warning" v-if="!toImport" :text="$ct('invalid_url_text')"></v-alert>
         <v-btn
             v-if="toImport"
             class="mt-5"
             color="primary"
             @click="go"
-        >Confirmer</v-btn>   
+        >{{$ct('confirm')}}</v-btn>   
         <v-btn
             v-else
             class="mt-5"
             color="primary"
             @click="scrap"
-        >Indiquer une URL</v-btn>       
+        >{{$ct('indicate_url')}}</v-btn>       
     </div>
     <div v-else>
-        <v-infinite-scroll class="text-center">Chargement de l'événement en cours</v-infinite-scroll>
+        <v-infinite-scroll class="text-center">{{$ct('loading_event')}}</v-infinite-scroll>
     </div>
 </template>
 

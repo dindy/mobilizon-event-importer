@@ -3,10 +3,8 @@ import { ref, computed, onMounted } from 'vue'
 import { useStore } from 'vuex'
 import { useRouter } from 'vue-router'
 import { componentTranslate } from '../i18n/utils.js'
-import { isValidUrl } from '../utils/utils.js'
 import UrlForm from './UrlForm.vue'
 
-const router = useRouter()
 const store = useStore()
 const url = ref(null)
 const $ct = componentTranslate('GroupScrapper')

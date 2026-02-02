@@ -1,7 +1,9 @@
 <script setup>
 import { computed, ref, onMounted, watch } from 'vue'
+import { componentTranslate } from '../i18n/utils.js'
 import { getFormattedAddress } from '../utils/utils'
 
+const $ct = componentTranslate('SearchAddressFromStringOverlay')
 
 const emit = defineEmits('toggleShow', 'useAddress', 'searchAddress', 'foundAdresses', 'selectAddressById')
 
@@ -67,13 +69,13 @@ const validate = () => {
         class="screen-overlay"
     >
         <div class="overlay-content">  
-            <v-btn v-if="groupAddress" prepend-icon="mdi-map-marker-account" @click="useGroupAddress">Utiliser l'adresse du groupe</v-btn>
+            <v-btn v-if="groupAddress" prepend-icon="mdi-map-marker-account" @click="useGroupAddress">{{ $ct('useGroupAddress') }}</v-btn>
             <!-- <v-btn v-if="latitude && longitude" prepend-icon="mdi-map-marker" @click="openSearchAddressFromCoordsOverlay">Utiliser la position</v-btn> -->
             <div>
-                <v-text-field @click:clear="searchAddress" @input="searchAddress" label="Nom du lieu" :clearable="true" v-model="physicalAddress.description"/>
-                <v-text-field @click:clear="searchAddress" @input="searchAddress" label="N° et voie" :clearable="true" id="street" v-model="physicalAddress.street"/>    
-                <v-text-field @click:clear="searchAddress" @input="searchAddress" label="Ville" :clearable="true" id="locality" v-model="physicalAddress.locality"/>    
-                <v-text-field @click:clear="searchAddress" @input="searchAddress" label="Code postal" :clearable="true" id="zip" v-model="physicalAddress.postalCode"/>
+                <v-text-field @click:clear="searchAddress" @input="searchAddress" :label="$ct('placeName')" :clearable="true" v-model="physicalAddress.description"/>
+                <v-text-field @click:clear="searchAddress" @input="searchAddress" :label="$ct('street')" :clearable="true" id="street" v-model="physicalAddress.street"/>    
+                <v-text-field @click:clear="searchAddress" @input="searchAddress" :label="$ct('city')" :clearable="true" id="locality" v-model="physicalAddress.locality"/>    
+                <v-text-field @click:clear="searchAddress" @input="searchAddress" :label="$ct('postalCode')" :clearable="true" id="zip" v-model="physicalAddress.postalCode"/>
             </div>
             <v-card 
                 style="margin-top: -20px; overflow-y: scroll; z-index: initial"
@@ -82,7 +84,7 @@ const validate = () => {
                     v-if="isLoading || (foundAddresses && foundAddresses.length > 0)" 
                     lines="two"
                     @click:select="selectAddress">
-                    <v-list-subheader>Résultats</v-list-subheader>
+                    <v-list-subheader>{{ $ct('results') }}</v-list-subheader>
                     <v-list-item
                         v-for="address in foundAddresses"    
                         :value="address.id" 
@@ -92,29 +94,29 @@ const validate = () => {
                     ></v-list-item>
                 </v-list>                    
                 <v-list v-else>
-                    <v-list-subheader>Aucune adresse trouvée</v-list-subheader>
+                    <v-list-subheader>{{ $ct('noAddressFound') }}</v-list-subheader>
                 </v-list>
             </v-card>
             <v-alert
                 v-if="incompleteSearchCriterias && !isLoading && foundAddresses.length == 0" 
-                text="Indiquez une ville ou un code postal pour améliorer la recherche."
-                title="Pas de résultat"
+                :text="$ct('incompleteCriteria')"
+                :title="$ct('noResultTitle')"
                 type="info"
                 class=""
             ></v-alert>  
             <v-alert
                 v-if="!incompleteSearchCriterias && !isLoading && foundAddresses.length == 0" 
-                title="Créez le lieu"
+                :title="$ct('createPlaceTitle')"
                 type="info"
                 class=""
             >
                 <template v-slot:default>
-                    <p>Vous ne trouvez pas votre lieu ? </p>
-                    <p>Créez le sur <a target="_blank" href="https://www.openstreetmap.org">Open Street Map</a> pour le rendre visible ici et pour des millions d'utilisateurs !</p>
+                    <p>{{ $ct('createPlaceQuestion') }}</p>
+                    <p>{{ $ct('createPlaceDescription') }}<a target="_blank" href="https://www.openstreetmap.org">Open Street Map</a> {{ $ct('createPlaceDescriptionEnd') }}</p>
                 </template>
             </v-alert>      
-            <v-btn color="" prepend-icon="mdi-close" @click="toggleShow">Annuler</v-btn>
-            <v-btn @click="validate" prepend-icon="mdi-check" color="success">Valider</v-btn>                                           
+            <v-btn color="" prepend-icon="mdi-close" @click="toggleShow">{{ $ct('cancel') }}</v-btn>
+            <v-btn @click="validate" prepend-icon="mdi-check" color="success">{{ $ct('validate') }}</v-btn>                                           
         </div>
     </v-overlay>    
 </template>

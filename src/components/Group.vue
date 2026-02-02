@@ -4,10 +4,6 @@ import { useStore } from 'vuex';
 import { useRouter } from 'vue-router'
 import { componentTranslate } from '../i18n/utils.js'
 import QuillEditor from './QuillEditor.vue'
-import Map from './Map.vue'
-import SearchAddressFromStringOverlay from './SearchAddressFromStringOverlay.vue'
-import SearchAddressFromCoordsOverlay from './SearchAddressFromCoordsOverlay.vue'
-import LocateFromMapOverlay from './LocateFromMapOverlay.vue'
 import ImageSelect from './ImageSelect.vue'
 import LocationSelect from './LocationSelect.vue'
 import { hasSpecialCharOrNotUnderscore, removeSpecialChar, removeDiacritics } from '../utils/utils'
@@ -123,7 +119,7 @@ const submit = async () => {
     const { valid } = await form.value.validate()
 
     if (!valid) {
-        store.dispatch('createErrorFromText', $ct('formErrors') || 'Le formulaire comporte des erreurs. Merci de vérifier les données.')
+        store.dispatch('createErrorFromText', $ct('formErrors'))
         return
     }
 
@@ -136,8 +132,8 @@ const submit = async () => {
 <template>
     <v-form class="form" ref="form" validate-on="input eager" @submit.prevent="">
         <v-alert
-            :text="$ct('checkInfoText') || 'Nous faisons de notre mieux pour récupérer les informations mais certaines données peuvent être manquantes ou erronées.'"
-            :title="$ct('checkInfo') || 'Vérifiez les infos SVP !'"
+            :text="$ct('checkInfoText')"
+            :title="$ct('checkInfo')"
             type="info"
             :closable="true"
         ></v-alert> 
@@ -146,8 +142,8 @@ const submit = async () => {
         
         <v-alert
             v-if="!getSelectedBanner()"
-            :text="$ct('noCoverImageText') || 'Aucune image de couverture n\'a été trouvée. Vous pouvez en téléverser une vous-même.'"
-            :title="$ct('noCoverImage') || 'Pas de d\'image de couverture'"
+            :text="$ct('noCoverImageText')"
+            :title="$ct('noCoverImage')"
             type="warning"
         />
 
@@ -164,8 +160,8 @@ const submit = async () => {
 
         <v-alert
             v-if="!getSelectedLogo()"
-            text="Aucun logo n'a été trouvé. Vous pouvez en téléverser un vous-même."
-            title="Pas de logo"
+            :text="$ct('noLogoText')"
+            :title="$ct('noLogo')"
             type="warning"
         />
 
@@ -178,7 +174,7 @@ const submit = async () => {
             @set-selected-image-index="setSelectedLogo"
         />  
 
-        <h1 class="text-subtitle-2">Nom</h1>
+        <h1 class="text-subtitle-2">{{ $ct('nameSection') }}</h1>
 
         <v-text-field :rules="[rules.notEmpty, rules.nameLength]" class="required" :label="$ct('name_label')" required id="name" v-model="group.name"/>    
         

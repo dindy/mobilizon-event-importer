@@ -69,7 +69,10 @@ export default {
             startDateSuperior: "The start date is greater than the end date.",
             startTimeSuperior: "The start time is greater than the end time.",
             emptyField: "The field must not be empty.",
-            titleTooLong: "The title cannot have more than 200 characters."
+            titleTooLong: "The title cannot have more than 200 characters.",
+            noDataText: "No matching results",
+            url: "Event link",
+            organized_by: "Organized by",
         },
         Group: {
             title: "Group details",
@@ -84,7 +87,10 @@ export default {
             submit: "Save",
             cancel: "Cancel",
             emptyField: "The field must not be empty.",
-            invalidFederatedName: "Only lowercase alphanumeric characters and underscores are accepted."
+            invalidFederatedName: "Only lowercase alphanumeric characters and underscores are accepted.",
+            nameSection: "Name",
+            noLogo: "No logo",
+            noLogoText: "No logo was found. You can upload one yourself."
         },
         Done: {
             title: "Event imported",
@@ -106,21 +112,108 @@ export default {
             placeholder: "https://www.facebook.com/group_name",
             button: "Import"
         },
-        SelectIdentity: {
-            selectIdentity: "Select an identity",
-            selectGroup: "Select a group"
-        },
         IdentitySelect: {
             label: "Select an identity"
         },
         GroupSelect: {
-            label: "Select a group"
+            label: "Select a group",
+            add: "Import a group"
+        },
+        
+        RegisterFeed: {
+            title: "Feed URL",
+            placeholder: "https://example.com/feed.ics",
+            label: "Enter the URL of an ics or ical file",
+            button: "Register"
         },
         Share: {
-            title: "Share the event"
+            title: "Share the event",
+            invalid_url_title: "Sharing impossible",
+            invalid_url_text: "Sorry, no valid URL detected.",
+            confirm: "Confirm",
+            indicate_url: "Provide a URL",
+            loading_event: "Loading event...",
+            login_to_share: "Please log in to share the event."
         },
         Welcome: {
-            login: "Login"
-        }
+            login: "Login",
+            title: "Import events",
+            text1: "This application lets you import events from Facebook, Instagram or other networks into your Mobilizon instance.",
+            text2: "To get started, log in to your Mobilizon account"
+        },
+        QuillEditor: {
+            too_big_error: "The file is too big (max {max} MB)",
+        },
+        ImageSelect: {
+            too_big_error: "The image is too big (max {max} MB)",
+            uploadButton: "Upload",
+            conversion_error: "Error converting image to base64"
+        },
+        LocateFromMapOverlay: {
+            geolocateButton: "Geolocate me",
+            mapCaption: "Click on the map or drag and drop the marker to change the position.",
+            cancel: "Cancel",
+            validate: "Validate"
+        },
+        SearchAddressFromCoordsOverlay: {
+            nearbyAddresses: "Addresses near the position",
+            searching: "Searching...",
+            noResults: "No results",
+            close: "Close"
+        },
+        SearchAddressFromStringOverlay: {
+            useGroupAddress: "Use group address",
+            placeName: "Place name",
+            street: "Street number and name",
+            city: "City",
+            postalCode: "Postal code",
+            results: "Results",
+            noAddressFound: "No address found",
+            incompleteCriteria: "Specify a city or postal code to improve the search."
+        },
+        LocationSelect: {
+            addressLabel: "Address",
+            noAddressText: "No address has been specified for this event!",
+            noAddress: "No address",
+            editAddress: "Edit address",
+            noLocationText: "No GPS location has been specified for this event!",
+            noLocation: "No location",
+            editPosition: "Edit position",
+            updateAddressQuestion: "Do you also want to update the event address with an address near the location?",
+            updateAddress: "Update address",
+            yes: "Yes",
+            no: "No"
+        },
+        UrlForm: {
+            emptyField: "The field is empty.",
+            invalidUrl: "The URL is not valid."
+        },
+        SelectInstance: {
+            title: "Mobilizon Instance",
+            alertTitle: "What is your Mobilizon instance URL?",
+            alertText: "This is the web address of the home page of the site you want to log in to. For example https://mobilizon.fr or https://keskonfait.fr.",
+            label: "Mobilizon instance URL",
+            placeholder: "mobilizon.fr",
+            emptyField: "The field is empty.",
+            invalidUrl: "The URL is not valid.",
+            loginButton: "Log in"
+        },
+        SearchAddressFromStringOverlay: {
+            useGroupAddress: "Use group address",
+            placeName: "Place name",
+            street: "Street number and name",
+            city: "City",
+            postalCode: "Postal code",
+            results: "Results",
+            noAddressFound: "No address found",
+            incompleteCriteria: "Specify a city or postal code to improve the search.",
+            noResultTitle: "No results",
+            createPlaceTitle: "Create the place",
+            createPlaceQuestion: "Can't find your place?",
+            createPlaceDescription: "Create it on ",
+            createPlaceDescriptionEnd: "to make it visible here and for millions of users!",
+            cancel: "Cancel",
+            validate: "Validate"
+        }        
     }
 }

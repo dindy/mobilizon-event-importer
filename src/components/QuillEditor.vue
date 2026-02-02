@@ -10,7 +10,9 @@ import ImageUploader from 'quill-image-uploader'
 import { useStore } from 'vuex'
 import BlotFormatter from 'quill-blot-formatter';
 import { convertBytesToMegabytes } from '../utils/utils';
+import { componentTranslate } from '../i18n/utils.js'
 
+const $ct = componentTranslate('QuillEditor')
 const store = useStore()
 const props = defineProps({uploadLimit: Number})
 const toolbarOptions = ref(
@@ -54,7 +56,7 @@ const modules = [
             return new Promise((resolve, reject) => {
                 if (file.size > props.uploadLimit) {
                     reject("File is too big")
-                    store.dispatch('createErrorFromText', `Le fichier est trop lourd (max. ${convertBytesToMegabytes(props.uploadLimit)} Mo)`)
+                    store.dispatch('createErrorFromText', $ct('too_big_error', { max: convertBytesToMegabytes(props.uploadLimit)}))
                     return
                 }
 

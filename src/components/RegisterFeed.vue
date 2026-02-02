@@ -3,12 +3,14 @@ import { ref, computed, onMounted } from 'vue'
 import { useStore } from 'vuex'
 import { useRouter } from 'vue-router'
 import UrlForm from './UrlForm.vue'
+import { componentTranslate } from '../i18n/utils.js'
 
 const router = useRouter()
 const store = useStore()
 const url = ref(null)
+const $ct = componentTranslate('RegisterFeed')
 
-store.dispatch('setPageTitle', 'URL du flux')
+store.dispatch('setPageTitle', $ct('title'))
 
 const register = async (url) => {    
     const success = await store.dispatch('registerFeed', { url, type: 'ics' })
@@ -21,10 +23,10 @@ const register = async (url) => {
 
 <template>
     <UrlForm
-        placeholder="https://example.com/feed.ics"
-        label="Entrez l'URL d'un fichier ics ou ical"
+        :placeholder="$ct('placeholder')"
+        :label="$ct('label')"
         :default="url"
-        buttonText="Enregistrer"
+        :buttonText="$ct('button')"
         :is-loading="store.getters.isRegisteringAutomation"
         @send="register"
     />

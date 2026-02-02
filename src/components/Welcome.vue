@@ -1,10 +1,9 @@
 <script setup>
-import { useRouter, useRoute } from 'vue-router'
+import { useRoute } from 'vue-router'
 import { useStore } from 'vuex';
 import { componentTranslate } from '../i18n/utils.js'
 
 const store = useStore()
-const router = useRouter()
 const route = useRoute()
 const $ct = componentTranslate('Welcome')
 
@@ -21,15 +20,15 @@ const next = () => {
 <template>
   <div class="empty-state-container">
     <v-empty-state
-      title="Importer des événements"
+      :title="$ct('title')"
       image="logo.svg"
     >
       <template v-slot:headline>
         <div class="mt-5">OFF EVENTS</div>
       </template>
       <template v-slot:text>
-        <p class="text-caption mt-2 mb-2">Cette application vous permet d'importer des événements depuis Facebook, Instagram ou d'autres réseaux dans votre instance Mobilizon.</p>
-        <p class="text-caption">Pour commencer, connectez-vous à votre compte Mobilizon</p>
+        <p class="text-caption mt-2 mb-2">{{ $ct('text1') }}</p>
+        <p class="text-caption">{{ $ct('text2') }}</p>
       </template>
       <template v-slot:actions>
         <v-btn

@@ -6,7 +6,9 @@ import Map from './Map.vue'
 import SearchAddressFromStringOverlay from './SearchAddressFromStringOverlay.vue'
 import SearchAddressFromCoordsOverlay from './SearchAddressFromCoordsOverlay.vue'
 import LocateFromMapOverlay from './LocateFromMapOverlay.vue'
+import { componentTranslate } from '../i18n/utils.js'
 
+const $ct = componentTranslate('LocationSelect')
 const store = useStore()
 
 const props = defineProps({
@@ -140,7 +142,7 @@ const mapCenter = computed(() => latitude.value && longitude.value ? [latitude.v
             v-if="hasAddress" 
             class="" 
             :hide-details="true" 
-            label="Adresse" 
+            :label="$ct('addressLabel')" 
             rows="1" 
             auto-grow 
             v-model="address" 
@@ -149,14 +151,14 @@ const mapCenter = computed(() => latitude.value && longitude.value ? [latitude.v
         
         <v-alert
             v-if="!hasAddress" 
-            text="Il n'y a pas d'adresse renseignée pour cet événement !"
-            title="Pas d'adresse"
+            :text="$ct('noAddressText')"
+            :title="$ct('noAddress')"
             type="warning"
             class=""
         ></v-alert>        
 
         <div>
-            <v-btn prepend-icon="mdi-pencil" @click="toggleSearchAddressFromStringOverlay">Modifier l'adresse</v-btn>
+            <v-btn prepend-icon="mdi-pencil" @click="toggleSearchAddressFromStringOverlay">{{ $ct('editAddress') }}</v-btn>
         </div>
 
         <div class="map" v-if="latitude && longitude">
@@ -173,14 +175,14 @@ const mapCenter = computed(() => latitude.value && longitude.value ? [latitude.v
 
         <v-alert
             v-else 
-            text="Il n'y a pas de localisation GPS renseignée pour cet événement !"
-            title="Pas de localisation"
+            :text="$ct('noLocationText')"
+            :title="$ct('noLocation')"
             type="warning"
             class=""
         ></v-alert>          
 
         <div>
-            <v-btn class="" prepend-icon="mdi-map-marker" @click="toggleLocateFromMapOverlay">Modifier la position</v-btn>
+            <v-btn class="" prepend-icon="mdi-map-marker" @click="toggleLocateFromMapOverlay">{{ $ct('editPosition') }}</v-btn>
         </div>
 
         <SearchAddressFromStringOverlay 
@@ -211,19 +213,19 @@ const mapCenter = computed(() => latitude.value && longitude.value ? [latitude.v
             <v-card
                 max-width="400"
                 prepend-icon="mdi-magnify"
-                text="Voulez-vous également mettre à jour l'adresse de l'événement avec une adresse à proximité de la localisation ?"
-                title="Mettre à jour l'adresse"
+                :text="$ct('updateAddressQuestion')"
+                :title="$ct('updateAddress')"
             >
                 <template v-slot:actions>
                 <v-btn
                     class="ms-auto"
                     color="primary"
-                    text="Oui"
+                    :text="$ct('yes')"
                     @click="acceptSearchAddressFromCoordsOverlay"
                 ></v-btn>
                 <v-btn
                     class="ms-auto"
-                    text="Non"
+                    :text="$ct('no')"
                     @click="validateMapLocationDialog = false"
                 ></v-btn>
                 </template>

@@ -1,6 +1,9 @@
 <script setup>
 import { computed, ref, onMounted } from 'vue'
 import { convertBytesToMegabytes, blobToDataUrl, dataURLtoFile } from '../utils/utils'
+import { componentTranslate } from '../i18n/utils.js'
+
+const $ct = componentTranslate('ImageSelect')
 
 const props = defineProps({
     maxSize: Number,
@@ -39,7 +42,7 @@ const setUploadedImage = async e => {
         
         if (!isValidSizeFile(file)) {
             tooBig.value = true
-            emit('displayError', `L'image est trop lourde (max ${convertBytesToMegabytes(props.maxSize) } Mo)`)
+            emit('displayError', $ct('too_big_error', { max: convertBytesToMegabytes(props.maxSize)}))
             e.target.value = ""
             return
         }
@@ -53,7 +56,7 @@ const setUploadedImage = async e => {
             updateSelected(index)
             emit('setSelectedImageIndex', index)
         } catch (e) {
-            console.error('Erreur lors de la conversion de l\'image en base 64')
+            emit('displayError', $ct('conversion_error'))
         }
     }
 }
@@ -106,7 +109,7 @@ const updateSelected = (index) => {
             </v-carousel-item>            
         </v-carousel>
     
-        <v-btn class="mt-5" @click="openUpload" prepend-icon="mdi-upload">{{ props.uploadButtonLabel }}</v-btn>
+        <v-btn class="mt-5" @click="openUpload" prepend-icon="mdi-upload">{{ props.uploadButtonLabel || $ct('uploadButton') }}</v-btn>
         
         <input ref="uploadInput" type="file" style="display: none;" v-on:change="setUploadedImage">
     </div>
