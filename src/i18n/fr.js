@@ -1,6 +1,18 @@
 import ImageSelect from "../components/ImageSelect.vue";
 
 export default {
+    messages: {
+        auth_error: "Erreur d'authentification. Veuillez vous reconnecter.",
+        server_communication_error: "Une erreur de communication avec le serveur est survenue. Veuillez réessayer.",
+        scrap_event_error: "Une erreur s'est produite lors de la lecture de l'événement. Essayez une autre adresse web.",
+        scrap_group_error: "Une erreur s'est produite lors de la lecture du groupe. Essayez une autre adresse web.",
+        register_app_error: "Impossible de se connecter à l'instance : {error}",
+        feed_already_exists_group: "Ce flux est déjà enregistré pour ce groupe.",
+        feed_already_exists_user: "Ce flux est déjà enregistré pour cet utilisateur.",
+        create_automation_error: "Erreur lors de la création de l'automatisation : {error}. Veuillez réessayer.",
+        fetch_automations_error: "Erreur lors de la récupération des automatisations : {error}. Veuillez réessayer.",
+        fetch_automation_history_error: "Erreur lors de la récupération de l'historique de l'automatisation : {error}. Veuillez réessayer."
+    },
     components: {
         AutomationHistory: {
             title: "Détails de l'automatisation",

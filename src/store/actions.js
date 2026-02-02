@@ -10,6 +10,7 @@ import { GeoApi } from '../api/geo.js'
 import compareVersions from '../utils/compareVersions.js'
 import router from '../router.js'
 import versionData from '../version.js'
+import { messageTranslate } from '../i18n/utils.js'
 
 const mobilizonApi = new MobilizonApi()
 const scrapperApi = new ScrapperApi()
@@ -20,13 +21,13 @@ export const issueMobilizonRequest = async ({ dispatch, commit, getters, state }
     try {
         return await requestHandler({ dispatch, commit, getters, state })
     } catch (error) {
-        if (error instanceof MbzProxyAuthError) { 
+        if (error instanceof MbzProxyAuthError) {
             console.log('Action - Proxy auth error')
-            dispatch('createErrorFromText', 'Erreur d\'authentification. Veuillez vous reconnecter.')
+            dispatch('createErrorFromText', messageTranslate('auth_error'))
             dispatch('logoutMobilizon')
             store.dispatch('navigateTo', '/')
         } else if (error instanceof MbzRequestError) {
-            dispatch('createErrorFromText', 'Une erreur de communication avec le serveur est survenue. Veuillez réessayer.')
+            dispatch('createErrorFromText', messageTranslate('server_communication_error'))
         }
     }
 }
@@ -170,19 +171,19 @@ export default {
         try {
             data = await scrapperApi.scrapEvent(url)
         } catch (error) {
-            dispatch('createErrorFromText', 'Une erreur s\'est produite lors de la lecture de l`événement. Essayez une autre adresse web.')
+            dispatch('createErrorFromText', messageTranslate('scrap_event_error'))
         }
         commit('setEventScrapperData', data)
         commit('setIsLoadingScrapper', false)    
         return data
     },
-    async scrapGroup({ commit }, url) {
+    async scrapGroup({ commit, dispatch }, url) {
         commit('setIsLoadingScrapper', true)
         let data = null
         try {
             data = await scrapperApi.scrapGroup(url)
         } catch (error) {
-            dispatch('createErrorFromText', 'Une erreur s\'est produite lors de la lecture du groupe. Essayez une autre adresse web.')
+            dispatch('createErrorFromText', messageTranslate('scrap_group_error'))
         }
         commit('setGroupScrapperData', data)            
         commit('setIsLoadingScrapper', false)
@@ -359,7 +360,7 @@ export default {
             commit('setMobilizonInstanceUrl', mobilizonInstanceUrl)
             window.location = authUrl
         } catch (error) {
-            dispatch('createErrorFromText', 'Impossible de se connecter à l\'instance : ' + error)
+            dispatch('createErrorFromText', messageTranslate('register_app_error', { error: error && error.message ? error.message : String(error) }))
         } finally {
             commit('setIsRegisteringApp', false)
         }
@@ -398,10 +399,11 @@ export default {
             await mobilizonApi.createAutomation(url, type, personId, groupId)
             return true
         } catch (error) {
-            if (error.body && error.body.name === "AutomationAlreadyExists") {                
-                dispatch('createErrorFromText', `Ce flux est déjà enregistré pour ${groupId ? 'ce groupe' : 'cet utilisateur'}.`)
+            if (error.body && error.body.name === "AutomationAlreadyExists") {
+                const key = groupId ? 'feed_already_exists_group' : 'feed_already_exists_user'
+                dispatch('createErrorFromText', messageTranslate(key))
             } else {
-                dispatch('createErrorFromText', `Erreur lors de la création de l'automatisation : ${error.message}. Veuillez réessayer.`)
+                dispatch('createErrorFromText', messageTranslate('create_automation_error', { error: error && error.message ? error.message : String(error) }))
             }
             return false
         } finally {
@@ -422,7 +424,7 @@ export default {
         // Handles Abort Exception
         } catch (error) {
             if ( ! (error instanceof DOMException) ) {
-                dispatch('createErrorFromText', `Erreur lors de la récupération des automatisations : ${error.message}. Veuillez réessayer.`)
+                dispatch('createErrorFromText', messageTranslate('fetch_automations_error', { error: error && error.message ? error.message : String(error) }))
             } else {
                 console.log(error.message);
             }
@@ -437,7 +439,7 @@ export default {
         // Handles Abort Exception
         } catch (error) {
             if ( ! (error instanceof DOMException) ) {
-                dispatch('createErrorFromText', `Erreur lors de la récupération de l'historique de l'automatisation : ${error.message}. Veuillez réessayer.`)
+                dispatch('createErrorFromText', messageTranslate('fetch_automation_history_error', { error: error && error.message ? error.message : String(error) }))
             } else {
                 console.log(error.message);
             }

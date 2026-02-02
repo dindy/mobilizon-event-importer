@@ -1,4 +1,16 @@
 export default {
+    messages: {
+        auth_error: "Authentication error. Please reconnect.",
+        server_communication_error: "A communication error with the server occurred. Please try again.",
+        scrap_event_error: "An error occurred while reading the event. Try another URL.",
+        scrap_group_error: "An error occurred while reading the group. Try another URL.",
+        register_app_error: "Unable to connect to the instance: {error}",
+        feed_already_exists_group: "This feed is already registered for this group.",
+        feed_already_exists_user: "This feed is already registered for this user.",
+        create_automation_error: "Error creating the automation: {error}. Please try again.",
+        fetch_automations_error: "Error fetching automations: {error}. Please try again.",
+        fetch_automation_history_error: "Error fetching automation history: {error}. Please try again."
+    },
     components: {
         AutomationHistory: {
             title: "Automation details",
