@@ -19,12 +19,15 @@ onMounted(() => {
     store.dispatch('fetchAutomations')
 })
 watch(actor, (newActor) => {
-    store.dispatch('fetchAutomations')
+    if (store.getters.isMobilizonAppAuthorized) {
+        store.dispatch('fetchAutomations')
+    }
 })
 </script>
 
 <template>
     <v-card
+        v-if="actor"
         :title="actor.name"
         :subtitle="$ct('subtitle')" 
         :loading="isFetching">
