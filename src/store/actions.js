@@ -483,10 +483,16 @@ export default {
         router.push(path)
     },
     navigateBack({ commit, state }) {
-        const lastPath = state.history[state.history.length - 2] || null
+        let lastIndex = 1
+        let lastPath = state.history[state.history.length - lastIndex - 1] || null
+        const currentPath = state.history[state.history.length - 1]
+        while (lastPath == currentPath) {
+            lastIndex++
+            lastPath = state.history[state.history.length - lastIndex - 1]
+        }
         console.log(`Action - Navigating to previous route : ${lastPath}`)
         if (lastPath) {
-            commit('removeLastPathsFromHistory', 1)
+            commit('removeLastPathsFromHistory', lastIndex)
             router.push(lastPath)
         }
     },
