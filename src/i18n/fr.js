@@ -25,7 +25,9 @@ export default {
             events: "Événements",
             logs: "Logs",
             created: "Création",
-            updated: "Modification"
+            updated: "Modification",
+            delete_automation: "Supprimer",
+            automation_deleted: "Automatisation supprimée",
         },
         Automations: {
             title: "Automatisations",

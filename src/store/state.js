@@ -34,6 +34,7 @@ export default {
         }
     },
     automations: {
+        isDeleting: false,
         isCreating: false,
         isFetching: false,
         isFetchingHistory: false,

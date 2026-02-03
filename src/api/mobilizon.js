@@ -918,4 +918,17 @@ export class MobilizonApi {
 
         return (await this.handleProxyResponse(response))
     }
+
+    async deleteAutomation(automationId)
+    {        
+        const response = await fetch(this.getProxyApiUrl(`automation/${automationId}/delete`), {
+            method: 'GET',
+            credentials: "include",
+            headers: {
+                'Content-Type': 'application/json',
+            },
+        })
+
+        return (await this.handleProxyResponse(response))
+    }
 }

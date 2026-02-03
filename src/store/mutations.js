@@ -168,7 +168,18 @@ export default {
     }, 
     setIsExecutingAutomation(state, { automationId, isExecuting }) {
         console.log('Mutation - Set is executing', automationId, isExecuting)
-        state.automations.currentActorAutomations = state.automations.currentActorAutomations.map(aut => ({ ...aut, isExecuting: aut.id == automationId ? isExecuting : aut.isExecuting }))
+        state.automations.currentActorAutomations = state.automations.currentActorAutomations
+            .map(aut => ({ ...aut, isExecuting: aut.id == automationId ? isExecuting : aut.isExecuting }))
+    },
+    setIsDeletingAutomation(state, { automationId, isDeleting }) {
+        console.log('Mutation - Set is deleting', automationId, isDeleting)
+        state.automations.currentActorAutomations = state.automations.currentActorAutomations
+            .map(aut => ({ ...aut, isDeleting: aut.id == automationId ? isDeleting : aut.isDeleting }))
+    },    
+    removeAutomation(state, automationId) {
+        console.log('Mutation - Delete automation', automationId)
+        state.automations.currentActorAutomations = state.automations.currentActorAutomations
+            .filter(automation => automation.id !== automationId)
     },
     addPathToHistory(state, path) {
         console.log('Mutation - Push path', path)

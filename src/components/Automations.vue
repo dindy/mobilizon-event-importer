@@ -38,7 +38,7 @@ watch(actor, (newActor) => {
             <v-btn
                 prepend-icon="mdi-plus"
                 :text="$ct('add_automation')"
-                @click="store.dispatch('navigateTo','/registerFeed')"
+                @click="store.dispatch('navigateTo', '/registerFeed')"
             ></v-btn>
         </v-card-actions>        
         <v-list>

@@ -37,13 +37,19 @@ onMounted(() => {
 watch(actor, (newActor) => {
     store.dispatch('navigateToAndReplace', '/automations')
 })
+
+const deleteAutomation = () => {
+    store.dispatch('deleteAutomation', automation.value.id)
+    store.dispatch('navigateToAndReplace', '/automations')
+    store.commit('addMessage', { text: $ct('automation_deleted'), type: 'success' })
+}
 </script>
 
 <template>
     <v-card :loading="isFetching || isExecuting">
         <v-card-title>{{ $ct('logsAndEvents') }}</v-card-title>   
         <v-card-subtitle>
-            <span class="text-wrap">{{ automation.url }}</span>
+            <span class="custom-text-wrap">{{ automation.url }}</span>
         </v-card-subtitle>
         <v-card-actions>
             <v-btn 
@@ -52,10 +58,16 @@ watch(actor, (newActor) => {
                 :text="$ct('execute')"
                 prepend-icon="mdi-lightning-bolt"
             ></v-btn>
+            <v-btn
+                prepend-icon="mdi-delete"
+                :text="$ct('delete_automation')"
+                @click="deleteAutomation"
+            ></v-btn>            
         </v-card-actions>
         <v-list>
-
-            <v-list-subheader v-if="!isFetching && history.length == 0">{{ $ct('noHistory') }}</v-list-subheader>
+            <v-list-subheader v-if="!isFetching && history.length == 0">
+                <span class="custom-text-wrap">{{ $ct('noHistory') }}</span>
+            </v-list-subheader>
 
             <v-list-group v-if="events.length > 0" value="events">
                 <template v-slot:activator="{ props }">
@@ -117,3 +129,19 @@ watch(actor, (newActor) => {
         </v-list>
     </v-card>
 </template>
+
+<style scoped>
+.custom-text-wrap {
+    -ms-word-break: break-all;
+    word-break: break-all;
+
+    /* Non standard for webkit */
+     word-break: break-word;
+
+    -webkit-hyphens: auto;
+    -moz-hyphens: auto;
+    -ms-hyphens: auto;
+    hyphens: auto;      
+    white-space: normal !important;  
+}
+</style>

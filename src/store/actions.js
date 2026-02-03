@@ -460,6 +460,14 @@ export default {
         commit('setAutomationHistory', history)
         commit('setIsExecutingAutomation', {isExecuting: false, automationId})
     },
+    async deleteAutomation({ commit, state }, automationId) {
+        console.log(`Action - Deleting automation`, automationId)
+        commit('setIsDeletingAutomation', { isDeleting: true, automationId })
+        await mobilizonApi.deleteAutomation(automationId)
+        commit('removeAutomation', automationId)
+        commit('resetAutomationHistory')
+        commit('setIsDeletingAutomation', {isDeleting: false, automationId})
+    },    
     navigateToAndReplace({ commit, state }, path) { 
         console.log(`Action - Navigating to ${path} and replace current route`)
         const lastPath = state.history[state.history.length - 2] || null
