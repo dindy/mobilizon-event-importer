@@ -38,15 +38,15 @@ watch(actor, (newActor) => {
     store.dispatch('navigateToAndReplace', '/automations')
 })
 
-const deleteAutomation = () => {
-    store.dispatch('deleteAutomation', automation.value.id)
+const deleteAutomation = async () => {
+    await store.dispatch('deleteAutomation', automation.value.id)
     store.dispatch('navigateToAndReplace', '/automations')
     store.commit('addMessage', { text: $ct('automation_deleted'), type: 'success' })
 }
 </script>
 
 <template>
-    <v-card :loading="isFetching || isExecuting">
+    <v-card v-if="automation" :loading="isFetching || isExecuting">
         <v-card-title>{{ $ct('logsAndEvents') }}</v-card-title>   
         <v-card-subtitle>
             <span class="custom-text-wrap">{{ automation.url }}</span>
