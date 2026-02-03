@@ -30,7 +30,8 @@ export default {
         Automations: {
             title: "Automatisations",
             subtitle: "Automatisations enregistrées",
-            noAutomations: "Aucune automatisation"
+            noAutomations: "Aucune automatisation",
+            add_automation: "Nouvelle automatisation"
         },
         Home: {
             title: "Accueil",

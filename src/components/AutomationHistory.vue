@@ -50,6 +50,7 @@ watch(actor, (newActor) => {
                 @click="store.dispatch('executeAutomation', automation.id)" 
                 class="float-right" 
                 :text="$ct('execute')"
+                prepend-icon="mdi-lightning-bolt"
             ></v-btn>
         </v-card-actions>
         <v-list>

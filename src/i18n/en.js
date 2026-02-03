@@ -28,7 +28,8 @@ export default {
         Automations: {
             title: "Automations",
             subtitle: "Registered automations",
-            noAutomations: "No automations"
+            noAutomations: "No automations",
+            add_automation: "New automation",
         },
         Home: {
             title: "Home",

@@ -34,6 +34,13 @@ watch(actor, (newActor) => {
         <template v-slot:prepend>
             <Avatar :type="manageForGroup ? 'group' : 'person'" :actor="actor"></Avatar>
         </template>
+        <v-card-actions>
+            <v-btn
+                prepend-icon="mdi-plus"
+                :text="$ct('add_automation')"
+                @click="store.dispatch('navigateTo','/registerFeed')"
+            ></v-btn>
+        </v-card-actions>        
         <v-list>
             <v-list-subheader v-if="isFetching || (automations.length > 0)">
                 {{ $ct('subtitle') }}
@@ -42,7 +49,7 @@ watch(actor, (newActor) => {
                 :value="automation.id" 
                 v-for="automation in automations" 
                 v-if="isFetching || (automations.length > 0)"
-                prepend-icon="mdi-lightning-bolt-circle"
+                prepend-icon="mdi-robot"
                 :title="automation.type" 
                 :subtitle="automation.url"
                 :key="automation.id"
@@ -52,18 +59,4 @@ watch(actor, (newActor) => {
             <v-list-subheader v-else>{{ $ct('noAutomations') }}</v-list-subheader>
         </v-list>
     </v-card>
-    <v-fade-transition>
-        <v-fab
-            v-show="!fabIsHidden"
-            color="primary"
-            class="fab-page"
-            icon="mdi-plus"
-            location="bottom end"
-            size="large"
-            absolute
-            transition="slide-x-transition"
-            @click="store.dispatch('navigateTo','/registerFeed')"
-        ></v-fab>    
-
-    </v-fade-transition>
 </template>
