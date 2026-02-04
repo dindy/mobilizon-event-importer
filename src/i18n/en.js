@@ -108,7 +108,9 @@ export default {
             invalidFederatedName: "Only lowercase alphanumeric characters and underscores are accepted.",
             nameSection: "Name",
             noLogo: "No logo",
-            noLogoText: "No logo was found. You can upload one yourself."
+            noLogoText: "No logo was found. You can upload one yourself.",
+            noCoverImage: "No cover image",
+            noCoverImageText: "No cover image was found. You can upload one yourself.",            
         },
         Done: {
             title: "Event imported",

@@ -110,7 +110,9 @@ export default {
             invalidFederatedName: "Seuls les caractères alphanumériques minuscules et les tirets bas sont acceptés.",
             nameSection: "Nom",
             noLogo: "Pas de logo",
-            noLogoText: "Aucun logo n'a été trouvé. Vous pouvez en téléverser un vous-même."
+            noLogoText: "Aucun logo n'a été trouvé. Vous pouvez en téléverser un vous-même.",
+            noCoverImage: "Pas de d'image de couverture",
+            noCoverImageText: "Aucune image de couverture n'a été trouvée. Vous pouvez en téléverser une vous-même.",
         },
         Done: {
             title: "Evenement importé",
