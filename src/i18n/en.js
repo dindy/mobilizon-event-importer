@@ -110,7 +110,9 @@ export default {
             noLogo: "No logo",
             noLogoText: "No logo was found. You can upload one yourself.",
             noCoverImage: "No cover image",
-            noCoverImageText: "No cover image was found. You can upload one yourself.",            
+            noCoverImageText: "No cover image was found. You can upload one yourself.",     
+            checkInfo: "Please check the info!",
+            checkInfoText: "We do our best to retrieve information but some data may be missing or incorrect.",            
         },
         Done: {
             title: "Event imported",

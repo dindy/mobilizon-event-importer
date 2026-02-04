@@ -113,6 +113,8 @@ export default {
             noLogoText: "Aucun logo n'a été trouvé. Vous pouvez en téléverser un vous-même.",
             noCoverImage: "Pas de d'image de couverture",
             noCoverImageText: "Aucune image de couverture n'a été trouvée. Vous pouvez en téléverser une vous-même.",
+            checkInfo: "Vérifiez les infos SVP !",
+            checkInfoText: "Nous faisons de notre mieux pour récupérer les informations mais certaines données peuvent être manquantes ou erronées.",
         },
         Done: {
             title: "Evenement importé",
