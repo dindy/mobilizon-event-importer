@@ -21,13 +21,15 @@ const events = computed(() => ([
 ]))
 const automation = computed(() => store.getters.getAutomationById(route.params.id))
 const isExecuting = computed(() => store.getters.isExecutingAutomationById(route.params.id))
+const isDeleting = computed(() => store.getters.isDeletingAutomationById(route.params.id))
 const isFetching = computed(() => store.getters.isFetchingAutomationHistory)
 const load = () => store.dispatch('loadAutomation', route.params.id) 
 const refresh = () => store.dispatch('fetchAutomationHistory', route.params.id) 
 const manageForGroup = computed(() => store.getters.getSelectedGroup)
 const actor = computed(() => manageForGroup.value || store.getters.getSelectedIdentity)
 const $ct = componentTranslate(`AutomationHistory`)
-
+const instanceUrl = store.getters.getMobilizonInstanceUrl
+const getMbzEventUrl = uid => `${instanceUrl}/events/${uid}`
 store.dispatch('setPageTitle', $ct('title'))
 
 onMounted(() => {
@@ -46,7 +48,7 @@ const deleteAutomation = async () => {
 </script>
 
 <template>
-    <v-card v-if="automation" :loading="isFetching || isExecuting">
+    <v-card v-if="automation" :loading="isFetching || isExecuting || isDeleting">
         <v-card-title>{{ $ct('logsAndEvents') }}</v-card-title>   
         <v-card-subtitle>
             <span class="custom-text-wrap">{{ automation.url }}</span>
@@ -88,7 +90,7 @@ const deleteAutomation = async () => {
                             {{ (new Date(event.eventDate)).toLocaleString() }}
                         </div>
                         <div>
-                            <span class="text-body-1">{{ event.type == 'created' ? $ct('created') : $ct('updated') }} de '{{ event.title }}'</span>
+                            <span class="text-body-1">{{ event.type == 'created' ? $ct('created') : $ct('updated') }} <a target="_blank" :href="getMbzEventUrl(event.mbzUid)">{{ event.title }}</a></span>
                         </div>
                     </template>
                 </v-list-item>

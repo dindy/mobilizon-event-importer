@@ -60,6 +60,7 @@ export default {
     getAutomationEvents: state => state.automations.events,
     getAutomationById: state => id => state.automations.currentActorAutomations.filter(aut => aut.id == id)[0] || null,
     isExecutingAutomationById: state => id => state.automations.currentActorAutomations.filter(aut => aut.id == id)[0]?.isExecuting,
+    isDeletingAutomationById: state => id => state.automations.currentActorAutomations.filter(aut => aut.id == id)[0]?.isDeleting,
     getAutomationHistory: state => ([
         ...state.automations.logs.map(log => ({...log, itemType: 'log', itemId: `log${log.id}`})),
         ...state.automations.events.map(event => ({...event, itemType: 'event', itemId: `event${event.id}`}))

@@ -20,7 +20,7 @@ export default {
             execute: "Execute",
             logsAndEvents: "Logs and imported events",
             noHistory: "This automation has not been executed yet.",
-            events: "Events",
+            events: "Imported events",
             logs: "Logs",
             created: "Created",
             updated: "Updated",
