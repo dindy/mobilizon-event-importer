@@ -43,10 +43,10 @@ export default {
             },
             automation: {
                 title: "Automatic imports",
-                subtitle: "Automatically import events from a feed",
+                subtitle: "Automatically import events from a source",
                 text: {
                     0: "The application records the URL of an event source and will automatically import new events at regular intervals.",
-                    1: "Only ICS (iCalendar) feeds are currently supported."
+                    1: "ICS feeds (iCalendar), Facebook groups and Facebook communities are currently supported."
                 },
                 btn: "Manage automations"
             }
@@ -143,9 +143,16 @@ export default {
         },
         
         RegisterFeed: {
-            title: "Feed URL",
-            placeholder: "https://example.com/feed.ics",
-            label: "Enter the URL of an ics or ical file",
+            title: "Events source",
+            title_ics: "iCalendar feed (ics)",
+            placeholder_ics: "https://example.com/file.ics",
+            label_ics: "Enter ics or ical file URL",
+            title_auto: "Automatic detection",
+            placeholder_auto: "URL",
+            label_auto: "Enter a source URL",            
+            title_fb: "Facebook group",
+            placeholder_fb: "(groups/)group_name",
+            label_fb: "Enter Facebook group URL",
             button: "Register"
         },
         Share: {

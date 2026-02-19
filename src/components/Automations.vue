@@ -23,6 +23,10 @@ watch(actor, (newActor) => {
         store.dispatch('fetchAutomations')
     }
 })
+const types = {
+    fb: 'Facebook',
+    ics: 'iCalendar',
+}
 </script>
 
 <template>
@@ -50,7 +54,7 @@ watch(actor, (newActor) => {
                 v-for="automation in automations" 
                 v-if="isFetching || (automations.length > 0)"
                 prepend-icon="mdi-robot"
-                :title="automation.type" 
+                :title="types[automation.type]" 
                 :subtitle="automation.url"
                 :key="automation.id"
                 @click="store.dispatch('navigateTo',`/automation/${automation.id}`)"

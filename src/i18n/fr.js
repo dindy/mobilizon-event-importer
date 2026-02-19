@@ -45,10 +45,10 @@ export default {
             },
             automation: {
                 title: 'Imports automatiques',
-                subtitle: "Importez automatiquement les événements d'un flux",
+                subtitle: "Importez automatiquement les événements d'une source",
                 text: {
                     0: "L'application enregistre l'URL d'une source d'événements et importera automatiquement les nouveaux événements à interval régulier.",
-                    1: "Seuls les flux ICS (iCalendar) sont actuellement supportés."
+                    1: "Les flux ICS (iCalendar), les groupes Facebook et les communautés Facebook sont actuellement supportés."
                 },
                 btn: "Gérer les automatisations"
             },
@@ -145,9 +145,19 @@ export default {
         },
         
         RegisterFeed: {
-            title: "URL du flux",
-            placeholder: "https://example.com/feed.ics",
-            label: "Entrez l'URL d'un fichier ics ou ical",
+            title: "Source d'événements",
+            title_ics: "Flux iCalendar (ics)",
+            placeholder_ics: "https://exemple.com/fichier.ics",
+            label_ics: "Entrez l'URL d'un fichier ics ou ical",
+            title_auto: "Détection automatique",
+            placeholder_auto: "URL",
+            label_auto: "Entrez l'URL d'une source",
+            title_fb_group: "Groupe Facebook",
+            placeholder_fb_group: "nom_du_groupe",
+            label_fb_group: "Entrez l'URL d'un groupe Facebook",
+            title_fb_community: "Communauté Facebook",
+            placeholder_fb_community: "nom_de_communauté",
+            label_fb_community: "Entrez l'URL d'une communauté Facebook",            
             button: "Enregistrer"
         },
         Share: {
