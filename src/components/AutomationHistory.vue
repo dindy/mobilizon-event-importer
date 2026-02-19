@@ -48,6 +48,14 @@ const deleteAutomation = async () => {
 </script>
 
 <template>
+    <v-alert
+        v-if="automation.type === 'fb'"
+        :text="$ct('fbWarningText')"
+        :title="$ct('fbWarningTitle')"
+        type="warning"
+        class="mb-5"
+        :closable="true"
+    ></v-alert>     
     <v-card v-if="automation" :loading="isFetching || isExecuting || isDeleting">
         <v-card-title>{{ $ct('logsAndEvents') }}</v-card-title>   
         <v-card-subtitle>
