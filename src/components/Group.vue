@@ -44,8 +44,13 @@ if (scrapped) {
     group.value.description = scrapped.description
     group.value.banners = scrapped.banners.map(url => ({ src: url, file: null }))
     group.value.logos = scrapped.logos.map(url => ({ src: url, file: null }))
-    group.value.longitude = scrapped.longitude
-    group.value.latitude = scrapped.latitude
+    if (scrapped.physicalAddress?.geom) {
+        group.value.latitude = parseFloat(scrapped.physicalAddress.geom.split(';')[1])
+        group.value.longitude = parseFloat(scrapped.physicalAddress.geom.split(';')[0])
+    } else {
+        group.value.latitude = null
+        group.value.longitude = null
+    }
     if (scrapped.physicalAddress) {
         group.value.physicalAddress.description = scrapped.physicalAddress.description
         group.value.physicalAddress.street = scrapped.physicalAddress.street
