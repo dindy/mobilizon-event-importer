@@ -49,8 +49,8 @@ export default {
                 title: 'Imports automatiques',
                 subtitle: "Importez automatiquement les événements d'une source",
                 text: {
-                    0: "L'application enregistre l'URL d'une source d'événements et importera automatiquement les nouveaux événements à interval régulier.",
-                    1: "Les flux ICS (iCalendar), les groupes Facebook et les communautés Facebook sont actuellement supportés."
+                    0: "L'application enregistre l'URL d'une source d'événements et importera automatiquement les nouveaux événements à intervalle régulier.",
+                    1: "Les flux ICS (iCalendar), les groupes Facebook et les pages Facebook sont actuellement supportés."
                 },
                 btn: "Gérer les automatisations"
             },
@@ -134,7 +134,7 @@ export default {
         },
         GroupScrapper: {
             title: "URL du groupe",
-            label: "Entrez une adresse web (groupe facebook de préférence)",
+            label: "Entrez une adresse web (page ou groupe facebook de préférence)",
             placeholder: "https://www.facebook.com/nom_du_group",
             button: "Importer"
         },
@@ -157,9 +157,9 @@ export default {
             title_fb_group: "Groupe Facebook",
             placeholder_fb_group: "nom_du_groupe",
             label_fb_group: "Entrez l'URL d'un groupe Facebook",
-            title_fb_community: "Communauté Facebook",
-            placeholder_fb_community: "nom_de_communauté",
-            label_fb_community: "Entrez l'URL d'une communauté Facebook",            
+            title_fb_community: "Page Facebook",
+            placeholder_fb_community: "nom_de_page",
+            label_fb_community: "Entrez l'URL d'une page Facebook",            
             button: "Enregistrer"
         },
         Share: {

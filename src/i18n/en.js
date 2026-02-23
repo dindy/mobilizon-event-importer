@@ -48,7 +48,7 @@ export default {
                 subtitle: "Automatically import events from a source",
                 text: {
                     0: "The application records the URL of an event source and will automatically import new events at regular intervals.",
-                    1: "ICS feeds (iCalendar), Facebook groups and Facebook communities are currently supported."
+                    1: "ICS feeds (iCalendar), Facebook groups and Facebook pages are currently supported."
                 },
                 btn: "Manage automations"
             }
@@ -152,9 +152,12 @@ export default {
             title_auto: "Automatic detection",
             placeholder_auto: "URL",
             label_auto: "Enter a source URL",            
-            title_fb: "Facebook group",
-            placeholder_fb: "(groups/)group_name",
-            label_fb: "Enter Facebook group URL",
+            title_fb_group: "Facebook group",
+            placeholder_fb_group: "group_name",
+            label_fb_group: "Enter Facebook group URL",
+            title_fb_community: "Facebook page",
+            placeholder_fb_community: "page_name",
+            label_fb_community: "Enter Facebook page URL",            
             button: "Register"
         },
         Share: {
