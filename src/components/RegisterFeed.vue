@@ -100,12 +100,12 @@ const getTypeAndUrl = value =>
     if (fbProfileMatch[0] && fbProfileMatch[0][1]) {
         type = 'fb_profile'       
         id = fbProfileMatch[0][1]
-    } else if (fbGroupMatch[0]) {
+    } else if (fbGroupMatch[0]) {        
         if (fbGroupMatch[0][1]) {
             id = fbGroupMatch[0][1]
             type = 'fb_group'
         } else {
-            id = fbGroupMatch[0][0]
+            id = fbGroupMatch[0][2]
             type = 'fb_community'
         }
     } else {
@@ -114,7 +114,6 @@ const getTypeAndUrl = value =>
     }
     const { prefix, suffix } = types.filter(lType => lType.value == type)?.[0] || null
     url = `${prefix || ''}${id}${suffix || ''}`     
-    console.log(type, id, url);
     
     return { type, url }
 }
