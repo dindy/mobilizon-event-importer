@@ -160,6 +160,9 @@ export default {
             title_fb_community: "Page Facebook",
             placeholder_fb_community: "nom_de_page",
             label_fb_community: "Entrez l'URL d'une page Facebook",            
+            title_fb_profile: "Profil Facebook",
+            placeholder_fb_profile: "identifiant_de_profil",
+            label_fb_profile: "Entrez l'URL d'un profil Facebook",            
             button: "Enregistrer"
         },
         Share: {

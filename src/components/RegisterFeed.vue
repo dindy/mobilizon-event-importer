@@ -35,6 +35,13 @@ const types = [{
     label: $ct('label_fb_community'),
     prefix: 'https://www.facebook.com/',
     suffix: '/events',
+}, {
+    value: 'fb_profile',
+    title: $ct('title_fb_profile'),
+    placeholder: $ct('placeholder_fb_profile'),
+    label: $ct('label_fb_profile'),
+    prefix: 'https://www.facebook.com/profile.php?id=',
+    suffix: '&sk=events',
 }]
 const urlForm = ref()
 const updateType = (value) =>
@@ -83,22 +90,31 @@ const getTypeAndUrl = value =>
 {
     const fbGroupRegex = /[\S]?facebook\.com\/(groups\/)?([^\/w]+)/g
     const fbGroupMatch = [...value.matchAll(fbGroupRegex)]
+
+    const fbProfileRegex = /[\S]?facebook\.com\/profile\.php\?id=([0-9]+)/g
+    const fbProfileMatch = [...value.matchAll(fbProfileRegex)]
+
     let type = null
     let url = null
-
-    if (fbGroupMatch[0]) 
-    {
+    let id = null
+    if (fbProfileMatch[0] && fbProfileMatch[0][1]) {
+        type = 'fb_profile'       
+        id = fbProfileMatch[0][1]
+    } else if (fbGroupMatch[0]) {
         if (fbGroupMatch[0][1]) {
+            id = fbGroupMatch[0][1]
             type = 'fb_group'
         } else {
+            id = fbGroupMatch[0][0]
             type = 'fb_community'
         }
-        const { prefix, suffix } = types.filter(lType => lType.value == type)?.[0] || null
-        url = `${prefix || ''}${fbGroupMatch[0][2]}${suffix || ''}`
     } else {
         type = 'ics'
-        url = value
+        id = value
     }
+    const { prefix, suffix } = types.filter(lType => lType.value == type)?.[0] || null
+    url = `${prefix || ''}${id}${suffix || ''}`     
+    console.log(type, id, url);
     
     return { type, url }
 }

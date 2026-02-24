@@ -157,7 +157,10 @@ export default {
             label_fb_group: "Enter Facebook group URL",
             title_fb_community: "Facebook page",
             placeholder_fb_community: "page_name",
-            label_fb_community: "Enter Facebook page URL",            
+            label_fb_community: "Enter Facebook page URL",
+            title_fb_profile: "Facebook profile",
+            placeholder_fb_profile: "profile_identifier",
+            label_fb_profile: "Enter Facebook profile URL",                
             button: "Register"
         },
         Share: {
