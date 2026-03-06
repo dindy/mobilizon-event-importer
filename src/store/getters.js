@@ -69,13 +69,6 @@ export default {
     getAutomationById: state => id => state.automations.currentActorAutomations.filter(aut => aut.id == id)[0] || null,
     isExecutingAutomationById: state => id => state.automations.currentActorAutomations.filter(aut => aut.id == id)[0]?.isExecuting,
     isDeletingAutomationById: state => id => state.automations.currentActorAutomations.filter(aut => aut.id == id)[0]?.isDeleting,
-    getAutomationHistory: state => ([
-        ...state.automations.logs.data.map(log => ({...log, itemType: 'log', itemId: `log${log.id}`})),
-        ...state.automations.events.map(event => ({...event, itemType: 'event', itemId: `event${event.id}`}))
-    ])
-        .sort((item1, item2) => new Date(item1.createdAt) < new Date(item2.createdAt))
-        .sort((item1, item2) => new Date(item1.id) < new Date(item2.id))
-        .sort((item1, item2) => item1.itemType > item2.itemType),
     getPreviousPath: state => state.history[state.history.length - 2] || null,
     isFirstRoute: state => state.isFirstRoute,
     getSharingUrl: state => state.sharingUrl

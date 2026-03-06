@@ -436,7 +436,7 @@ export default {
         commit('setIsFetchingAutomationEvents', true)
         try {
             const events = await mobilizonApi.getAutomationEvents(automationId)
-            commit('setAutomationEvents', events.events)
+            commit('setAutomationEvents', events.data)
         // Handles Abort Exception
         } catch (error) {
             if ( ! (error instanceof DOMException) ) {
@@ -454,7 +454,7 @@ export default {
         try {
             const response = await mobilizonApi.getAutomationLogs(automationId, page, pageSize)
             commit('setAutomationLogs', {
-                logs: response.logs,
+                logs: response.data,
                 page: response.page,
                 pageSize: response.pageSize,
                 total: response.total
@@ -488,8 +488,14 @@ export default {
     async executeAutomation({ commit, state }, automationId) {
         console.log(`Action - Executing automation`, automationId)
         commit('setIsExecutingAutomation', { isExecuting: true, automationId })
-        const history = await mobilizonApi.executeAutomation(automationId)
-        commit('setAutomationHistory', history)
+        const result = await mobilizonApi.executeAutomation(automationId)
+        commit('setAutomationEvents', result.events.data)
+        commit('setAutomationLogs', {
+            logs: result.logs.data,
+            page: result.logs.page,
+            pageSize: result.logs.pageSize,
+            total: result.logs.total
+        })
         commit('setIsExecutingAutomation', {isExecuting: false, automationId})
     },
     async deleteAutomation({ commit, state }, automationId) {

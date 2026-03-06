@@ -8,7 +8,6 @@ import { componentTranslate } from '../i18n/utils.js'
 const { t } = useI18n()
 const route = useRoute()
 const store = useStore()
-const history = computed(() => store.getters.getAutomationHistory)
 const logs = computed(() => store.getters.getAutomationLogs
     .sort((log1, log2) => log1.id < log2.id)
 )
@@ -54,7 +53,7 @@ const loadMoreLogs = () => {
 
 <template>
     <v-alert
-        v-if="automation.type === 'fb'"
+        v-if="automation && automation.type === 'fb'"
         :text="$ct('fbWarningText')"
         :title="$ct('fbWarningTitle')"
         type="warning"
@@ -80,7 +79,7 @@ const loadMoreLogs = () => {
             ></v-btn>            
         </v-card-actions>
         <v-list>
-            <v-list-subheader v-if="!isFetchingEvents && !isFetchingLogs && history.length == 0">
+            <v-list-subheader v-if="!isFetchingEvents && !isFetchingLogs && logs.length == 0 && events.length == 0">
                 <span class="custom-text-wrap">{{ $ct('noHistory') }}</span>
             </v-list-subheader>
 
