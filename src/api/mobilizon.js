@@ -603,7 +603,8 @@ export class MobilizonApi {
                 showStartTime: true,
                 showEndTime: event.endDate ? true : false,
                 showRemainingAttendeeCapacity: false,
-                hideOrganizerWhenGroupEvent: false
+                hideOrganizerWhenGroupEvent: false,
+                hideNumberOfParticipants: true
             },
             organizerActorId: event.organizerActorId,
             attributedToId: event.attributedToId,
