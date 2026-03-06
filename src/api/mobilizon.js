@@ -46,7 +46,8 @@ export class MobilizonApi {
     websiteUrl = 'https://website.mobilizon.webworkers.agency'
     searchAddressController = null
     getAutomationsController = null
-    getAutomationHistoryController = null
+    getAutomationEventsController = null
+    getAutomationLogsController = null
     
     get apiUrl() {
         return `${this.instanceUrl}/api`
@@ -889,16 +890,37 @@ export class MobilizonApi {
         return (await this.handleProxyResponse(response))
     }
 
-    async getAutomationHistory(automationId)
+    async getAutomationEvents(automationId)
     {
-        if (this.getAutomationHistoryController) this.getAutomationHistoryController.abort()
+        if (this.getAutomationEventsController) this.getAutomationEventsController.abort()
     
-        this.getAutomationHistoryController = new AbortController()
+        this.getAutomationEventsController = new AbortController()
         
-        const response = await fetch(this.getProxyApiUrl(`automation/${automationId}/history`), {
+        const response = await fetch(this.getProxyApiUrl(`automation/${automationId}/events`), {
             method: 'GET',
             credentials: "include",
-            signal: this.getAutomationHistoryController.signal,
+            signal: this.getAutomationEventsController.signal,
+            headers: {
+                'Content-Type': 'application/json',
+            },
+        })
+
+        return (await this.handleProxyResponse(response))
+    }
+
+    async getAutomationLogs(automationId, page = 1, pageSize = 10)
+    {
+        if (this.getAutomationLogsController) this.getAutomationLogsController.abort()
+    
+        this.getAutomationLogsController = new AbortController()
+        
+        const response = await fetch(this.getProxyApiUrl(`automation/${automationId}/logs?` + new URLSearchParams({
+                page: page,
+                page_size: pageSize
+            })), {
+            method: 'GET',
+            credentials: "include",
+            signal: this.getAutomationLogsController.signal,
             headers: {
                 'Content-Type': 'application/json',
             },

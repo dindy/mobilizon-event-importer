@@ -431,12 +431,12 @@ export default {
             }
         }   
     },
-    async fetchAutomationHistory({ state, commit, dispatch }, automationId) {
-        console.log(`Action - Fetching automation history`, automationId)    
-        commit('setIsFetchingAutomationHistory', true)
+    async fetchAutomationEvents({ state, commit, dispatch }, automationId) {
+        console.log(`Action - Fetching automation events`, automationId)    
+        commit('setIsFetchingAutomationEvents', true)
         try {
-            const history = await mobilizonApi.getAutomationHistory(automationId)
-            commit('setAutomationHistory', history)
+            const events = await mobilizonApi.getAutomationEvents(automationId)
+            commit('setAutomationEvents', events.events)
         // Handles Abort Exception
         } catch (error) {
             if ( ! (error instanceof DOMException) ) {
@@ -445,13 +445,45 @@ export default {
                 console.log(error.message);
             }
         } finally {
-            commit('setIsFetchingAutomationHistory', false)
+            commit('setIsFetchingAutomationEvents', false)
+        }
+    },
+    async fetchAutomationLogs({ state, commit, dispatch }, { automationId, page = 1, pageSize = 250 }) {
+        console.log(`Action - Fetching automation logs`, automationId, page, pageSize)    
+        commit('setIsFetchingAutomationLogs', true)
+        try {
+            const response = await mobilizonApi.getAutomationLogs(automationId, page, pageSize)
+            commit('setAutomationLogs', {
+                logs: response.logs,
+                page: response.page,
+                pageSize: response.pageSize,
+                total: response.total
+            })
+        // Handles Abort Exception
+        } catch (error) {
+            if ( ! (error instanceof DOMException) ) {
+                dispatch('createErrorFromText', messageTranslate('fetch_automation_history_error', { error: error && error.message ? error.message : String(error) }))
+            } else {
+                console.log(error.message);
+            }
+        } finally {
+            commit('setIsFetchingAutomationLogs', false)
         }
     },
     async loadAutomation({ commit, dispatch }, automationId) {
         console.log(`Action - Loading automation`, automationId)
         commit('resetAutomationHistory')
-        dispatch('fetchAutomationHistory', automationId)
+        dispatch('fetchAutomationEvents', automationId)
+        dispatch('fetchAutomationLogs', { automationId, page: 1, pageSize: 250 })
+    },
+    async loadMoreAutomationLogs({ state, dispatch }, automationId) {
+        console.log(`Action - Loading more automation logs`, automationId)
+        const currentPage = state.automations.logs.page
+        const nextPage = currentPage + 1
+        const logsData = state.automations.logs
+        if (logsData.data.length < logsData.total) {
+            dispatch('fetchAutomationLogs', { automationId, page: nextPage, pageSize: 250 })
+        }
     },
     async executeAutomation({ commit, state }, automationId) {
         console.log(`Action - Executing automation`, automationId)

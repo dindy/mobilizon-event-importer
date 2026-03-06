@@ -37,9 +37,15 @@ export default {
         isDeleting: false,
         isCreating: false,
         isFetching: false,
-        isFetchingHistory: false,
+        isFetchingEvents: false,
+        isFetchingLogs: false,
         currentActorAutomations: [],
-        logs: [],
+        logs: {
+            data: [],
+            page: 1,
+            pageSize: 10,
+            total: 0,
+        },
         events: [],
     },
     geo: {

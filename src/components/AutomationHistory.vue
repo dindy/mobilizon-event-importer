@@ -1,5 +1,5 @@
 <script setup>
-import { computed, watch, onMounted } from 'vue'
+import { computed, watch, onMounted, ref } from 'vue'
 import { useStore } from 'vuex'
 import { useRoute } from 'vue-router'
 import { useI18n } from 'vue-i18n'
@@ -22,9 +22,10 @@ const events = computed(() => ([
 const automation = computed(() => store.getters.getAutomationById(route.params.id))
 const isExecuting = computed(() => store.getters.isExecutingAutomationById(route.params.id))
 const isDeleting = computed(() => store.getters.isDeletingAutomationById(route.params.id))
-const isFetching = computed(() => store.getters.isFetchingAutomationHistory)
-const load = () => store.dispatch('loadAutomation', route.params.id) 
-const refresh = () => store.dispatch('fetchAutomationHistory', route.params.id) 
+const isFetchingEvents = computed(() => store.getters.isFetchingAutomationEvents)
+const isFetchingLogs = computed(() => store.getters.isFetchingAutomationLogs)
+const canLoadMore = computed(() => store.getters.canLoadMoreAutomationLogs)
+const refresh = () => store.dispatch('fetchAutomationEvents', route.params.id) 
 const manageForGroup = computed(() => store.getters.getSelectedGroup)
 const actor = computed(() => manageForGroup.value || store.getters.getSelectedIdentity)
 const $ct = componentTranslate(`AutomationHistory`)
@@ -33,7 +34,7 @@ const getMbzEventUrl = uid => `${instanceUrl}/events/${uid}`
 store.dispatch('setPageTitle', $ct('title'))
 
 onMounted(() => {
-    load()
+    store.dispatch('loadAutomation', route.params.id) 
 })
 
 watch(actor, (newActor) => {
@@ -44,6 +45,10 @@ const deleteAutomation = async () => {
     await store.dispatch('deleteAutomation', automation.value.id)
     store.dispatch('navigateToAndReplace', '/automations')
     store.commit('addMessage', { text: $ct('automation_deleted'), type: 'success' })
+}
+
+const loadMoreLogs = () => {
+    store.dispatch('loadMoreAutomationLogs', automation.value.id)
 }
 </script>
 
@@ -56,7 +61,7 @@ const deleteAutomation = async () => {
         class="mb-5"
         :closable="true"
     ></v-alert>     
-    <v-card v-if="automation" :loading="isFetching || isExecuting || isDeleting">
+    <v-card v-if="automation" :loading="isFetchingEvents || isFetchingLogs || isExecuting || isDeleting">
         <v-card-title>{{ $ct('logsAndEvents') }}</v-card-title>   
         <v-card-subtitle>
             <span class="custom-text-wrap">{{ automation.url }}</span>
@@ -75,7 +80,7 @@ const deleteAutomation = async () => {
             ></v-btn>            
         </v-card-actions>
         <v-list>
-            <v-list-subheader v-if="!isFetching && history.length == 0">
+            <v-list-subheader v-if="!isFetchingEvents && !isFetchingLogs && history.length == 0">
                 <span class="custom-text-wrap">{{ $ct('noHistory') }}</span>
             </v-list-subheader>
 
@@ -133,6 +138,16 @@ const deleteAutomation = async () => {
                             <span class="text-body-1">{{ log.message }}</span>
                         </div>
                     </template>
+                </v-list-item>
+
+                <v-list-item v-if="canLoadMore" :key="'load-more'" class="pb-2">
+                    <v-btn
+                        @click="loadMoreLogs"
+                        :loading="isFetchingLogs"
+                        block
+                        variant="outlined"
+                        text="Charger plus de logs"
+                    ></v-btn>
                 </v-list-item>
             </v-list-group>
 

@@ -152,19 +152,38 @@ export default {
         console.log('Mutation - Set automations', automations)
         state.automations.currentActorAutomations = automations.map(aut => ({ ...aut, isExecuting: false }))
     },
-    setAutomationHistory(state, { logs, events }) {
-        console.log('Mutation - Set automation history', logs, events)
-        state.automations.logs = logs
+    setAutomationEvents(state, events) {
+        console.log('Mutation - Set automation events', events)
         state.automations.events = events
+    },
+    setAutomationLogs(state, { logs, page, pageSize, total }) {
+        console.log('Mutation - Set automation logs', logs, page, pageSize, total)
+        if (page === 1) {
+            state.automations.logs.data = logs
+        } else {
+            state.automations.logs.data = [...state.automations.logs.data, ...logs]
+        }
+        state.automations.logs.page = page
+        state.automations.logs.pageSize = pageSize
+        state.automations.logs.total = total
     },
     resetAutomationHistory(state) {
         console.log('Mutation - Reset automation history')
-        state.automations.logs = []
+        state.automations.logs = {
+            data: [],
+            page: 1,
+            pageSize: 10,
+            total: 0,
+        }
         state.automations.events = []
     },
-    setIsFetchingAutomationHistory(state, isFetching) {
-        console.log('Mutation - Set is fetching automation history', isFetching)
-        state.automations.isFetchingHistory = isFetching
+    setIsFetchingAutomationEvents(state, isFetching) {
+        console.log('Mutation - Set is fetching automation events', isFetching)
+        state.automations.isFetchingEvents = isFetching
+    },
+    setIsFetchingAutomationLogs(state, isFetching) {
+        console.log('Mutation - Set is fetching automation logs', isFetching)
+        state.automations.isFetchingLogs = isFetching
     }, 
     setIsExecutingAutomation(state, { automationId, isExecuting }) {
         console.log('Mutation - Set is executing', automationId, isExecuting)
