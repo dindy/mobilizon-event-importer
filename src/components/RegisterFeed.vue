@@ -102,7 +102,7 @@ const getTypeAndUrl = value =>
         id = fbProfileMatch[0][1]
     } else if (fbGroupMatch[0]) {        
         if (fbGroupMatch[0][1]) {
-            id = fbGroupMatch[0][1]
+            id = fbGroupMatch[0][2]
             type = 'fb_group'
         } else {
             id = fbGroupMatch[0][2]
