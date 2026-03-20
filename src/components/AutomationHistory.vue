@@ -52,6 +52,7 @@ const loadMoreLogs = () => {
 </script>
 
 <template>
+
     <v-alert
         v-if="automation && automation.type === 'fb'"
         :text="$ct('fbWarningText')"
@@ -60,6 +61,16 @@ const loadMoreLogs = () => {
         class="mb-5"
         :closable="true"
     ></v-alert>     
+
+    <v-alert
+        v-if="automation && automation.type === 'fb'"
+        :text="$ct('fbWarning2Text')"
+        :title="$ct('fbWarning2Title')"
+        type="warning"
+        class="mb-5"
+        :closable="true"
+    ></v-alert>     
+
     <v-card v-if="automation" :loading="isFetchingEvents || isFetchingLogs || isExecuting || isDeleting">
         <v-card-title>{{ $ct('logsAndEvents') }}</v-card-title>   
         <v-card-subtitle>

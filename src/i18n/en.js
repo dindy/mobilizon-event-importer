@@ -27,7 +27,9 @@ export default {
             delete_automation: "Delete",
             automation_deleted: "Automation deleted",
             fbWarningText: "Sometimes Facebook may block requests and the application may not find any events. Events will be retrieved on the next run.",
-            fbWarningTitle: "Facebook Warning",
+            fbWarningTitle: "Facebook limitations",
+            fbWarning2Text: "Only the next 10 events will be imported even if more events are created in Facebook.",
+            fbWarning2Title: "Facebook limitations (2)"
         },
         Automations: {
             title: "Automations",
