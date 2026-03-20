@@ -259,7 +259,13 @@ export default {
             
             if (!state.mobilizon.selectedIdentityId) {
                 dispatch('selectMobilizonIdentity', formattedActors[0].id)
-                dispatch('selectMobilizonGroup', null)
+                const identityGroups = formattedGroups
+                    .filter(group => group.memberId === formattedActors[0].id)
+                if (identityGroups.length > 0) {
+                    dispatch('selectMobilizonGroup', identityGroups[0].id)
+                } else {
+                    dispatch('selectMobilizonGroup', null)
+                }
             }
         })        
     },
