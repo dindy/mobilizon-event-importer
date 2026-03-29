@@ -50,11 +50,12 @@ function mergeDateTime(date, time) {
 
 const timestampToDate = ts => {
     if (!ts) return ''
-    const date = new Date(ts * 1000).toLocaleDateString([], {timeZone: "Europe/Paris"})
-    const year = date.substring(6, 10)
-    const month = date.substring(3, 5)
-    const day = date.substring(0, 2)
-    return `${year}-${month}-${day}` 
+    const date = new Date(ts * 1000)
+    const year = date.getFullYear()
+    const month = date.getMonth() + 1
+    const day = date.getDate()
+    
+    return `${year}-${("0" + month).slice(-2)}-${("0" + day).slice(-2)}` 
 }
 
 const timestampToTime = ts => ts ? new Date(ts * 1000).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false }) : ''
