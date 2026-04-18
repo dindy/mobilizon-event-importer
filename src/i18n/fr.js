@@ -58,6 +58,16 @@ export default {
                 },
                 btn: "Gérer les automatisations"
             },
+            bug: {
+                title: "Vous avez trouvé un bug ?",
+                subtitle: "Aidez-nous à améliorer l'application !",
+                text: "Si vous rencontrez un comportement anormal de l'application, n'hésitez pas à envoyer un email à"
+            },
+            contribute: {
+                title: "Dépôt GitHub",
+                subtitle: "Vous souhaitez contribuer au projet ou simplement consulter le code source ?",
+                text: "Le code source de l'application est disponible sur GitHub : "
+            }
         },
         AppBar: {
             logout: "Me déconnecter",

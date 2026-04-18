@@ -18,7 +18,7 @@ store.dispatch('setPageTitle', $ct('title'))
     <div v-else>
         <v-card
             prepend-icon="mdi-calendar-plus"
-            color="secondary"
+            color="primary"
             variant="outlined"
             :title="$ct('occasional_import.title')" 
             :subtitle="$ct('occasional_import.subtitle')"
@@ -36,7 +36,7 @@ store.dispatch('setPageTitle', $ct('title'))
         </v-card>
         <v-card
             prepend-icon="mdi-calendar-multiple"
-            color="secondary"
+            color="primary"
             variant="outlined"        
             class="mt-5" 
             :title="$ct('automation.title')" 
@@ -50,9 +50,42 @@ store.dispatch('setPageTitle', $ct('title'))
                 <v-btn @click="store.dispatch('navigateTo', '/automations')" :text="$ct('automation.btn')"></v-btn>
             </v-card-actions>        
         </v-card>
+        <v-card
+            prepend-icon="mdi-bug"
+            color="secondary"
+            variant="tonal"        
+            class="mt-5" 
+            :title="$ct('bug.title')" 
+            :subtitle="$ct('bug.subtitle')"
+        >
+            <v-card-text>
+                <p>{{ $ct('bug.text') }} <a class="color: blue;" href="mailto:sylvain@webworkers.agency" target="_blank">sylvain@webworkers.agency</a></p>
+            </v-card-text>
+        </v-card> 
+        <v-card
+            prepend-icon="mdi-github"
+            color="secondary"
+            variant="tonal"        
+            class="mt-5" 
+            :title="$ct('contribute.title')" 
+            :subtitle="$ct('contribute.subtitle')"
+        >
+            <v-card-text>
+                <p>{{ $ct('contribute.text') }}</p>
+                <ul>
+                    <li><a href="https://github.com/dindy/mobilizon-event-importer" target="_blank">Front-end</a></li>
+                    <li><a href="https://github.com/dindy/event-parser" target="_blank">Back-end</a></li>
+                </ul>
+            </v-card-text>
+        </v-card>                 
     </div>
 </template>
 
 <style scoped>
-
+    ul {
+        list-style-position: inside;
+    }
+    a {
+        color: rgb(var(--v-theme-secondary)) !important;
+    }
 </style>

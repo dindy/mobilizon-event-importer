@@ -54,6 +54,16 @@ export default {
                     1: "ICS feeds (iCalendar), Facebook groups and Facebook pages are currently supported."
                 },
                 btn: "Manage automations"
+            },
+            bug: {
+                title: "Found a bug ?",
+                subtitle: "Help us improve the application !",
+                text: "If you experience any unusual behavior from the application, please feel free to send an email to",
+            },
+            contribute: {
+                title: "Github repository",
+                subtitle: "Want to contribute to the project or just want to check out the source code?",
+                text: "The source code of the application is available on Github: "
             }
         },
         AppBar: {
