@@ -43,7 +43,8 @@ export default {
                 title: "One-time imports",
                 subtitle: "Import an event from its URL",
                 text: "Import an event from its Facebook, Instagram, HelloAsso, Dice, Shotgun, Eventbrite address or any other platform that uses standard metadata.",
-                btn: "Import an event"
+                btn: "Import an event",
+                mobile_tutorial_txt: "You can also import an event from your smartphone's share menu by installing the web application."
             },
             automation: {
                 title: "Automatic imports",
@@ -253,6 +254,19 @@ export default {
             createPlaceDescriptionEnd: "to make it visible here and for millions of users!",
             cancel: "Cancel",
             validate: "Validate"
-        }        
+        },
+        ShareTutorial: {
+            title: "Smartphone integration",
+            subtitle: "How to share an event from your smartphone?",
+            notabene: "Note: this feature has only been tested with Chrome on Android.",
+            step1: "Load the page https://importer.mobilizon.webworkers.agency with Chrome and open the browser menu at the top right.",
+            step2: "Select « Add to Home screen » in the menu.",
+            step3: "Select « Install » in the window that opens.",
+            step4: "The application is now available in your phone's sharing context menu!",
+            step5: "In Facebook, for example, click on « Share » under an event.",
+            step6: "Search for the « Import Mobilizon » application in the list of applications. Click on « More » if you don't see it appear.",
+            step7: "Search for the « Import Mobilizon » application in the list of applications. Click on « More » if you still don't see it appear.",
+            step8: "Select the « Import Mobilizon » application.",
+        }
     }
 }

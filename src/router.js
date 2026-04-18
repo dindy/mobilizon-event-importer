@@ -13,11 +13,13 @@ import Welcome from './components/Welcome.vue'
 import RegisterFeed from './components/RegisterFeed.vue' 
 import Automations from './components/Automations.vue' 
 import AutomationHistory from './components/AutomationHistory.vue' 
+import ShareTutorial from './components/ShareTutorial.vue'
 
 const routes = [
     { path: '/', component: Welcome },
     { path: '/home', component: Home },
     { path: '/share', component: Share },
+    { path: '/shareTutorial', component: ShareTutorial },
     { path: '/instance', component: SelectInstance },
     { path: '/mobilizon/callback', component: Callback },
     { path: '/scrapEvent', component: EventScrapper },

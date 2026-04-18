@@ -1,4 +1,5 @@
 import ImageSelect from "../components/ImageSelect.vue";
+import ShareTutorial from "../components/ShareTutorial.vue";
 
 export default {
     messages: {
@@ -45,7 +46,8 @@ export default {
                 title: 'Imports ponctuels',
                 subtitle: 'Importez un événement depuis son URL',
                 text: "Importez un événement depuis son adresse Facebook, Instagram, HelloAsso, Dice, Shotgun, Eventbrite ou toute autre plateforme qui utilise des metadonnées standards.",
-                btn: "Importer un événement"
+                btn: "Importer un événement",
+                mobile_tutorial_txt: "Vous pouvez également importer un événement depuis le menu de partage de votre smartphone en installant l'application web.",
             },
             automation: {
                 title: 'Imports automatiques',
@@ -255,6 +257,19 @@ export default {
             createPlaceDescriptionEnd: "pour le rendre visible ici et pour des millions d'utilisateurs !",
             cancel: "Annuler",
             validate: "Valider"
+        },
+        ShareTutorial: {
+            title: "Intrégration smartphone",
+            subtitle: "Comment partager un événement depuis votre smartphone ?",
+            notabene: "Note : cette fonctionnalité a uniquement été testée avec Chrome sous Android.",
+            step1: "Chargez la page https://importer.mobilizon.webworkers.agency avec Chrome et ouvrez le menu du navigateur en haut à droite.",
+            step2: "Sélectionnez « Ajouter à l'écran d'accueil » dans le menu.",
+            step3: "Sélectionnez « Installer » dans la fenêtre qui s'ouvre.",
+            step4: "L'application est désormais disponible dans le menu contextuel de partage de votre téléphone !",
+            step5: "Dans Facebook par exemple, cliquez sur « Partager » sous un événement.",
+            step6: "Recherchez l'application « Import Mobilizon » dans la liste des applications. Cliquez sur « Plus » si vous ne la voyez pas apparaître.",
+            step7: "Recherchez l'application « Import Mobilizon » dans la liste des applications. Cliquez sur « Plus » si vous ne la voyez toujours pas apparaître.",
+            step8: "Sélectionnez l'application « Import Mobilizon ».",
         }
     },
 }

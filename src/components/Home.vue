@@ -3,6 +3,7 @@ import { computed } from 'vue'
 import { useStore } from 'vuex'
 import { useI18n } from 'vue-i18n'
 import { componentTranslate } from '../i18n/utils.js'
+import { info } from 'autoprefixer'
 
 const store = useStore()
 const isLoadingGroups = computed(() => store.getters.isLoadingGroups)
@@ -25,6 +26,9 @@ store.dispatch('setPageTitle', $ct('title'))
         >
             <v-card-text>
                 <p>{{ $ct('occasional_import.text') }}</p>
+                <p class="mt-3">{{ $ct('occasional_import.mobile_tutorial_txt') }}
+                    <v-icon @click="store.dispatch('navigateTo', '/shareTutorial')" icon="mdi-help-circle" size="medium"></v-icon>
+                </p>
             </v-card-text>
             <v-card-actions>
                 <v-btn @click="store.dispatch('navigateTo', '/scrapEvent')" :text="$ct('occasional_import.btn')"></v-btn>
