@@ -273,7 +273,7 @@ export default {
             validate: "Valider"
         },
         ShareTutorial: {
-            title: "Intrégration smartphone",
+            title: "Intégration smartphone",
             subtitle: "Comment partager un événement depuis votre smartphone ?",
             notabene: "Note : cette fonctionnalité a uniquement été testée avec Chrome sous Android.",
             step1: "Chargez la page https://importer.mobilizon.webworkers.agency avec Chrome et ouvrez le menu du navigateur en haut à droite.",
