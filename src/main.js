@@ -63,6 +63,7 @@ router.beforeEach(async (to, from) => {
         '/mobilizon/callback',
         '/share/',
         '/share',
+        '/shareTutorial',
     ]
     
     if (store.getters.isFirstRoute) {
