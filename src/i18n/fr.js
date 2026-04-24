@@ -42,6 +42,10 @@ export default {
         },
         Home: {
             title: "Accueil",
+            facebook_alert: {
+                title: "Alerte Facebook !",
+                text: "L'application est actuellement bloquée par Facebook, ce qui peut entraîner des erreurs lors de l'importation d'événements depuis cette plateforme. Nous faisons de notre mieux pour résoudre ce problème au plus vite."
+            },
             occasional_import: {
                 title: 'Imports ponctuels',
                 subtitle: 'Importez un événement depuis son URL',

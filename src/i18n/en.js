@@ -15,6 +15,10 @@ export default {
         unknown_error: "Unknown error"
     },
     components: {
+        facebook_alert: {
+            title: "Facebook Alert !",
+            text: "The application is currently blocked by Facebook, which may cause errors when importing events from this platform. We are doing our best to resolve this issue as soon as possible."
+        },        
         AutomationHistory: {
             title: "Automation details",
             execute: "Execute",

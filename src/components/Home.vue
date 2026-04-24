@@ -16,6 +16,12 @@ store.dispatch('setPageTitle', $ct('title'))
 <template>
     <v-infinite-scroll v-if="isLoadingConfig || isLoadingGroups"></v-infinite-scroll>
     <div v-else>
+        <v-alert 
+            :title="$ct('facebook_alert.title')" 
+            type="warning" 
+            :text="$ct('facebook_alert.text')"
+            class="mb-5 mt-1"
+        ></v-alert>
         <v-card
             prepend-icon="mdi-calendar-plus"
             color="primary"
@@ -52,20 +58,20 @@ store.dispatch('setPageTitle', $ct('title'))
         </v-card>
         <v-card
             prepend-icon="mdi-bug"
-            color="secondary"
-            variant="tonal"        
+            color="grey-darken-1"
+            variant="outlined"        
             class="mt-5" 
             :title="$ct('bug.title')" 
             :subtitle="$ct('bug.subtitle')"
         >
             <v-card-text>
-                <p>{{ $ct('bug.text') }} <a class="color: blue;" href="mailto:sylvain@webworkers.agency" target="_blank">sylvain@webworkers.agency</a></p>
+                <p>{{ $ct('bug.text') }} <a class="color: blue;" href="mailto:contact@webworkers.agency" target="_blank">contact@webworkers.agency</a></p>
             </v-card-text>
         </v-card> 
         <v-card
             prepend-icon="mdi-github"
-            color="secondary"
-            variant="tonal"        
+            color="grey-darken-1"
+            variant="outlined"        
             class="mt-5" 
             :title="$ct('contribute.title')" 
             :subtitle="$ct('contribute.subtitle')"
@@ -86,6 +92,6 @@ store.dispatch('setPageTitle', $ct('title'))
         list-style-position: inside;
     }
     a {
-        color: rgb(var(--v-theme-secondary)) !important;
+        color: rgb(var(--v-grey-darken-1)) !important;
     }
 </style>
