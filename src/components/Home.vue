@@ -16,12 +16,12 @@ store.dispatch('setPageTitle', $ct('title'))
 <template>
     <v-infinite-scroll v-if="isLoadingConfig || isLoadingGroups"></v-infinite-scroll>
     <div v-else>
-        <v-alert 
+        <!-- <v-alert 
             :title="$ct('facebook_alert.title')" 
             type="warning" 
             :text="$ct('facebook_alert.text')"
             class="mb-5 mt-1"
-        ></v-alert>
+        ></v-alert> -->
         <v-card
             prepend-icon="mdi-calendar-plus"
             color="primary"
