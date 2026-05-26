@@ -88,7 +88,7 @@ const register = async (url) =>
 
 const getTypeAndUrl = value => 
 {
-    const fbGroupRegex = /[\S]?facebook\.com\/(groups\/)?([^\/w]+)/g
+    const fbGroupRegex = /[\S]?facebook\.com\/(groups\/)?([\w]+)/g
     const fbGroupMatch = [...value.matchAll(fbGroupRegex)]
 
     const fbProfileRegex = /[\S]?facebook\.com\/profile\.php\?id=([0-9]+)/g
